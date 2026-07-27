@@ -1,0 +1,35 @@
+# owners.yaml — 人类决策身份（本项目）
+
+# 引导阶段：一人多身份可运行；请尽快把 name/contact 换成真实负责人。
+# 每次人类批准须注明 identity。
+
+projectId: SEP
+
+owners:
+  productOwner:
+    name: "项目协调人（待具名）"
+    contact: "请更新"
+    notes: "业务范围、优先级、需求层开放问题；平台 PRD 最终批准人"
+
+  techLead:
+    name: "项目协调人（待具名）"
+    contact: "请更新"
+    notes: "架构升级、审查超限、技术债接受；规范 active 放行"
+
+  securityOperationsOwner:
+    name: "项目协调人（待具名）"
+    contact: "请更新"
+    notes: "高风险接受、合规与生产红线；RULE-ORG-SECURITY 会签"
+
+  maintainer:
+    name: "项目协调人（待具名）"
+    contact: "请更新"
+    notes: "最终集成与发布放行、环境阻塞协调"
+
+aliases:
+  - person: "项目协调人（待具名）"
+    identities:
+      - productOwner
+      - techLead
+      - securityOperationsOwner
+      - maintainer

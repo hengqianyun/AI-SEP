@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "code-review@1",
+  "title": "CodeReview",
+  "type": "object",
+  "required": ["reviewId", "taskId", "decision", "findings"],
+  "properties": {
+    "reviewId": { "type": "string" },
+    "taskId": { "type": "string" },
+    "round": { "type": "integer", "minimum": 1 },
+    "decision": {
+      "type": "string",
+      "enum": ["APPROVE", "REQUEST_CHANGES", "BLOCK"]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "evidence", "closeWhen"],
+        "properties": {
+          "id": { "type": "string" },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+          "evidence": { "type": "string" },
+          "closeWhen": { "type": "string" },
+          "relatedReqs": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

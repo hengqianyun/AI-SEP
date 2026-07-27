@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-package@1",
+  "title": "TaskPackage",
+  "type": "object",
+  "required": [
+    "taskId",
+    "planId",
+    "goal",
+    "reqs",
+    "allowModify",
+    "denyModify",
+    "readSet",
+    "writeSet"
+  ],
+  "properties": {
+    "taskId": { "type": "string" },
+    "planId": { "type": "string" },
+    "goal": { "type": "string" },
+    "reqs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "allowModify": { "type": "array", "items": { "type": "string" } },
+    "denyModify": { "type": "array", "items": { "type": "string" } },
+    "readSet": { "type": "array", "items": { "type": "string" } },
+    "writeSet": { "type": "array", "items": { "type": "string" } },
+    "dependsOn": { "type": "array", "items": { "type": "string" } },
+    "mergeAfter": { "type": "array", "items": { "type": "string" } },
+    "riskTags": { "type": "array", "items": { "type": "string" } },
+    "frozenContracts": { "type": "array", "items": { "type": "string" } }
+  }
+}

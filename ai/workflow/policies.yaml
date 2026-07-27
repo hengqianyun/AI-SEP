@@ -1,0 +1,65 @@
+# 项目工作流策略 — 平台本体 SEP（引导阶段）
+
+projectId: SEP
+workflowId: ai-software-delivery
+workflowVersion: 1.0.0
+
+planningCommittee:
+  maxRounds: 5
+  requiredRoles:
+    - productAnalyst
+    - solutionArchitect
+    - qaStrategist
+    - parallelPlanner
+    - planEditor
+  optionalRoles:
+    uxUiPlanner:
+      enabled: false
+      omitReason: "平台 V1 无业务 UI 产品面；体验不在本仓库交付范围"
+    apiDataDesigner:
+      enabled: false
+      omitReason: "平台阶段无业务 API/DB；制品契约由 ai/schemas 维护，本轮不启用独立 API 角色"
+    securityOperations:
+      enabled: true
+      omitReason: ""
+
+codeReview:
+  maxRounds: 5
+  passWhen: no-p0-or-p1
+
+riskTriggers:
+  securityReviewer:
+    - auth-model-change
+    - new-public-endpoint
+    - handles-pii
+    - agent-secret-handling
+  migrationReviewer:
+    - schema-migration
+    - data-backfill
+
+release:
+  requireHumanApproval: true
+  approverIdentity: maintainer
+  requireIntegrationReview: true
+  requireAllP0Verified: true
+
+escalation:
+  onPlanningRoundLimit: productOwner
+  onReviewRoundLimit: techLead
+  onSecurityResidualRisk: securityOperationsOwner
+  onReleaseGate: maintainer
+  responseSlaHours: 24
+
+isolation:
+  mode: branch
+  notes: "引导阶段以文档/规范变更为主；并行编码启用后再评估 worktree"
+
+learning:
+  minIndependentEvents: 3
+  minConfidence: 4
+  scoreThreshold: 15
+  requireHumanApproval: true
+  approvers:
+    global: platform
+    organization: architecture-committee
+    project: techLead

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "planning-review@1",
+  "title": "PlanningReview",
+  "type": "object",
+  "required": ["reviewId", "planId", "role", "decision", "summary"],
+  "properties": {
+    "reviewId": { "type": "string" },
+    "planId": { "type": "string" },
+    "round": { "type": "integer", "minimum": 1 },
+    "role": { "type": "string" },
+    "decision": {
+      "type": "string",
+      "enum": ["APPROVE", "REQUEST_CHANGES", "BLOCK", "ABSTAIN"]
+    },
+    "summary": { "type": "string" },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "evidence", "closeWhen"],
+        "properties": {
+          "id": { "type": "string" },
+          "severity": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+          "evidence": { "type": "string" },
+          "closeWhen": { "type": "string" },
+          "relatedReqs": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "abstainReason": { "type": "string" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "decision": { "const": "ABSTAIN" } } },
+      "then": { "required": ["abstainReason"] }
+    }
+  ]
+}

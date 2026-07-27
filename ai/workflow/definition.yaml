@@ -1,0 +1,49 @@
+# 工作流节点骨架 — 与 design.md §18.2 对齐
+# 角色启用/阈值以 policies.yaml 为准；本文件描述节点与转换。
+
+workflow:
+  id: ai-software-delivery
+  version: 1.0.0
+  entryNode: PRD_ANALYSIS
+  nodes:
+    PRD_ANALYSIS:
+      requiredRoles: [productAnalyst]
+      onPass: REQUIREMENT_REVIEW
+    REQUIREMENT_REVIEW:
+      requiredRoles: [productAnalyst]
+      onPass: PLAN_DRAFT
+    PLAN_DRAFT:
+      requiredRoles: [planEditor]
+      onPass: PLAN_REVIEW
+    PLAN_REVIEW:
+      requiredRolesFromPolicy: planningCommittee
+      passWhen: all-required-roles-approve
+      maxRoundsFromPolicy: planningCommittee.maxRounds
+      onPass: PLAN_APPROVED
+      onRoundLimit: ESCALATED
+    PLAN_APPROVED:
+      requiredRoles: [parallelPlanner]
+      onPass: TASK_DISPATCH
+    TASK_DISPATCH:
+      requiredRoles: [orchestrator]
+      onPass: DEVELOPMENT
+    DEVELOPMENT:
+      requiredRoles: [developer]
+      onPass: CODE_REVIEW
+    CODE_REVIEW:
+      requiredRoles: [codeReviewer]
+      passWhen: no-p0-or-p1
+      maxRoundsFromPolicy: codeReview.maxRounds
+      onPass: TESTING
+      onRoundLimit: ESCALATED
+    TESTING:
+      requiredRoles: [tester]
+      onPass: INTEGRATION
+    INTEGRATION:
+      requiredRoles: [integrationReviewer]
+      when: parallel-bundle-complete
+      onPass: RELEASE_REVIEW
+    RELEASE_REVIEW:
+      passWhen: release-gates
+      humanApprovalFromPolicy: release.requireHumanApproval
+      onPass: COMPLETED

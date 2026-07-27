@@ -1,0 +1,54 @@
+# context-map.yaml — 路径/角色 → 必装规则与技能（最小装载）
+
+projectId: REPLACE_ME
+
+# Orchestrator 装载顺序建议：global → organization → 下列匹配项 → 任务包内声明
+
+defaults:
+  rules:
+    - RULE-GLOBAL-SECRETS
+    - RULE-GLOBAL-CONSENSUS
+  # organization 规则在 status: active 后取消注释
+  # - RULE-ORG-STACK
+  # - RULE-ORG-CODING
+  # - RULE-ORG-SECURITY
+  # - RULE-ORG-RELEASE
+
+byRole:
+  developer:
+    skills: [skill.developer]
+    rules: [RULE-PROJECT-LAYOUT, RULE-PROJECT-DOMAIN]
+  codeReviewer:
+    skills: [skill.code-review]
+    rules: [RULE-PROJECT-LAYOUT, RULE-PROJECT-ARCHITECTURE]
+  tester:
+    skills: [skill.tester]
+    rules: [RULE-PROJECT-LAYOUT]
+  solutionArchitect:
+    skills: [skill.solution-architect]
+    rules: [RULE-PROJECT-ARCHITECTURE]
+  apiDataDesigner:
+    skills: [skill.api-data-designer]
+    rules: [RULE-PROJECT-DOMAIN]
+  qaStrategist:
+    skills: [skill.qa-strategist]
+  parallelPlanner:
+    skills: [skill.parallel-planner]
+    rules: [RULE-PROJECT-LAYOUT]
+  uxUiPlanner:
+    skills: [skill.ux-ui-planner]
+  securityOperations:
+    skills: [skill.security-operations]
+  securityReviewer:
+    skills: [skill.security-review]
+  migrationReviewer:
+    skills: [skill.migration-review]
+  integrationReviewer:
+    skills: [skill.integration-review]
+
+byPath:
+  # - pattern: "backend/src/**"
+  #   extraRules: [RULE-PROJECT-DOMAIN]
+  # - pattern: "**/migrations/**"
+  #   extraSkills: [skill.migration-review]
+  #   requireRoles: [migrationReviewer]

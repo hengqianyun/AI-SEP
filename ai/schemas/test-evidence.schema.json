@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "test-evidence@1",
+  "title": "TestEvidence",
+  "type": "object",
+  "required": ["evidenceId", "taskId", "status", "layers"],
+  "properties": {
+    "evidenceId": { "type": "string" },
+    "taskId": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["PASSED", "FAILED", "BLOCKED"]
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "command", "result"],
+        "properties": {
+          "name": { "type": "string" },
+          "command": { "type": "string" },
+          "result": { "type": "string", "enum": ["PASSED", "FAILED", "SKIPPED", "BLOCKED"] },
+          "relatedReqs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "blockedBy": { "type": "string" }
+  }
+}

@@ -217,6 +217,37 @@ agentContract:
 - 为了推进流程把 `REQUEST_CHANGES` 改成 `APPROVE`；
 - 在任务边界不完整时直接启动开发。
 
+### 5.1 默认运行模型：主会话 + Subagent
+
+为避免“每个角色新开聊天”或“主会话换帽子扮演多角色”，默认采用：
+
+```text
+用户 ↔ 唯一主会话（Orchestrator）
+              │
+              ├── subagent / worker → productAnalyst
+              ├── subagent / worker → solutionArchitect / qaStrategist / ...
+              ├── subagent / worker → developer
+              ├── subagent / worker → codeReviewer   ← 必须另一实例
+              └── subagent / worker → tester / integrationReviewer / ...
+```
+
+映射规则：
+
+1. **主会话只扮演 `orchestrator`**：与用户对话、推进状态、调度、门禁、升级人类。
+2. **专业角色一律隔离执行**：通过 subagent、worker、独立会话或独立模型调用启动；装载对应 `ai/agents/{role}.md`。
+3. **交接靠版本化制品**：主会话传给子实例的是角色契约路径、输入制品路径、输出路径与本轮目标；不以长聊天摘要作为真相源。
+4. **制衡角色不得同实例**：同一任务的 `developer` 与 `codeReviewer` 必须分离；规划评审角色先独立输出，再由 Orchestrator 汇总。
+5. **可证明安全才并行**：无写冲突的评审或任务可同时拉起多个子实例；否则串行。
+6. **用户不手动切角色**：换角色由 Orchestrator 调度完成；仅在 Run 结束、严重跑偏或需要全新人类决策线程时才新开主会话。
+
+反模式：
+
+- 主会话自行撰写“全员 APPROVE”或“审查通过”；
+- 同一上下文先开发后自审；
+- 每换一个角色就让用户新开聊天并手工粘贴全部历史。
+
+角色级调度协议见 [`ai/agents/orchestrator.md`](./ai/agents/orchestrator.md)。
+
 ## 6. 规划委员会
 
 ### 6.1 角色边界
@@ -745,6 +776,13 @@ result: PASS
 - 建立 Prompt/Skill 注册表与回滚流程；
 - 验收：新规则可说明来源、效果、适用范围及回滚版本。
 
+### 阶段 6：工作流控制面
+
+- 建立可机器读取的状态机定义、运行实例、事件日志和 Worker 租约；
+- 提供 `start`、`resume`、`status`、`approve`、`cancel` 五个稳定入口；
+- 增加 CLI、文件触发器和 Agent Runtime Adapter，避免依赖长篇手工提示词；
+- 验收：关闭当前聊天后，新会话可仅根据落盘状态准确恢复到下一动作，且不会重复派发已运行任务。
+
 ## 17. 架构完成定义
 
 只有同时满足以下条件，才可以认为该 AI 开发平台具备可持续运行能力：
@@ -758,873 +796,321 @@ result: PASS
 7. P0/P1 和必需测试是自动化硬门禁；
 8. 知识按层装载，冲突和来源可审计；
 9. Rule、Prompt、Skill 都经过评测、版本化并可回滚；
-10. 原始事件、决策和执行证据足以复现一次交付。
+10. 原始事件、决策和执行证据足以复现一次交付；
+11. 工作流可通过稳定入口启动，不要求用户重复粘贴完整提示词；
+12. 任意新会话都能从持久化状态恢复，聊天记录不再是权威状态来源。
+
+## 18. 工作流控制面
+
+前述章节定义了“如何协作”，本节定义“如何启动、记录和恢复”。没有控制面时，`design.md` 仍然只是规范，Agent 不会因为项目中出现 PRD 就安全地自动执行。
+
+### 18.1 控制面目录
+
+```text
+ai/
+├── workflow/
+│   ├── definition.yaml       # 节点、转换、角色和门禁
+│   ├── policies.yaml         # 超时、重试、升级和人工审批策略
+│   ├── start.md              # 启动协议，供 Runtime Adapter 使用
+│   └── resume.md             # 恢复协议，供 Runtime Adapter 使用
+├── schemas/
+│   ├── run.schema.json
+│   ├── state.schema.json
+│   ├── event.schema.json
+│   ├── lease.schema.json
+│   └── task.schema.json
+├── inbox/                    # 文件触发请求
+├── runs/
+│   └── RUN-{PROJECT}-{NNN}/
+│       ├── manifest.yaml
+│       ├── state.yaml
+│       ├── events.jsonl
+│       ├── artifacts.yaml
+│       ├── leases/
+│       ├── approvals/
+│       ├── issues/
+│       ├── checkpoints/
+│       └── tasks/
+└── adapters/
+    ├── cli/
+    ├── cursor/
+    ├── ci/
+    └── generic-agent/
+```
+
+`workflow/` 是版本化定义，`runs/` 是具体执行状态，`adapters/` 只负责把不同工具的调用转换为同一控制协议。业务规则不得写进某个特定 Adapter。
+
+### 18.2 工作流状态机
+
+```text
+CREATED
+  → PRD_ANALYSIS
+  → REQUIREMENT_REVIEW
+  → PLAN_DRAFT
+  → PLAN_REVIEW
+  → PLAN_APPROVED
+  → TASK_DISPATCH
+  → DEVELOPMENT
+  → CODE_REVIEW
+  → TESTING
+  → INTEGRATION
+  → RELEASE_REVIEW
+  → COMPLETED
+```
+
+任一节点还可进入：
+
+- `BLOCKED`：缺少输入、环境或前置决策；
+- `PAUSED`：用户主动暂停；
+- `ESCALATED`：达到最大轮次或出现高风险分歧；
+- `CANCELLED`：由有权限的人类终止；
+- `FAILED`：不可自动恢复的技术失败。
+
+`definition.yaml` 至少声明：
+
+```yaml
+workflow:
+  id: ai-software-delivery
+  version: 1.0.0
+  entryNode: PRD_ANALYSIS
+  nodes:
+    PLAN_REVIEW:
+      requiredRoles:
+        - productAnalyst
+        - solutionArchitect
+        - qaStrategist
+        - parallelPlanner
+      passWhen: all-required-roles-approve
+      maxRounds: 5
+      onPass: PLAN_APPROVED
+      onRoundLimit: ESCALATED
+    CODE_REVIEW:
+      requiredRoles:
+        - codeReviewer
+      passWhen: no-p0-or-p1
+      onPass: TESTING
+```
+
+### 18.3 运行状态
+
+每次处理一个 PRD 都创建独立 `runId`。`state.yaml` 是当前节点的唯一权威来源：
+
+```yaml
+runId: RUN-MALL-001
+workflowVersion: 1.0.0
+stateVersion: 17
+status: ACTIVE
+currentNode: PLAN_REVIEW
+round: 2
+activeArtifact: PLAN-MALL-1.1
+completedNodes:
+  - PRD_ANALYSIS
+  - REQUIREMENT_REVIEW
+blockedBy:
+  - ISSUE-PLAN-023
+nextAction:
+  role: planEditor
+  action: revise-plan
+updatedAt: 2026-07-23T18:00:00+08:00
+updatedBy: orchestrator-01
+```
+
+进度不能只记录百分比。必须记录：
+
+- 当前节点与状态；
+- 已完成节点；
+- 当前评审轮次；
+- 已批准和未批准角色；
+- 未关闭问题；
+- 正在运行的 Worker；
+- 下一角色和下一动作；
+- 当前权威制品及版本；
+- 最近一次成功 Checkpoint。
+
+### 18.4 事件日志
+
+`events.jsonl` 只允许追加，禁止重写历史：
+
+```json
+{"eventId":"EVT-001","stateVersion":1,"type":"RUN_CREATED","node":"PRD_ANALYSIS"}
+{"eventId":"EVT-002","stateVersion":2,"type":"ARTIFACT_PUBLISHED","artifact":"SNAP-MALL-001"}
+{"eventId":"EVT-003","stateVersion":3,"type":"REVIEW_REQUEST_CHANGES","role":"qaStrategist","issues":["ISSUE-PLAN-023"]}
+```
+
+更新顺序：
+
+1. 校验当前 `stateVersion`；
+2. 写入带唯一 `runId` 的临时制品；
+3. 校验 Schema、来源和 Hash；
+4. 原子发布正式制品；
+5. 追加事件；
+6. 以比较并交换方式更新 `state.yaml`；
+7. 写入 Checkpoint。
+
+若版本已被其他会话更新，本次写入必须停止并重新读取，不能覆盖较新的状态。
+
+### 18.5 Worker 租约与晚到结果
+
+网络断开或调用返回 `aborted` 不代表 Worker 已经终止。Orchestrator 不得立即向同一目标重新派发写入任务。
+
+每个 Worker 必须拥有租约：
+
+```yaml
+leaseId: LEASE-0041
+runId: RUN-MALL-001
+workerId: worker-plan-editor-02
+role: planEditor
+taskId: PLAN-REVISION-R2
+status: ACTIVE
+startedAt: 2026-07-23T18:00:00+08:00
+heartbeatAt: 2026-07-23T18:00:30+08:00
+leaseExpiresAt: 2026-07-23T18:02:00+08:00
+temporaryOutput: planning/proposals/PLAN-MALL-1.2.worker-plan-editor-02.tmp
+publishTarget: planning/proposals/PLAN-MALL-1.2.md
+```
+
+规则：
+
+- Worker 只能写自己的临时输出；
+- 只有 Orchestrator 可以发布正式制品；
+- 租约有效时禁止重复派发同一任务；
+- 租约过期后先检查进程、临时文件和晚到结果；
+- 每次派发必须携带幂等键；
+- 晚到结果与当前 `stateVersion` 不一致时只能归档，不能覆盖正式制品。
+
+### 18.6 跨会话恢复
+
+新会话不得依赖上一会话聊天摘要，而应执行统一恢复协议：
+
+1. 查找未完成的 `ai/runs/*/state.yaml`；
+2. 用户未指定 `runId` 且只有一个活动运行时，自动选择该运行；
+3. 存在多个活动运行时，仅询问用户选择哪个 `runId`；
+4. 校验 workflow 版本、state Schema、制品 Hash 和 Worker 租约；
+5. 读取 `currentNode`、`blockedBy`、`nextAction`；
+6. 不重复执行 `completedNodes`；
+7. 从 `nextAction` 恢复；
+8. 恢复事件写入 `events.jsonl`。
+
+恢复后 Agent 首条状态输出应保持简短：
+
+```text
+已恢复 RUN-MALL-001。
+当前节点：PLAN_REVIEW，第 2 轮。
+阻塞问题：1 个。
+下一动作：Plan Editor 修订 PLAN-MALL-1.1。
+```
+
+### 18.7 无可视化时的启动方式
+
+不应要求用户每次粘贴长篇提示词。推荐按以下优先级提供入口。
+
+#### 方式一：CLI 包装器（推荐）
+
+```bash
+ai-flow start product/prd/v1.0.md
+ai-flow resume RUN-MALL-001
+ai-flow status RUN-MALL-001
+ai-flow approve RUN-MALL-001 --artifact PLAN-MALL-1.2
+ai-flow pause RUN-MALL-001
+ai-flow cancel RUN-MALL-001
+```
+
+CLI 负责创建状态、校验输入并调用已配置的 Agent Runtime。用户只输入短命令，不需要记忆角色和提示词。
+
+无 GUI 时，`status` 输出节点式摘要：
+
+```text
+RUN-MALL-001  ACTIVE
+PRD_ANALYSIS       DONE
+REQUIREMENT_REVIEW DONE
+PLAN_DRAFT         DONE
+PLAN_REVIEW        BLOCKED  round=2 issues=1
+TASK_DISPATCH      WAITING
+next: planEditor/revise-plan
+```
+
+#### 方式二：文件触发器
+
+用户只需新增：
+
+```yaml
+# ai/inbox/start-mall.yaml
+action: start
+prd: product/prd/v1.0.md
+workflow: ai-software-delivery@1.0.0
+requestedBy: product-owner
+```
+
+Watcher、CI 或自动化服务消费请求，创建 Run 后将原文件移动到 `processed/`。请求必须有唯一 ID，重复提交不能创建第二个 Run。
+
+恢复请求：
+
+```yaml
+action: resume
+runId: RUN-MALL-001
+```
+
+#### 方式三：项目级 Runtime Adapter
+
+不同 Agent 工具可以使用各自的自动加载能力：
+
+- Cursor：项目 Rule、Command、Hook 或 Automation；
+- 支持 `AGENTS.md` 的工具：在根规则中注册启动与恢复协议；
+- CI：通过 PR 标签、评论命令或工作流派发；
+- 通用 Agent：启动脚本注入 `start.md` 或 `resume.md`。
+
+Adapter 只需做两件事：
+
+1. 检测用户是启动新 Run 还是恢复现有 Run；
+2. 把控制面文件和 `nextAction` 交给 Agent。
+
+不要让 Adapter 自行维护另一份状态机。
+
+#### 方式四：约定式自动发现
+
+当 Agent 打开项目时，可执行：
+
+```text
+若存在唯一 ACTIVE Run，则自动恢复。
+若不存在 ACTIVE Run，但 ai/inbox 中存在 start 请求，则启动。
+若只有 PRD 而没有显式请求，不自动编码，只提示可创建 Run。
+```
+
+禁止“发现任意 `.md` 就自动开发”，否则示例、历史 PRD 或未批准草案可能误触发工作流。
+
+### 18.8 人类与多 Agent 协作
+
+控制面不会消除多人协作，只会减少依赖聊天同步。
+
+人类负责：
+
+- Product Owner 裁决业务范围和优先级；
+- Tech Lead 处理架构升级和不可逆技术决策；
+- Security/Operations Owner 接受高风险发布决策；
+- Maintainer 批准最终集成和发布。
+
+Agent 负责：
+
+- 结构化分析和制品生成；
+- 独立规划评审；
+- developer/codeReviewer 对抗；
+- 自动化测试和追踪证据；
+- 按 DAG 并行执行边界清晰的任务。
+
+小项目可由一个人承担多个“人类身份”，但每次批准必须注明身份。AI 的 developer 与 codeReviewer 仍不能由同一实例兼任。
+
+### 18.9 推荐默认交互
+
+无可视化时采用“CLI + 自动恢复 + 文件状态”：
+
+1. 用户首次执行 `ai-flow start <prd>`；
+2. 后续进入项目时 Adapter 自动恢复唯一活动 Run；
+3. Agent 只在需要人类裁决时提问；
+4. 用户使用 `ai-flow status` 查看进度；
+5. 所有长提示词隐藏在版本化的 `start.md`、`resume.md` 和角色 Contract 中。
+
+默认交互与 §5.1 一致：用户只维护对接 Orchestrator 的主会话；具体角色由主会话调度隔离 subagent/worker 执行，而不是让用户频繁切换角色或为每个角色新开聊天。
+
+这样，用户只需要记住 `start`、`resume` 和 `status`，而不是重复描述完整工作流。
 
 ---
-
-## 附录：原始设计
-
-以下内容原样保留，独立基线文件见 [`base_design.md`](./base_design.md)。
-
-```
-project
-│
-├── product/                  # 产品层
-│   ├── prd/
-│   │    v1.0.md
-│   │    v1.1.md
-│   │
-│   ├── changelog/
-│   │
-│   └── glossary.md           # 业务术语
-│
-├── design/                   # UI设计层
-│   │
-│   ├── ui-spec/
-│   │
-│   ├── prototype/
-│   │
-│   ├── components/
-│   │
-│   └── design-token/
-│
-├── planning/                 # AI规划层
-│   │
-│   ├── task/
-│   │
-│   ├── coding-plan/
-│   │
-│   ├── api-design/
-│   │
-│   ├── database/
-│   │
-│   └── dependency-graph/
-│
-├── frontend/
-│
-├── backend/
-│
-├── e2e/
-│
-├── ai/
-│   ├── skills/
-│   ├── rules/
-│   ├── prompts/
-│   ├── templates/
-│   ├── agents/
-│   └── memory/
-│
-└── docs/
-```
-
----
-
-# 第一层 Product  
-
-
-这一层唯一职责：
-
-> 告诉 AI 我想做什么。
-
-建议不仅仅放 PRD。
-
-例如
-
-```
-
-```
-
-```
-product
-    prd/
-        user.md
-
-        role.md
-
-        permission.md
-
-    changelog/
-
-    glossary.md
-
-    business-rule.md
-
-    user-story.md
-```
-
-例如：
-
-```
-
-```
-
-```
-business-rule.md
-
-权限规则：
-
-超级管理员
-
-可以管理全部组织
-
-组织管理员
-
-只能管理自己组织
-
-普通员工
-
-没有管理权限
-```
-
-AI非常喜欢这种结构化文档。
-
-比全部塞PRD里效果好很多。
-
----
-
-# 第二层 Design
-
-这里不要只放UI。
-
-应该放
-
-```
-
-```
-
-```
-design
-
-    prototype/
-
-    ui-spec/
-
-    components/
-
-    tokens/
-
-    assets/
-```
-
-例如：
-
-```
-
-```
-
-```
-Button
-
-Primary
-
-Danger
-
-Success
-
-Hover
-
-Disabled
-```
-
-AI以后生成页面的时候不用猜。
-
----
-
-# 第三层 Planning
-
-这是整个AI开发最重要的一层。
-
-也是很多团队没有的。
-
-例如
-
-```
-
-```
-
-```
-planning
-
-    coding-plan/
-
-    api-design/
-
-    database/
-
-    task/
-
-    dependency/
-
-```
-
-例如 AI解析PRD后生成
-
-```
-
-```
-
-```
-Task-001
-
-实现用户管理
-
-依赖：
-
-登录
-
-组织
-
-接口：
-
-GET /users
-
-POST /users
-
-数据库：
-
-User
-
-Role
-```
-
-再继续拆
-
-```
-
-```
-
-```
-Task001
-
-↓
-
-Frontend
-
-Backend
-
-Test
-
-Review
-```
-
-Agent就可以并发。
-
----
-
-# Coding Plan
-
-我建议不是一个文档。
-
-而是一堆。
-
-例如
-
-```
-
-```
-
-```
-coding-plan
-
-    epic-user/
-
-        overview.md
-
-        FE-001.md
-
-        FE-002.md
-
-        BE-001.md
-
-        TEST-001.md
-```
-
-每个Agent拿一个。
-
----
-
-# API Design
-
-例如
-
-```
-
-```
-
-```
-GET
-
-/users
-
-返回
-
-{
- list:[]
-}
-```
-
-AI开发Frontend的时候不用再猜接口。
-
----
-
-# Database
-
-```
-
-```
-
-```
-User
-
-id
-
-name
-
-role
-
-dept
-
-```
-
-AI写SQL直接看这里。
-
----
-
-# Dependency
-
-AI其实最怕
-
-不知道先做什么。
-
-所以
-
-```
-
-```
-
-```
-graph.md
-
-Login
-
-↓
-
-Permission
-
-↓
-
-User
-
-↓
-
-Role
-
-↓
-
-Menu
-```
-
-Agent知道依赖。
-
----
-
-# Frontend
-
-这里建议增加
-
-```
-
-```
-
-```
-frontend
-
-    src/
-
-    docs/
-
-        architecture/
-
-        coding-standard/
-
-        route/
-
-        state/
-
-        api/
-
-```
-
-例如
-
-```
-
-```
-
-```
-state
-
-所有Pinia Store说明
-```
-
-以后Agent不用分析代码。
-
----
-
-# Backend
-
-同理
-
-```
-
-```
-
-```
-backend
-
-    docs/
-
-        architecture/
-
-        dto/
-
-        service/
-
-        entity/
-```
-
----
-
-# Test
-
-你的结构已经很好。
-
-我建议再加两层。
-
-```
-
-```
-
-```
-e2e
-
-    tests
-
-    pages
-
-    fixtures
-
-    utils
-
-    data
-
-    reports
-
-    snapshots
-
-    docs
-
-        testcase/
-
-        coverage/
-
-```
-
----
-
-testcase不是代码。
-
-而是
-
-```
-
-```
-
-```
-新增用户
-
-步骤
-
-登录
-
-点击新增
-
-输入
-
-保存
-
-预期
-
-成功
-```
-
-AI再生成Playwright。
-
----
-
-# AI目录
-
-我建议不要叫config。
-
-建议直接
-
-```
-
-```
-
-```
-ai
-```
-
-因为未来东西会越来越多。
-
-例如
-
-```
-
-```
-
-```
-ai
-
-    agents/
-
-    skills/
-
-    rules/
-
-    prompts/
-
-    templates/
-
-    memory/
-
-    logs/
-
-```
-
----
-
-## rules
-
-例如
-
-```
-
-```
-
-```
-vue.rule
-
-所有组件必须script setup
-
-必须使用Composition API
-
-不能使用Options API
-
-```
-
----
-
-## skills
-
-例如
-
-```
-
-```
-
-```
-generate-crud.skill
-
-输入
-
-PRD
-
-输出
-
-CRUD页面
-```
-
-或者
-
-```
-
-```
-
-```
-write-playwright.skill
-
-输入
-
-TestCase
-
-输出
-
-Playwright
-```
-
----
-
-## prompt
-
-例如
-
-```
-
-```
-
-```
-frontend.prompt
-
-你是高级Vue工程师
-
-...
-```
-
----
-
-## memory
-
-这是很多人没有想到的。
-
-Agent需要记忆。
-
-例如
-
-```
-
-```
-
-```
-memory
-
-bug-history/
-
-coding-history/
-
-review/
-
-```
-
-例如
-
-```
-
-```
-
-```
-Bug-001
-
-原因：
-
-Select组件异步加载
-
-经验：
-
-所有Select等待接口返回
-
-```
-
-以后Agent开发到Select
-
-直接读取。
-
----
-
-# 学习机制
-
-这是我觉得最值得做的一部分。
-
-建议增加
-
-```
-
-```
-
-```
-learning/
-
-```
-
-例如
-
-```
-
-```
-
-```
-learning
-
-    failed-tests/
-
-    root-cause/
-
-    generated-rules/
-
-    generated-skills/
-
-```
-
-工作流
-
-```
-
-```
-
-```
-Playwright失败
-
-↓
-
-AI读取Report
-
-↓
-
-定位代码
-
-↓
-
-分析失败原因
-
-↓
-
-总结经验
-
-↓
-
-生成Rule
-
-↓
-
-下次开发自动引用
-```
-
-例如
-
-失败
-
-```
-
-```
-
-```
-Locator Timeout
-```
-
-AI总结
-
-```
-
-```
-
-```
-Rule-018
-
-所有Dialog
-
-必须等待动画结束
-
-禁止立即点击
-```
-
-以后自动加入rule。
-
----
-
-再比如
-
-```
-
-```
-
-```
-连续5次
-
-都是Table滚动失败
-
-```
-
-AI总结
-
-```
-
-```
-
-```
-Skill
-
-TableScroll.skill
-```
-
-以后所有项目都会用。
-
----
-
-# 完整工作流（推荐）
-
-```
-
-```
-
-```
-PRD
-        │
-        ▼
-AI解析业务
-        │
-        ▼
-生成任务(Task)
-        │
-        ├──────────────┐
-        ▼              ▼
-生成API        生成UI
-        │              │
-        └──────┬───────┘
-               ▼
-      Frontend Agent
-               │
-               ▼
-      Backend Agent
-               │
-               ▼
-       自动Code Review
-               │
-               ▼
-     AI生成Test Case
-               │
-               ▼
- AI生成Playwright脚本
-               │
-               ▼
-        自动执行E2E
-               │
-      ┌────────┴─────────┐
-      ▼                  ▼
-    成功              失败
-      │                  │
-      ▼                  ▼
-   Merge        Root Cause Analysis
-                          │
-                          ▼
-              Rule / Skill Generator
-                          │
-                          ▼
-                  更新 ai/rules
-                  更新 ai/skills
-                          │
-                          ▼
-                  下一轮开发引用
-```
-
-## 可以进一步优化的几个关键点
-
-如果目标是打造一个长期可演进的 AI 开发平台，而不仅是一个项目模板，我建议增加以下能力：
-
-1. **需求可追踪性（Traceability）**：为每条 PRD 需求分配唯一 ID（如 `REQ-001`），并在设计、开发任务、代码注释、测试用例中引用该 ID。这样可以快速回答“这个需求是否已经实现并覆盖测试”。 
-2. **Agent 明确职责边界**：不要让一个 Agent 完成所有事情，而是拆分为 Product Analyst、UI Planner、Frontend Developer、Backend Developer、Code Reviewer、Test Generator、Root Cause Analyzer 等角色，每个角色只消费固定格式的输入并输出固定格式的文档。 
-3. **知识库分层**：将 `ai/rules` 区分为全局规则（所有项目通用）、团队规则（公司规范）和项目规则（当前项目特有），避免项目越来越大后规则互相污染。 
-4. **自动评估学习价值**：不是所有失败都值得生成 Rule。建议增加一个筛选流程，例如同类问题重复出现 3 次以上才提升为 Rule，否则仅记录到 `memory` 中，避免规则库膨胀。 
-5. **版本化 Prompt 与 Skill**：随着模型升级，同一个 Skill 的 Prompt 也会演进。建议每个 Skill 和 Prompt 都带版本号，并记录适用模型、更新时间和效果说明，方便回滚和持续优化。 
-
-整体来看，你的设想已经不仅仅是“AI 辅助编码”，而是一个**AI 驱动的软件工程平台（AI Software Engineering Platform）**。如果把文档规范、Agent 通信协议、知识沉淀机制设计好，后续无论接入 Cursor、Claude Code、Codex 还是其他 Agent，都可以复用同一套工程体系。
