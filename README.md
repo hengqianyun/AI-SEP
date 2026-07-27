@@ -239,6 +239,7 @@ PRD：product/prd/<file>.md
 | [`product/prd/v1.0.md`](./product/prd/v1.0.md) | 本模板作为「平台产品」的需求说明 |
 | [`PROJECT-CUSTOMIZATION.md`](./PROJECT-CUSTOMIZATION.md) | 实例化必填项勾选 |
 | [`PROJECT-CUSTOMIZATION-ASSIGNMENTS.md`](./PROJECT-CUSTOMIZATION-ASSIGNMENTS.md) | 谁写哪份规范 |
+| [`customization-templates/`](./customization-templates/README.md) | 每个实例化任务的可复制填写模板 |
 | [`ai/README.md`](./ai/README.md) | `ai/` 目录导读 |
 | [`ai/agents/README.md`](./ai/agents/README.md) | 角色总表与契约共性 |
 | [`ai/rules/README.md`](./ai/rules/README.md) | 规则分层与装载 |

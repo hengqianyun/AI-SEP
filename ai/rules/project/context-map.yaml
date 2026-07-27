@@ -47,7 +47,12 @@ byRole:
     skills: [skill.integration-review]
 
 byPath:
+  # 每个启用的代码域按真实路径装载对应 Developer Skill。
+  # 技术栈尚未确定或 Skill 仍为 draft 时，不得取消注释。
+  # - pattern: "frontend/**"
+  #   extraSkills: [skill.frontend-developer]
   # - pattern: "backend/src/**"
+  #   extraSkills: [skill.backend-developer]
   #   extraRules: [RULE-PROJECT-DOMAIN]
   # - pattern: "**/migrations/**"
   #   extraSkills: [skill.migration-review]

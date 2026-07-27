@@ -2,6 +2,8 @@
 
 > 适用：本仓库作为**项目模板**被新项目实例化时，人工补齐规则、Skill、门禁。  
 > 勾选总表见 [`PROJECT-CUSTOMIZATION.md`](./PROJECT-CUSTOMIZATION.md)。  
+> 所有任务的可复制填写参考见 [`customization-templates/`](./customization-templates/README.md)。
+> Template 直达链接请在 **Markdown 预览** 中点击；源码视图对跨文件 `#锚点` 常无法跳转。
 > 原则：各角色只改自己负责的落盘文件；`ai/agents/*.md` 角色骨架不改。
 
 ### 覆盖范围说明（是否「完整」）
@@ -64,17 +66,17 @@
 
 ### 3.1 产品人员
 
-| ID | 任务 | 交付物 | 完成标准 | 依赖 |
-|---|---|---|---|---|
-| P-01 | 确认 Product Owner 信息 | `ai/rules/project/owners.yaml` → `productOwner` | name/contact 非空 | — |
-| P-02 | 编写术语表 | `product/glossary.md` | 核心实体 ≥ 一版可评审；含易混淆点 | — |
-| P-03 | 领域不变量 + 业务规则 | `RULE-PROJECT-DOMAIN.md` + `product/business-rules/*` | 至少列出违反即 P0 的不变量；规则有 ID | P-02 |
-| P-04 | MODULE 业务含义 | `modules.yaml` 中 `code`/`name`/`ownerRole` | 与术语表一致；路径可暂空由开发补 | P-02 |
-| P-05 | 规划角色裁剪（业务侧） | `policies.yaml` → `optionalRoles.uxUiPlanner` | 无 UI 则 `enabled: false` 并写 `omitReason` | — |
-| P-06 | UX/体验 Skill（若启用 UX） | `ai/skills/ux-ui-planner/SKILL.md` | 设计系统路径或「暂无、用文字稿」写清 | P-05 |
-| P-07 | 试点 PRD + 非目标 | `product/prd/` | 有范围、优先级、Out of Scope、开放问题 | P-02～P-03 |
-| P-08 | 需求快照模板试填 | `ai/schemas/templates/requirement-snapshot.md` 样例或首份 SNAP | 字段可被产品分析角色直接套用 | P-07 |
-| P-09 | 既有产品向设计决策（若有） | `design/decisions/` | 决策有 ID；否则注明 N/A | — |
+| ID | 任务 | 交付物 | 完成标准 | 依赖 | Template |
+|---|---|---|---|---|---|
+| P-01 | 确认 Product Owner 信息 | `ai/rules/project/owners.yaml` → `productOwner` | name/contact 非空 | — | [P-01](./customization-templates/PRODUCT.md#p-01) |
+| P-02 | 编写术语表 | `product/glossary.md` | 核心实体 ≥ 一版可评审；含易混淆点 | — | [P-02](./customization-templates/PRODUCT.md#p-02) |
+| P-03 | 领域不变量 + 业务规则 | `RULE-PROJECT-DOMAIN.md` + `product/business-rules/*` | 至少列出违反即 P0 的不变量；规则有 ID | P-02 | [P-03](./customization-templates/PRODUCT.md#p-03) |
+| P-04 | MODULE 业务含义 | `modules.yaml` 中 `code`/`name`/`ownerRole` | 与术语表一致；路径可暂空由开发补 | P-02 | [P-04](./customization-templates/PRODUCT.md#p-04) |
+| P-05 | 规划角色裁剪（业务侧） | `policies.yaml` → `optionalRoles.uxUiPlanner` | 无 UI 则 `enabled: false` 并写 `omitReason` | — | [P-05](./customization-templates/PRODUCT.md#p-05) |
+| P-06 | UX/体验 Skill（若启用 UX） | `ai/skills/ux-ui-planner/SKILL.md` | 设计系统路径或「暂无、用文字稿」写清 | P-05 | [P-06](./customization-templates/PRODUCT.md#p-06) |
+| P-07 | 试点 PRD + 非目标 | `product/prd/` | 有范围、优先级、Out of Scope、开放问题 | P-02～P-03 | [P-07](./customization-templates/PRODUCT.md#p-07) |
+| P-08 | 需求快照模板试填 | `ai/schemas/templates/requirement-snapshot.md` 样例或首份 SNAP | 字段可被产品分析角色直接套用 | P-07 | [P-08](./customization-templates/PRODUCT.md#p-08) |
+| P-09 | 既有产品向设计决策（若有） | `design/decisions/` | 决策有 ID；否则注明 N/A | — | [P-09](./customization-templates/PRODUCT.md#p-09) |
 
 **产品验收口径**：业务同学不看代码也能判断「Agent 是否越权改需求」。
 
@@ -82,72 +84,74 @@
 
 ### 3.2 前端开发人员
 
-| ID | 任务 | 交付物 | 完成标准 | 依赖 |
-|---|---|---|---|---|
-| FE-01 | 前端技术栈段落 | `RULE-ORG-STACK.md` 前端行 | 框架/版本/禁止库写清 | — |
-| FE-02 | 前端编码约定 | `RULE-ORG-CODING.md` 中前端节，或项目补充段 | 目录约定、组件/状态/路由规范 | FE-01 |
-| FE-03 | 前端目录与写边界 | `RULE-PROJECT-LAYOUT.md` 前端表；`modules.yaml` paths | `frontend/`（或实际路径）可被 parallelPlanner 使用 | — |
-| FE-04 | Developer Skill（前端部分） | `ai/skills/developer/SKILL.md` | lint/单测/启动命令可复制执行 | FE-01 |
-| FE-05 | Code Review 前端检查项 | `ai/skills/code-review/SKILL.md` | 列出必查与「不可风格阻塞」项 | FE-02 |
-| FE-06 | UX Skill 技术侧补充 | `ux-ui-planner/SKILL.md` 组件库/tokens 路径 | 与产品 P-06 不冲突；无 UI 则跳过 | P-05 |
-| FE-07 | context-map 前端路径 | `context-map.yaml` → `byPath` | 前端 glob → 额外 rules/skills | FE-03 |
-| FE-08 | 集成冒烟（前端入口） | `integration-review/SKILL.md` 相关条 | 给出可执行的冒烟路径/命令 | FE-04、QA 配合 |
+> 若组织未预先指定前端技术栈，**FE-01～FE-04 由项目的前端负责人/前端团队制定**。AI 不得代选 Vue、React 等方案；普通开发者也不得未经评审自行将个人偏好设为项目规范。前端团队起草，测试人员确认验证门禁，Tech Lead 最终批准 `active`。
+
+| ID | 任务 | 交付物 | 完成标准 | 依赖 | Template |
+|---|---|---|---|---|---|
+| FE-01 | 前端技术栈段落 | `RULE-ORG-STACK.md` 前端行 | 框架/版本/禁止库写清 | — | [FE-01](./customization-templates/FRONTEND.md#fe-01) |
+| FE-02 | 前端编码约定 | `RULE-ORG-CODING.md` 中前端节，或项目补充段 | 目录约定、组件/状态/路由规范 | FE-01 | [FE-02](./customization-templates/FRONTEND.md#fe-02) |
+| FE-03 | 前端目录与写边界 | `RULE-PROJECT-LAYOUT.md` 前端表；`modules.yaml` paths | `frontend/`（或实际路径）可被 parallelPlanner 使用 | — | [FE-03](./customization-templates/FRONTEND.md#fe-03) |
+| FE-04 | Frontend Developer Skill | `ai/skills/frontend-developer/SKILL.md` | 前端负责人按模板填写；lint/类型/单测/构建/启动命令可复制执行，经 QA 与 Tech Lead 复核后激活 | FE-01～FE-03 | [FE-04](./customization-templates/FRONTEND.md#fe-04) |
+| FE-05 | Code Review 前端检查项 | `ai/skills/code-review/SKILL.md` | 列出必查与「不可风格阻塞」项 | FE-02 | [FE-05](./customization-templates/FRONTEND.md#fe-05) |
+| FE-06 | UX Skill 技术侧补充 | `ux-ui-planner/SKILL.md` 组件库/tokens 路径 | 与产品 P-06 不冲突；无 UI 则跳过 | P-05 | [FE-06](./customization-templates/FRONTEND.md#fe-06) |
+| FE-07 | context-map 前端路径 | `context-map.yaml` → `byPath` | 前端 glob → 额外 rules/skills | FE-03 | [FE-07](./customization-templates/FRONTEND.md#fe-07) |
+| FE-08 | 集成冒烟（前端入口） | `integration-review/SKILL.md` 相关条 | 给出可执行的冒烟路径/命令 | FE-04、QA 配合 | [FE-08](./customization-templates/FRONTEND.md#fe-08) |
 
 ---
 
 ### 3.3 后端开发人员
 
-| ID | 任务 | 交付物 | 完成标准 | 依赖 |
-|---|---|---|---|---|
-| BE-01 | 后端/数据技术栈 | `RULE-ORG-STACK.md` 后端与数据行 | 语言、框架、DB、迁移工具版本 | — |
-| BE-02 | API / 日志 / 错误码约定 | `RULE-ORG-CODING.md` | 错误结构、鉴权头、分页有示例字段 | BE-01 |
-| BE-03 | 安全红线（工程可执行部分） | `RULE-ORG-SECURITY.md` 协作稿 | 数据分级、密钥、触发 Security Review 条件；需安全负责人会签 | — |
-| BE-04 | 分支/PR/发布惯例 | `RULE-ORG-RELEASE.md` | 与团队真实流程一致 | 协调人确认 Maintainer |
-| BE-05 | 项目架构约束 | `RULE-PROJECT-ARCHITECTURE.md` | 边界、模块关系、不可破坏约定、ADR 入口 | BE-01 |
-| BE-06 | 后端布局与共享契约路径 | `RULE-PROJECT-LAYOUT.md` + `modules.yaml` paths | 标明共享契约目录（禁止乱并行写） | — |
-| BE-07 | API/Data Skill | `ai/skills/api-data-designer/SKILL.md` | 契约落盘路径、兼容策略、迁移路径 | BE-02 |
-| BE-08 | Architect / Parallel / Migration Skill | `solution-architect`、`parallel-planner`、`migration-review` | NFR 基线、写集冲突提示、回滚剧本要点 | BE-05～BE-06 |
-| BE-09 | Developer / Review Skill（后端部分） | `developer`、`code-review` | 与前端共同维护同一文件时分节署名 | BE-01 |
-| BE-10 | 风险触发标签 | `policies.yaml` → `riskTriggers` | 与真实变更类型对齐（鉴权/PII/迁移等） | BE-03 |
-| BE-11 | context-map 后端/迁移路径 | `context-map.yaml` | migrations 等强制额外角色 | BE-06、BE-10 |
+| ID | 任务 | 交付物 | 完成标准 | 依赖 | Template |
+|---|---|---|---|---|---|
+| BE-01 | 后端/数据技术栈 | `RULE-ORG-STACK.md` 后端与数据行 | 语言、框架、DB、迁移工具版本 | — | [BE-01](./customization-templates/BACKEND.md#be-01) |
+| BE-02 | API / 日志 / 错误码约定 | `RULE-ORG-CODING.md` | 错误结构、鉴权头、分页有示例字段 | BE-01 | [BE-02](./customization-templates/BACKEND.md#be-02) |
+| BE-03 | 安全红线（工程可执行部分） | `RULE-ORG-SECURITY.md` 协作稿 | 数据分级、密钥、触发 Security Review 条件；需安全负责人会签 | — | [BE-03](./customization-templates/BACKEND.md#be-03) |
+| BE-04 | 分支/PR/发布惯例 | `RULE-ORG-RELEASE.md` | 与团队真实流程一致 | 协调人确认 Maintainer | [BE-04](./customization-templates/BACKEND.md#be-04) |
+| BE-05 | 项目架构约束 | `RULE-PROJECT-ARCHITECTURE.md` | 边界、模块关系、不可破坏约定、ADR 入口 | BE-01 | [BE-05](./customization-templates/BACKEND.md#be-05) |
+| BE-06 | 后端布局与共享契约路径 | `RULE-PROJECT-LAYOUT.md` + `modules.yaml` paths | 标明共享契约目录（禁止乱并行写） | — | [BE-06](./customization-templates/BACKEND.md#be-06) |
+| BE-07 | API/Data Skill | `ai/skills/api-data-designer/SKILL.md` | 契约落盘路径、兼容策略、迁移路径 | BE-02 | [BE-07](./customization-templates/BACKEND.md#be-07) |
+| BE-08 | Architect / Parallel / Migration Skill | `solution-architect`、`parallel-planner`、`migration-review` | NFR 基线、写集冲突提示、回滚剧本要点 | BE-05～BE-06 | [BE-08](./customization-templates/BACKEND.md#be-08) |
+| BE-09 | Backend Developer / Review Skill | 下游按相同模式创建 `skill.backend-developer`；并补 `code-review` | 后端负责人填写真实命令与约定，不与前端共用技术栈正文 | BE-01 | [BE-09](./customization-templates/BACKEND.md#be-09) |
+| BE-10 | 风险触发标签 | `policies.yaml` → `riskTriggers` | 与真实变更类型对齐（鉴权/PII/迁移等） | BE-03 | [BE-10](./customization-templates/BACKEND.md#be-10) |
+| BE-11 | context-map 后端/迁移路径 | `context-map.yaml` | migrations 等强制额外角色 | BE-06、BE-10 | [BE-11](./customization-templates/BACKEND.md#be-11) |
 
 ---
 
 ### 3.4 测试人员
 
-| ID | 任务 | 交付物 | 完成标准 | 依赖 |
-|---|---|---|---|---|
-| QA-01 | 测试分层与强制层 | `ai/skills/qa-strategist/SKILL.md` | unit/integration/e2e 目标与「何时强制」 | FE-04、BE-09 命令草案 |
-| QA-02 | Tester Skill（可执行） | `ai/skills/tester/SKILL.md` | 环境、fixture 约定、分层命令、阻塞≠通过 | QA-01 |
-| QA-03 | 覆盖与发布测试门槛 | `policies.yaml` 建议项 + Skill 内门槛 | P0 REQ / 关键路径要求可检查 | P-07 优先级口径 |
-| QA-04 | 测试证据模板确认 | `test-evidence.schema.json` + `templates/test-evidence.md` | 字段满足审计；按需增列 | QA-02 |
-| QA-05 | 集成审查测试视角 | `integration-review/SKILL.md` | 跨模块冒烟、契约测试入口 | FE-08、BE |
-| QA-06 | 规划委员会：是否强化 QA 门禁 | `policies.yaml` → `maxRounds` / release 相关 | 给出「测试未证据化不得 COMPLETED」的确认 | 协调人合并 |
-| QA-07 | 安全/隐私测试触发（协作） | 与 BE-03/`riskTriggers` 对齐检查表 | handles-pii 等有对应测试注意点 | BE-10 |
+| ID | 任务 | 交付物 | 完成标准 | 依赖 | Template |
+|---|---|---|---|---|---|
+| QA-01 | 测试分层与强制层 | `ai/skills/qa-strategist/SKILL.md` | unit/integration/e2e 目标与「何时强制」 | FE-04、BE-09 命令草案 | [QA-01](./customization-templates/QA.md#qa-01) |
+| QA-02 | Tester Skill（可执行） | `ai/skills/tester/SKILL.md` | 环境、fixture 约定、分层命令、阻塞≠通过 | QA-01 | [QA-02](./customization-templates/QA.md#qa-02) |
+| QA-03 | 覆盖与发布测试门槛 | `policies.yaml` 建议项 + Skill 内门槛 | P0 REQ / 关键路径要求可检查 | P-07 优先级口径 | [QA-03](./customization-templates/QA.md#qa-03) |
+| QA-04 | 测试证据模板确认 | `test-evidence.schema.json` + `templates/test-evidence.md` | 字段满足审计；按需增列 | QA-02 | [QA-04](./customization-templates/QA.md#qa-04) |
+| QA-05 | 集成审查测试视角 | `integration-review/SKILL.md` | 跨模块冒烟、契约测试入口 | FE-08、BE | [QA-05](./customization-templates/QA.md#qa-05) |
+| QA-06 | 规划委员会：是否强化 QA 门禁 | `policies.yaml` → `maxRounds` / release 相关 | 给出「测试未证据化不得 COMPLETED」的确认 | 协调人合并 | [QA-06](./customization-templates/QA.md#qa-06) |
+| QA-07 | 安全/隐私测试触发（协作） | 与 BE-03/`riskTriggers` 对齐检查表 | handles-pii 等有对应测试注意点 | BE-10 | [QA-07](./customization-templates/QA.md#qa-07) |
 
 ---
 
 ### 3.5 项目协调人（Tech Lead / Maintainer）
 
-| ID | 任务 | 交付物 | 完成标准 |
-|---|---|---|---|
-| C-01 | 填全 `owners.yaml` 四身份 | 含升级联系人 | 四人字段齐全（可一人多身份） |
-| C-02 | `projectId` 全局替换 | `owners`/`modules`/`policies`/`context-map` | 无 `REPLACE_ME` |
-| C-03 | 合并前后端对 STACK/CODING/LAYOUT 的段落 | 无互相矛盾版本 | 冲突已裁决 |
-| C-04 | 定稿 `policies.yaml` | 角色启用、escalation、release、isolation、learning | 与各角色确认签字 |
-| C-05 | 勾选 `PROJECT-CUSTOMIZATION.md` §0 | 全部或写明试点豁免 | 豁免须列未完成项与风险 |
-| C-06 | Schema 任务包/评审字段（工程侧） | `task-package`、`planning-review`、`code-review` | 与并行/审查习惯一致；产品确认需求快照 |
-| C-07 | Adapter / 隔离方式（可后置） | `ai/adapters/`、`policies.isolation` | 工具选定后再做 |
+| ID | 任务 | 交付物 | 完成标准 | Template |
+|---|---|---|---|---|
+| C-01 | 填全 `owners.yaml` 四身份 | 含升级联系人 | 四人字段齐全（可一人多身份） | [C-01](./customization-templates/COORDINATOR.md#c-01) |
+| C-02 | `projectId` 全局替换 | `owners`/`modules`/`policies`/`context-map` | 无 `REPLACE_ME` | [C-02](./customization-templates/COORDINATOR.md#c-02) |
+| C-03 | 合并前后端对 STACK/CODING/LAYOUT 的段落 | 无互相矛盾版本 | 冲突已裁决 | [C-03](./customization-templates/COORDINATOR.md#c-03) |
+| C-04 | 定稿 `policies.yaml` | 角色启用、escalation、release、isolation、learning | 与各角色确认签字 | [C-04](./customization-templates/COORDINATOR.md#c-04) |
+| C-05 | 勾选 `PROJECT-CUSTOMIZATION.md` §0 | 全部或写明试点豁免 | 豁免须列未完成项与风险 | [C-05](./customization-templates/COORDINATOR.md#c-05) |
+| C-06 | Schema 任务包/评审字段（工程侧） | `task-package`、`planning-review`、`code-review` | 与并行/审查习惯一致；产品确认需求快照 | [C-06](./customization-templates/COORDINATOR.md#c-06) |
+| C-07 | Adapter / 隔离方式（可后置） | `ai/adapters/`、`policies.isolation` | 工具选定后再做 | [C-07](./customization-templates/COORDINATOR.md#c-07) |
 
 ### 3.6 已知未单列 / 按需追加
 
-| ID | 任务 | 建议责任人 | 说明 |
-|---|---|---|---|
-| OPT-01 | `skill.security-operations` / `skill.security-review` 正文 | 后端 + Security Owner | 启用 security 规划/审查角色时必填；可与 BE-03 同 PR |
-| OPT-02 | 纯后端项目：标注 FE 全套 N/A | 协调人 | 在 §0 豁免中写明；跳过 FE-01～FE-08 |
-| OPT-03 | `skill.product-analyst` / `plan-editor`（若新建） | 产品 / 协调人 | 当前无文件则不必造；契约 + 模板足够 |
-| OPT-04 | Learning 评测集 / 过期复查 | 协调人 | 对应定制清单 §9，实例化首轮可后置 |
-| OPT-05 | Cursor/CLI Adapter 实装 | 协调人 / 平台 | 对应 C-07；不阻塞人工写规则 |
+| ID | 任务 | 建议责任人 | 说明 | Template |
+|---|---|---|---|---|
+| OPT-01 | `skill.security-operations` / `skill.security-review` 正文 | 后端 + Security Owner | 启用 security 规划/审查角色时必填；可与 BE-03 同 PR | [OPT-01](./customization-templates/OPTIONAL.md#opt-01) |
+| OPT-02 | 纯后端项目：标注 FE 全套 N/A | 协调人 | 在 §0 豁免中写明；跳过 FE-01～FE-08 | [OPT-02](./customization-templates/OPTIONAL.md#opt-02) |
+| OPT-03 | `skill.product-analyst` / `plan-editor`（若新建） | 产品 / 协调人 | 当前无文件则不必造；契约 + 模板足够 | [OPT-03](./customization-templates/OPTIONAL.md#opt-03) |
+| OPT-04 | Learning 评测集 / 过期复查 | 协调人 | 对应定制清单 §9，实例化首轮可后置 | [OPT-04](./customization-templates/OPTIONAL.md#opt-04) |
+| OPT-05 | Cursor/CLI Adapter 实装 | 协调人 / 平台 | 对应 C-07；不阻塞人工写规则 | [OPT-05](./customization-templates/OPTIONAL.md#opt-05) |
 
 ---
 
@@ -165,7 +169,9 @@
 | `RULE-PROJECT-DOMAIN` | **R** | I | C | C | A |
 | `RULE-PROJECT-ARCHITECTURE` | I | C | **R** | I | A |
 | `policies.yaml` | C（UX 省略） | C | C（risk） | C（门槛） | **A/R** |
-| `skill.developer` / `code-review` | I | **R** | **R** | C | A |
+| `skill.developer`（通用基线） | I | C | C | C | **A/R** |
+| `skill.frontend-developer` / 前端 review 约定 | I | **R** | I | C | A |
+| `skill.backend-developer` / 后端 review 约定 | I | I | **R** | C | A |
 | `skill.tester` / `qa-strategist` | C | C | C | **R** | A |
 | `skill.api-data` / `migration` / `architect` | I | I | **R** | C | A |
 | `skill.security-operations` / `security-review` | C | I | **R**（OPT-01） | C | A（安全会签） |

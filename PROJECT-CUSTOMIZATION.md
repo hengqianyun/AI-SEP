@@ -19,7 +19,7 @@
 - [ ] §2 Organization 规则至少有一份 ACTIVE
 - [ ] §3 Project 规则（目录地图 + 领域不变量）已落盘
 - [ ] §4 工作流策略已按本项目裁剪
-- [ ] §5 developer / codeReviewer / tester 三套 Skill 已按技术栈填写
+- [ ] §5 通用 developer + 各启用代码域 Developer Skill、codeReviewer、tester 已填写
 - [ ] §6 制品 Schema/模板与 MODULE 码表已就绪
 - [ ] §7 至少一份可执行的 PRD（或明确试点范围）
 
@@ -83,7 +83,9 @@
 
 | 勾选 | Skill ID | 优先级 | 路径 |
 |---|---|---|---|
-| [ ] | `skill.developer` | P0 | `ai/skills/developer/SKILL.md` |
+| [ ] | `skill.developer`（通用基线） | P0 | `ai/skills/developer/SKILL.md` |
+| [ ] | `skill.frontend-developer`（项目有前端时） | P0/按需 | `ai/skills/frontend-developer/SKILL.md` |
+| [ ] | `skill.backend-developer`（项目有后端时） | P0/按需 | 下游按前端模板模式创建 |
 | [ ] | `skill.code-review` | P0 | `ai/skills/code-review/SKILL.md` |
 | [ ] | `skill.tester` | P0 | `ai/skills/tester/SKILL.md` |
 | [ ] | `skill.solution-architect` | P1 | `ai/skills/solution-architect/SKILL.md` |
@@ -95,6 +97,8 @@
 | [ ] | `skill.security-review` | 按需 | `ai/skills/security-review/SKILL.md` |
 | [ ] | `skill.migration-review` | 按需 | `ai/skills/migration-review/SKILL.md` |
 | [ ] | `skill.integration-review` | P1 | `ai/skills/integration-review/SKILL.md` |
+
+规则：每个实际启用的代码域必须有对应的 `*-developer` Skill；不存在前端或后端时写明 `N/A`，不要创建空壳并标为 `active`。若技术栈尚未确定，Skill 必须保持 `draft`。
 
 ---
 
