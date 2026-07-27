@@ -11,6 +11,7 @@ reviewBy: TBD
 
 # 领域不变量
 
+> 填写请复制同目录 [`DOMAIN-TEMPLATE.md`](./DOMAIN-TEMPLATE.md)。
 > **人类必填**。详细条文可放在 `product/business-rules/`，此处做索引与硬约束摘要。
 
 ## 不变量（违反即 P0/BLOCK）

@@ -11,6 +11,7 @@ reviewBy: TBD
 
 # 安全与合规红线
 
+> 填写请复制同目录 [`SECURITY-TEMPLATE.md`](./SECURITY-TEMPLATE.md)。
 > **人类必填**。本文件默认 `override: forbidden`，Project 层不得削弱。
 
 ## 数据分级

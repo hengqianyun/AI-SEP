@@ -11,6 +11,7 @@ reviewBy: TBD
 
 # 编码与 API 约定
 
+> 填写请复制同目录 [`CODING-TEMPLATE.md`](./CODING-TEMPLATE.md)。
 > **人类必填**。
 
 ## API

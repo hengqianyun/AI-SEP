@@ -1,4 +1,5 @@
 # modules.yaml — REQ/TASK/API 等 ID 中的 {MODULE} 码表（实例化时填写）
+# 填写请复制同目录 MODULES-TEMPLATE.yaml。
 
 projectId: REPLACE_ME
 

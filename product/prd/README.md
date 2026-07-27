@@ -1,5 +1,7 @@
 # PRD
 
+填写模板：[`PRD-TEMPLATE.md`](./PRD-TEMPLATE.md)。
+
 | 文档 | 说明 |
 |---|---|
 | [`v1.0.md`](./v1.0.md) | **AI-SEP 平台本体** PRD（多 Agent 交付流水线 / 项目模板） |

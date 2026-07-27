@@ -1,7 +1,8 @@
 # Rules 分层说明
 
 > 对应 `design.md` §11。优先级：`Task > Project > Organization > Global`。  
-> 低层不得覆盖高层标注为 `override: forbidden` 的安全/合规规则。
+> 低层不得覆盖高层标注为 `override: forbidden` 的安全/合规规则。  
+> 填写模板：`organization/*-TEMPLATE.md`、`project/*-TEMPLATE.md` / `*-TEMPLATE.yaml`（与目标交付物同目录）。
 
 ## 目录
 

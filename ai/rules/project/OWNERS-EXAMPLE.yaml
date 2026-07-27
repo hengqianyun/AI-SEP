@@ -1,0 +1,30 @@
+# owners.yaml 已填写示例（acme-orders）
+# 仅展示填写粒度，不代表真实人员；复制时必须替换为可联系的真实 Owner。
+
+projectId: acme-orders
+
+owners:
+  productOwner:
+    name: "张产品"
+    contact: "zhang@example.com"
+    notes: "业务范围、优先级、需求层开放问题"
+
+  techLead:
+    name: "李技术"
+    contact: "li@example.com"
+    notes: "架构升级、审查超限、技术债接受"
+
+  securityOperationsOwner:
+    name: "王安全"
+    contact: "wang@example.com"
+    notes: "高风险接受、合规与生产红线"
+
+  maintainer:
+    name: "赵维护"
+    contact: "zhao@example.com"
+    notes: "最终集成与发布放行、环境阻塞协调"
+
+# 小团队一人多身份示例（本项目未启用，保留结构供参考）：
+# aliases:
+#   - person: "李技术"
+#     identities: [techLead, maintainer]

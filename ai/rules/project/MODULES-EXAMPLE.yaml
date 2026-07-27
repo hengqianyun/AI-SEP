@@ -1,0 +1,29 @@
+# modules.yaml 已填写示例（acme-orders）
+# 仅展示填写粒度；code 须与 REQ/TASK/API ID 及 glossary 一致。
+
+projectId: acme-orders
+
+modules:
+  - code: ORDER
+    name: 订单
+    paths:
+      - frontend/src/features/orders/**
+      - backend/src/main/java/com/acme/orders/**
+      - contracts/openapi/paths/orders.yaml
+    ownerRole: techLead
+
+  - code: CATALOG
+    name: 商品目录
+    paths:
+      - frontend/src/features/catalog/**
+      - backend/src/main/java/com/acme/catalog/**
+      - contracts/openapi/paths/catalog.yaml
+    ownerRole: techLead
+
+  - code: AUTH
+    name: 认证与账号
+    paths:
+      - frontend/src/features/auth/**
+      - backend/src/main/java/com/acme/auth/**
+      - contracts/openapi/paths/auth.yaml
+    ownerRole: techLead

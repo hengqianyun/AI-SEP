@@ -1,5 +1,7 @@
 # 工作流定义与策略
 
+填写模板：[`POLICIES-TEMPLATE.yaml`](./POLICIES-TEMPLATE.yaml)（供填写 `policies.yaml`）。
+
 | 文件 | 用途 |
 |---|---|
 | `definition.yaml` | 节点、角色、通过条件（机器可读骨架） |

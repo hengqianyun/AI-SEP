@@ -7,20 +7,35 @@ inputSchema: task-package@1
 compatibleRoles: [developer]
 ---
 
-# Developer Skill（通用基线）
+# Developer Skill（通用基线，实例化时填写）
 
-> 本文件只承载所有 Developer 共用的执行底线。前端、后端等技术栈做法应拆成独立 Skill，并通过 `context-map.yaml` 按路径装载。
+> 本文件只承载所有 Developer 共用的执行底线（边界、验证、输出）。前端、后端等技术栈做法应拆成独立 Skill，并通过 `context-map.yaml` 按路径装载；**不在此填写具体框架或命令栈**。
 >
-> - 前端：[`../frontend-developer/SKILL.md`](../frontend-developer/SKILL.md)
+> - 填写模板：[`TEMPLATE.md`](./TEMPLATE.md)
+> - 已填写示例：[`EXAMPLE.md`](./EXAMPLE.md)（仅展示粒度，不代表默认技术栈）
+> - 前端：[`../frontend-developer/SKILL.md`](../frontend-developer/SKILL.md)（模板见 [`FRONTEND-TEMPLATE.md`](../frontend-developer/FRONTEND-TEMPLATE.md)）
 > - 后端：由下游项目按相同模式创建 `skill.backend-developer`
+
+## 责任与审批
+
+| 环节 | 责任人 |
+|---|---|
+| 起草通用边界、验证结果规则与输出格式 | Tech Lead / 工程负责人 |
+| 确认与独立实现 Skill、context-map 装载策略一致 | Tech Lead |
+| 将 `status` 从 `draft` 改为 `active` | 文件 Owner 或 Tech Lead |
 
 ## 填写完成标准
 
-- 所有命令均可从仓库根目录直接复制执行，或明确写出工作目录
-- 每条实现约定都能指向真实目录、配置文件或现有代码范例
-- “必须”和“禁止”可以由 reviewer/tester 客观检查，不写“保持高质量”等空泛要求
-- 已覆盖安装、静态检查、类型检查、单元测试、构建和本地启动；不适用项明确写 `N/A` 及原因
-- 文件 Owner 已人工复核，且不存在 `_待填_`、`REPLACE_ME` 或未解释的示例值
+- 写边界、`BLOCKED ≠ PASSED`、输出格式完整
+- 明确指向路径装载的实现 Skill，而非在此写入栈细节
+- “必须”和“禁止”可由 reviewer/tester 客观检查
+- 不存在 `_待填_`、`REPLACE_ME` 或未解释的示例值
+
+## 激活前检查
+
+- [ ] Tech Lead 完成通用基线填写
+- [ ] 与 frontend/backend 等独立 Skill 分工清晰
+- [ ] 文件 Owner 批准激活
 
 ## 通用执行要求
 

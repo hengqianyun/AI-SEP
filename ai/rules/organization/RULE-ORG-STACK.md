@@ -11,6 +11,7 @@ reviewBy: TBD
 
 # 官方技术栈与版本边界
 
+> 填写请复制同目录 [`STACK-TEMPLATE.md`](./STACK-TEMPLATE.md)。
 > **人类必填**：删除本提示后写入本组织真实约束。
 
 ## 允许

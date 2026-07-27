@@ -1,0 +1,75 @@
+# policies.yaml 填写模板
+# 已填写示例：POLICIES-EXAMPLE.yaml（仅粒度参考，非默认）
+
+> 协调人定稿；产品确认 UX 省略；后端确认 riskTriggers；测试确认门槛。
+
+```yaml
+projectId: <PROJECT_ID>
+workflowId: ai-software-delivery
+workflowVersion: 1.0.0
+
+planningCommittee:
+  maxRounds: <数字，默认 5>
+  requiredRoles:
+    - productAnalyst
+    - solutionArchitect
+    - qaStrategist
+    - parallelPlanner
+    - planEditor
+  optionalRoles:
+    uxUiPlanner:
+      enabled: <true|false>
+      omitReason: "<enabled=false 时必填>"
+    apiDataDesigner:
+      enabled: <true|false>
+      omitReason: ""
+    securityOperations:
+      enabled: <true|false>
+      omitReason: ""
+
+codeReview:
+  maxRounds: <数字>
+  passWhen: no-p0-or-p1
+
+riskTriggers:
+  securityReviewer:
+    - auth-model-change
+    - new-public-endpoint
+    - handles-pii
+    # 按项目增删
+  migrationReviewer:
+    - schema-migration
+    - data-backfill
+
+release:
+  requireHumanApproval: true
+  approverIdentity: maintainer
+  requireIntegrationReview: true
+  requireAllP0Verified: true
+
+escalation:
+  onPlanningRoundLimit: productOwner
+  onReviewRoundLimit: techLead
+  onSecurityResidualRisk: securityOperationsOwner
+  onReleaseGate: maintainer
+  responseSlaHours: <数字>
+
+isolation:
+  mode: <branch|worktree|other>
+  notes: "<说明>"
+
+learning:
+  minIndependentEvents: <数字>
+  minConfidence: <0-5>
+  scoreThreshold: <数字>
+  requireHumanApproval: true
+  approvers:
+    global: platform
+    organization: architecture-committee
+    project: techLead
+```
+
+完成检查：
+- [ ] 省略角色均有 omitReason
+- [ ] riskTriggers 与安全/迁移/QA 清单一致
+- [ ] 产品/前端/后端/测试/Tech Lead 已签字确认

@@ -1,4 +1,5 @@
 # context-map.yaml — 路径/角色 → 必装规则与技能（最小装载）
+# 填写请复制同目录 CONTEXT-MAP-TEMPLATE.yaml。
 
 projectId: REPLACE_ME
 

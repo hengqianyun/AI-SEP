@@ -1,5 +1,7 @@
 # Runtime Adapters
 
+填写模板：[`ADAPTER-TEMPLATE.md`](./ADAPTER-TEMPLATE.md)。
+
 将控制协议映射到具体工具。**业务规则仍在 `ai/rules/`**，Adapter 只做启动/恢复/调度翻译。
 
 ## 计划中的适配器

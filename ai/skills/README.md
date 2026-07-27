@@ -8,7 +8,7 @@
 
 - `SKILL.md`：正文（人类必填技术栈细节）
 - 可选 `registry.yaml`：版本元数据（晋升与回滚用）
-- 可选 `*-TEMPLATE.md`：供负责人复制的逐项填写说明
+- `TEMPLATE.md` 或 `*-TEMPLATE.md`：供负责人复制的逐项填写说明（与生效 `SKILL.md` 同目录）
 - 可选 `*-EXAMPLE-*.md`：已填写示例；必须标明“仅示例，不是默认技术栈”
 
 `SKILL.md` 是运行时实际装载的生效文件；Template/Example 仅用于人工编写，Orchestrator 不应将示例作为项目规则装载。
@@ -18,6 +18,11 @@
 - [`frontend-developer/SKILL.md`](./frontend-developer/SKILL.md)
 - [`frontend-developer/FRONTEND-TEMPLATE.md`](./frontend-developer/FRONTEND-TEMPLATE.md)
 - [`frontend-developer/FRONTEND-EXAMPLE-VUE.md`](./frontend-developer/FRONTEND-EXAMPLE-VUE.md)
+- [`backend-developer/SKILL.md`](./backend-developer/SKILL.md)
+- [`backend-developer/TEMPLATE.md`](./backend-developer/TEMPLATE.md)
+- [`backend-developer/BACKEND-EXAMPLE-SPRING.md`](./backend-developer/BACKEND-EXAMPLE-SPRING.md)
+
+统一假设示例栈（仅粒度参考）：`acme-orders` = Vue3 + Spring Boot；Rule/配置 EXAMPLE 见各 `*-EXAMPLE*` 旁路文件。
 
 ## Developer Skill 分层
 

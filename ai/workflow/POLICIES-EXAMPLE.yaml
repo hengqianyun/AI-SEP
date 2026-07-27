@@ -1,0 +1,66 @@
+# policies.yaml 已填写示例（acme-orders）
+# 仅展示填写粒度；须与 RULE-ORG-RELEASE、RULE-ORG-SECURITY 风险触发一致。
+
+projectId: acme-orders
+workflowId: ai-software-delivery
+workflowVersion: 1.0.0
+
+planningCommittee:
+  maxRounds: 5
+  requiredRoles:
+    - productAnalyst
+    - solutionArchitect
+    - qaStrategist
+    - parallelPlanner
+    - planEditor
+  optionalRoles:
+    uxUiPlanner:
+      enabled: true
+      omitReason: ""
+    apiDataDesigner:
+      enabled: true
+      omitReason: ""
+    securityOperations:
+      enabled: true
+      omitReason: ""
+
+codeReview:
+  maxRounds: 5
+  passWhen: no-p0-or-p1
+
+riskTriggers:
+  securityReviewer:
+    - auth-model-change
+    - new-public-endpoint
+    - handles-pii
+    - dependency-high-risk
+  migrationReviewer:
+    - schema-migration
+    - data-backfill
+
+release:
+  requireHumanApproval: true
+  approverIdentity: maintainer
+  requireIntegrationReview: true
+  requireAllP0Verified: true
+
+escalation:
+  onPlanningRoundLimit: productOwner
+  onReviewRoundLimit: techLead
+  onSecurityResidualRisk: securityOperationsOwner
+  onReleaseGate: maintainer
+  responseSlaHours: 24
+
+isolation:
+  mode: branch
+  notes: "feature 分支自 main 拉出；Agent 不得直接 push main"
+
+learning:
+  minIndependentEvents: 3
+  minConfidence: 4
+  scoreThreshold: 15
+  requireHumanApproval: true
+  approvers:
+    global: platform
+    organization: architecture-committee
+    project: techLead

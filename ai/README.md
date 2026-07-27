@@ -11,4 +11,4 @@
 | `runs/` | 运行时状态（执行产生） | 勿手改权威历史 |
 | `memory/` / `learning/` | 失败记忆与晋升 | 运行后产生 |
 
-接入新项目：从仓库根目录 [`PROJECT-CUSTOMIZATION.md`](../PROJECT-CUSTOMIZATION.md) 勾选。
+接入新项目：从仓库根目录 [`PROJECT-CUSTOMIZATION.md`](../PROJECT-CUSTOMIZATION.md) 勾选；各 Skill 填写见同目录 `TEMPLATE.md`（前端见 `FRONTEND-TEMPLATE.md`）。

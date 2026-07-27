@@ -1,0 +1,38 @@
+# context-map.yaml 填写模板
+# 已填写示例：CONTEXT-MAP-EXAMPLE.yaml（仅粒度参考，非默认）
+
+> 协调人合并前后端路径后定稿。仅 `active` 的 Rule/Skill 才应被引用。
+
+```yaml
+projectId: <PROJECT_ID>
+
+defaults:
+  rules:
+    - RULE-GLOBAL-SECRETS
+    - RULE-GLOBAL-CONSENSUS
+    # active 后取消注释：
+    # - RULE-ORG-STACK
+    # - RULE-ORG-CODING
+    # - RULE-ORG-SECURITY
+    # - RULE-ORG-RELEASE
+
+byRole:
+  developer:
+    skills: [skill.developer]
+    rules: [RULE-PROJECT-LAYOUT, RULE-PROJECT-DOMAIN]
+  # ... 其余角色保持与仓库模板一致，仅按项目增删
+
+byPath:
+  - pattern: "<frontend/** 或真实路径>"
+    extraSkills: [skill.frontend-developer]
+  - pattern: "<backend/** 或真实路径>"
+    extraSkills: [skill.backend-developer]
+  - pattern: "**/migrations/**"
+    extraSkills: [skill.migration-review]
+    requireRoles: [migrationReviewer]
+```
+
+完成检查：
+- [ ] 无 draft Skill 被装载
+- [ ] 路径 glob 与 LAYOUT/modules 一致
+- [ ] 无前端/后端时对应条目删除或注释并记豁免

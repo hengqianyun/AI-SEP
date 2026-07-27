@@ -1,4 +1,5 @@
 # 项目工作流策略（实例化时按项目裁剪）
+# 填写请复制同目录 POLICIES-TEMPLATE.yaml。
 
 projectId: REPLACE_ME
 workflowId: ai-software-delivery

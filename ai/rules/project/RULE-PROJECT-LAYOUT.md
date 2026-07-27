@@ -11,6 +11,7 @@ reviewBy: TBD
 
 # 目录与模块地图
 
+> 填写请复制同目录 [`LAYOUT-TEMPLATE.md`](./LAYOUT-TEMPLATE.md)。
 > **人类必填**：与真实仓库结构对齐。
 
 ## 顶层目录

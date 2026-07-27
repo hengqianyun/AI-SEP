@@ -1,0 +1,20 @@
+# modules.yaml 填写模板
+# 已填写示例：MODULES-EXAMPLE.yaml（仅粒度参考，非默认）
+
+> 产品提供 code/name；开发补 paths。与 glossary、LAYOUT 一致。
+
+```yaml
+projectId: <PROJECT_ID>
+
+modules:
+  - code: <MODULE_CODE>          # 用于 REQ/TASK/API ID
+    name: <与术语表一致的名称>
+    paths:
+      - <真实路径 glob，可稍后由开发补全>
+    ownerRole: <techLead 或其他角色>
+```
+
+完成检查：
+- [ ] code 与 ID 规范一致且不复用
+- [ ] name 与 glossary 无冲突
+- [ ] paths 最终指向真实仓库路径

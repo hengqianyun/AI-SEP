@@ -85,7 +85,7 @@
 |---|---|---|---|
 | [ ] | `skill.developer`（通用基线） | P0 | `ai/skills/developer/SKILL.md` |
 | [ ] | `skill.frontend-developer`（项目有前端时） | P0/按需 | `ai/skills/frontend-developer/SKILL.md` |
-| [ ] | `skill.backend-developer`（项目有后端时） | P0/按需 | 下游按前端模板模式创建 |
+| [ ] | `skill.backend-developer`（项目有后端时） | P0/按需 | `ai/skills/backend-developer/SKILL.md` |
 | [ ] | `skill.code-review` | P0 | `ai/skills/code-review/SKILL.md` |
 | [ ] | `skill.tester` | P0 | `ai/skills/tester/SKILL.md` |
 | [ ] | `skill.solution-architect` | P1 | `ai/skills/solution-architect/SKILL.md` |

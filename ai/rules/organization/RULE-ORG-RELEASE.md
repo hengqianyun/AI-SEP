@@ -11,6 +11,7 @@ reviewBy: TBD
 
 # 分支、PR 与发布惯例
 
+> 填写请复制同目录 [`RELEASE-TEMPLATE.md`](./RELEASE-TEMPLATE.md)。
 > **人类必填**。
 
 ## 分支模型

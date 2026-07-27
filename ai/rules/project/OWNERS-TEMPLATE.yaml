@@ -1,0 +1,35 @@
+# owners.yaml 填写模板
+# 已填写示例：OWNERS-EXAMPLE.yaml（仅粒度参考，非默认）
+
+> 协调人复制结构到 `owners.yaml`。`name`/`contact` 必须可联系；小团队可一人多身份但须在 aliases 写明。
+
+```yaml
+projectId: <PROJECT_ID>   # 替换所有 REPLACE_ME
+owners:
+  productOwner:
+    name: "<姓名或团队>"
+    contact: "<联系渠道>"
+    notes: "业务范围、优先级、需求层开放问题"
+  techLead:
+    name: "<姓名或团队>"
+    contact: "<联系渠道>"
+    notes: "架构升级、审查超限、技术债接受"
+  securityOperationsOwner:
+    name: "<姓名或团队>"
+    contact: "<联系渠道>"
+    notes: "高风险接受、合规与生产红线"
+  maintainer:
+    name: "<姓名或团队>"
+    contact: "<联系渠道>"
+    notes: "最终集成与发布放行、环境阻塞协调"
+
+# 可选：同一人多身份
+# aliases:
+#   - person: "<姓名>"
+#     identities: [productOwner, techLead]
+```
+
+完成检查：
+- [ ] 四身份均可联系
+- [ ] 一人多身份已显式记录
+- [ ] 批准记录要求填写当时 identity

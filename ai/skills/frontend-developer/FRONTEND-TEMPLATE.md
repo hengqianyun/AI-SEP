@@ -1,7 +1,8 @@
 # Frontend Developer Skill 填写模板
 
 > 前端负责人复制本结构填写 `SKILL.md`。尖括号内容必须替换；不适用项写 `N/A` 及原因。  
-> 本 Skill 只写“怎么做”；技术选型与版本边界应引用 Organization Rule。
+> 本 Skill 只写“怎么做”；技术选型与版本边界应引用 Organization Rule。  
+> 已填写示例：[`FRONTEND-EXAMPLE-VUE.md`](./FRONTEND-EXAMPLE-VUE.md)（仅展示粒度，不代表默认技术栈）。
 
 ## 1. 元数据
 

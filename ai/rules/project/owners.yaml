@@ -1,4 +1,5 @@
 # owners.yaml — 人类决策身份（实例化时填写）
+# 填写请复制同目录 OWNERS-TEMPLATE.yaml。
 
 # 模板占位：name/contact 保持为空字符串。
 # 小团队可一人多身份（用下方 aliases）；每次批准须注明 identity。

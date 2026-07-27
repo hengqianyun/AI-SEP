@@ -11,6 +11,7 @@ reviewBy: TBD
 
 # 项目架构约束
 
+> 填写请复制同目录 [`ARCHITECTURE-TEMPLATE.md`](./ARCHITECTURE-TEMPLATE.md)。
 > **人类必填**。
 
 ## 系统边界
