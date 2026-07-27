@@ -4,6 +4,20 @@
 > 勾选总表见 [`PROJECT-CUSTOMIZATION.md`](./PROJECT-CUSTOMIZATION.md)。  
 > 原则：各角色只改自己负责的落盘文件；`ai/agents/*.md` 角色骨架不改。
 
+### 覆盖范围说明（是否「完整」）
+
+| 范围 | 是否覆盖 |
+|---|---|
+| 实例化时人工必填的 Org/Project Rule、P0～P1 Skill、policies、owners、modules、主 Schema | **是** — 见 §3 任务 ID |
+| `PROJECT-CUSTOMIZATION.md` §0～§7 的落地责任人 | **是** — 与 RACI §4 对齐 |
+| 无前端 / 无 UX 时的裁剪路径 | **部分** — 仅 P-05/FE-06 跳过提示；未单列「后端-only 省略 FE 全套」清单 |
+| `skill.security-operations` / `skill.security-review` | **弱** — 安全红线在 BE-03；这两份 Skill 正文未单独立任务（见 §3.6） |
+| `productAnalyst` / `planEditor` 专属 Skill | **否** — 仓库未建对应 Skill 文件；靠角色契约 + 制品模板即可起步 |
+| Global 规则、`ai/agents` 契约、Adapter/CLI、Learning 评测集 | **否（有意）** — 属平台维护或后置，见定制清单 §8～§9 |
+| 业务功能开发任务（写业务代码） | **否** — 本文件只覆盖「规范定制」，不含功能 backlog |
+
+结论：对「实例化后谁来写规范」而言，**主路径完整**；不是全仓库一切工作的总任务书。缺口任务见 §3.6。
+
 ---
 
 ## 1. 角色与职责边界
@@ -125,6 +139,16 @@
 | C-06 | Schema 任务包/评审字段（工程侧） | `task-package`、`planning-review`、`code-review` | 与并行/审查习惯一致；产品确认需求快照 |
 | C-07 | Adapter / 隔离方式（可后置） | `ai/adapters/`、`policies.isolation` | 工具选定后再做 |
 
+### 3.6 已知未单列 / 按需追加
+
+| ID | 任务 | 建议责任人 | 说明 |
+|---|---|---|---|
+| OPT-01 | `skill.security-operations` / `skill.security-review` 正文 | 后端 + Security Owner | 启用 security 规划/审查角色时必填；可与 BE-03 同 PR |
+| OPT-02 | 纯后端项目：标注 FE 全套 N/A | 协调人 | 在 §0 豁免中写明；跳过 FE-01～FE-08 |
+| OPT-03 | `skill.product-analyst` / `plan-editor`（若新建） | 产品 / 协调人 | 当前无文件则不必造；契约 + 模板足够 |
+| OPT-04 | Learning 评测集 / 过期复查 | 协调人 | 对应定制清单 §9，实例化首轮可后置 |
+| OPT-05 | Cursor/CLI Adapter 实装 | 协调人 / 平台 | 对应 C-07；不阻塞人工写规则 |
+
 ---
 
 ## 4. RACI 总表（关键交付物）
@@ -144,6 +168,7 @@
 | `skill.developer` / `code-review` | I | **R** | **R** | C | A |
 | `skill.tester` / `qa-strategist` | C | C | C | **R** | A |
 | `skill.api-data` / `migration` / `architect` | I | I | **R** | C | A |
+| `skill.security-operations` / `security-review` | C | I | **R**（OPT-01） | C | A（安全会签） |
 | `skill.ux-ui-planner` | **R**（体验） | **R**（组件路径） | I | I | A |
 | `skill.integration-review` | I | **R** | **R** | **R** | A |
 | Schemas / 模板 | C（快照） | C | C（任务包） | **R**（证据） | A |

@@ -1,16 +1,14 @@
-# modules.yaml — REQ/TASK/API 等 ID 中的 {MODULE} 码表
+# modules.yaml — REQ/TASK/API 等 ID 中的 {MODULE} 码表（实例化时填写）
 
 projectId: REPLACE_ME
 
-modules:
-  # - code: USER
-  #   name: 用户与账号
-  #   paths:
-  #     - backend/src/user/**
-  #     - frontend/src/features/user/**
-  #   ownerRole: techLead
+modules: []
 
-  - code: REPLACE
-    name: 请替换为真实模块
-    paths: []
-    ownerRole: techLead
+# 示例（实例化后改为非空列表）：
+# modules:
+#   - code: USER
+#     name: 用户与账号
+#     paths:
+#       - backend/src/user/**
+#       - frontend/src/features/user/**
+#     ownerRole: techLead

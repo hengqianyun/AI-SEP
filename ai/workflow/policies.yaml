@@ -1,6 +1,6 @@
-# 项目工作流策略 — 平台本体 SEP（引导阶段）
+# 项目工作流策略（实例化时按项目裁剪）
 
-projectId: SEP
+projectId: REPLACE_ME
 workflowId: ai-software-delivery
 workflowVersion: 1.0.0
 
@@ -13,12 +13,13 @@ planningCommittee:
     - parallelPlanner
     - planEditor
   optionalRoles:
+    # enabled=false 时必须填写 omitReason
     uxUiPlanner:
-      enabled: false
-      omitReason: "平台 V1 无业务 UI 产品面；体验不在本仓库交付范围"
+      enabled: true
+      omitReason: ""
     apiDataDesigner:
-      enabled: false
-      omitReason: "平台阶段无业务 API/DB；制品契约由 ai/schemas 维护，本轮不启用独立 API 角色"
+      enabled: true
+      omitReason: ""
     securityOperations:
       enabled: true
       omitReason: ""
@@ -28,11 +29,11 @@ codeReview:
   passWhen: no-p0-or-p1
 
 riskTriggers:
+  # 实例化时按真实变更类型增删
   securityReviewer:
     - auth-model-change
     - new-public-endpoint
     - handles-pii
-    - agent-secret-handling
   migrationReviewer:
     - schema-migration
     - data-backfill
@@ -51,8 +52,8 @@ escalation:
   responseSlaHours: 24
 
 isolation:
-  mode: branch
-  notes: "引导阶段以文档/规范变更为主；并行编码启用后再评估 worktree"
+  mode: branch # branch | worktree | other
+  notes: ""
 
 learning:
   minIndependentEvents: 3

@@ -1,35 +1,33 @@
-# owners.yaml — 人类决策身份（本项目）
+# owners.yaml — 人类决策身份（实例化时填写）
 
-# 引导阶段：一人多身份可运行；请尽快把 name/contact 换成真实负责人。
-# 每次人类批准须注明 identity。
+# 模板占位：name/contact 保持为空字符串。
+# 小团队可一人多身份（用下方 aliases）；每次批准须注明 identity。
+# 对应 ai/agents/human-owners.md
 
-projectId: SEP
+projectId: REPLACE_ME
 
 owners:
   productOwner:
-    name: "项目协调人（待具名）"
-    contact: "请更新"
-    notes: "业务范围、优先级、需求层开放问题；平台 PRD 最终批准人"
+    name: ""
+    contact: ""
+    notes: "业务范围、优先级、需求层开放问题"
 
   techLead:
-    name: "项目协调人（待具名）"
-    contact: "请更新"
-    notes: "架构升级、审查超限、技术债接受；规范 active 放行"
+    name: ""
+    contact: ""
+    notes: "架构升级、审查超限、技术债接受"
 
   securityOperationsOwner:
-    name: "项目协调人（待具名）"
-    contact: "请更新"
-    notes: "高风险接受、合规与生产红线；RULE-ORG-SECURITY 会签"
+    name: ""
+    contact: ""
+    notes: "高风险接受、合规与生产红线"
 
   maintainer:
-    name: "项目协调人（待具名）"
-    contact: "请更新"
+    name: ""
+    contact: ""
     notes: "最终集成与发布放行、环境阻塞协调"
 
-aliases:
-  - person: "项目协调人（待具名）"
-    identities:
-      - productOwner
-      - techLead
-      - securityOperationsOwner
-      - maintainer
+# 可选：同一人映射（实例化后按需取消注释并填写）
+# aliases:
+#   - person: ""
+#     identities: [productOwner, techLead, securityOperationsOwner, maintainer]
