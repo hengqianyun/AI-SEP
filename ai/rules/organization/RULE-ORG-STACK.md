@@ -17,7 +17,7 @@ pilot: WSC
 | 层 | 技术 | 版本范围 | 备注 |
 |---|---|---|---|
 | 语言 | TypeScript | 5.x | 前端 |
-| 语言 | Java | 21 LTS | 后端 |
+| 语言 | Java | 17 LTS | 后端（DEC-WSC-004） |
 | 前端 | Vue 3 + Vite + pnpm | Vue ^3.4 / Vite ^5 | `frontend/` |
 | 前端 UI | Ant Design Vue | 与 Vue 3 兼容主版本 | 禁止第二套 UI 框架 |
 | 前端状态 | Pinia + Vue Router 4 | 随 frontend package.json | |

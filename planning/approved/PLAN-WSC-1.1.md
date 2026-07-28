@@ -70,7 +70,7 @@ reviews:
 | 层 | 固定选型 |
 |---|---|
 | 前端 | Vue 3 + TypeScript + Vite + pnpm + Pinia + Vue Router 4 + Ant Design Vue |
-| 后端 | Spring Boot 3.3.x + Java 21 |
+| 后端 | Spring Boot 3.3.x + Java 17（DEC-WSC-004） |
 | 数据 | PostgreSQL 16 + Flyway |
 | 测试 | Vitest / JUnit 5 + Testcontainers / Playwright |
 | 上链 | 可替换模拟存证适配层（DEC-WSC-002）；禁止业务层直连真实链 SDK |

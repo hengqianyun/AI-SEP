@@ -16,7 +16,7 @@ pilot: WSC
 ## 适用范围
 
 - 服务：`backend/`
-- 技术栈：以 `RULE-ORG-STACK` 为准（Java 21 / Spring Boot 3.3 / PostgreSQL / Flyway）
+- 技术栈：以 `RULE-ORG-STACK` 为准（Java 17 / Spring Boot 3.3 / PostgreSQL / Flyway；DEC-WSC-004）
 - 构建工具：Maven Wrapper；清单：`backend/pom.xml`
 - 工作目录：仓库根目录
 

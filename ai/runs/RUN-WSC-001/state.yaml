@@ -1,29 +1,42 @@
 runId: RUN-WSC-001
 currentNode: DEVELOPMENT
 round: 1
-status: BLOCKED
-blockedBy:
-  - id: BLOCKER-WSC-001-JDK
-    taskId: TASK-WSC-001
-    reason: 本机 JDK 17，后端需 Java 21；tester 结论 BLOCKED
-    unblockWhen: 安装 JDK 21 并设置 JAVA_HOME 后复跑 mvn -f backend/pom.xml -DskipTests compile 为 PASSED，且 TESTRUN 更新为可 VERIFIED
-activeTaskId: TASK-WSC-001
+status: IN_PROGRESS
+blockedBy: []
+completedNodes:
+  - PRD_ANALYSIS
+  - REQUIREMENT_REVIEW
+  - PLAN_DRAFT
+  - PLAN_REVIEW
+  - PLAN_APPROVED
+  - TASK_DISPATCH
+activeTaskId: null
+activeSnapshotId: SNAP-WSC-001
+activePlanId: PLAN-WSC-1.1
+approvedPlanPath: planning/approved/PLAN-WSC-1.1.md
 taskGate:
   TASK-WSC-001:
     developer: READY_FOR_REVIEW
     codeReview: APPROVE
-    tester: BLOCKED
-    verified: false
-activeSnapshotId: SNAP-WSC-001
-activePlanId: PLAN-WSC-1.1
-approvedPlanPath: planning/approved/PLAN-WSC-1.1.md
+    tester: PASSED
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-001.md
+    residual: flyway-empty-db-apply deferred until PostgreSQL available
 nextAction:
-  role: human
-  identity: techLead
-  action: provide-jdk21-or-decide-unblock-path
-artifacts:
-  taskPackage: planning/tasks/TASK-WSC-001.md
-  devReport: planning/tasks/DEV-TASK-WSC-001.md
-  codeReview: planning/tasks/REV-TASK-WSC-001.md
-  testEvidence: planning/tasks/TESTRUN-TASK-WSC-001.md
-updatedAt: 2026-07-28T17:30:00+08:00
+  role: orchestrator
+  action: TASK_DISPATCH
+  nextTask: TASK-WSC-002
+  wave: W2
+  note: TASK-WSC-001 VERIFIED；待人类「继续」派发 W2
+humanDecisions:
+  - identity: productOwner
+    action: CONFIRM_SNAPSHOT
+    at: 2026-07-28T16:12:00+08:00
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    at: 2026-07-28T16:42:00+08:00
+  - identity: techLead
+    action: CHANGE_STACK_TO_JDK17
+    at: 2026-07-28T17:26:00+08:00
+    decision: DEC-WSC-004
+updatedAt: 2026-07-28T17:31:00+08:00

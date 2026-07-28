@@ -84,7 +84,7 @@ P0/P1 未清零不得 `APPROVE`。本轮 **P0=0，P1=0**。
 
 | 项 | 结果 |
 |---|---|
-| pom 正确锁定 Java 21 / Spring Boot 3.3.x（RULE-ORG-STACK） | PASS |
+| pom 正确锁定 Java 17 / Spring Boot 3.3.x（RULE-ORG-STACK + DEC-WSC-004） | PASS（复测后） |
 | DEV 记录 BLOCKED 原因与解除条件 | PASS（合理） |
 | 不因 BLOCKED 跳过契约审查 | 已执行静态+机检 |
 

@@ -99,11 +99,11 @@ completedAt: 2026-07-28T17:15:00+08:00
 | `pnpm --filter frontend typecheck` | **PASSED** | vue-tsc |
 | `pnpm --filter frontend build` | **PASSED** | vite production build |
 | `pnpm --filter frontend lint` | **PASSED** | scaffold placeholder（无 eslint 配置，exit 0） |
-| `mvn -f backend/pom.xml -DskipTests compile` | **BLOCKED** | 本机仅 JDK 17；pom 要求 Java 21（`不支持发行版本 21`） |
+| `mvn -f backend/pom.xml -DskipTests compile` | **PASSED**（复测） | DEC-WSC-004 后 `java.version=17`；JDK 17.0.11 BUILD SUCCESS |
 
-### BLOCKED 解除条件
+### BLOCKED 解除条件（历史）
 
-1. 安装 JDK 21 并设置 `JAVA_HOME` 指向该 JDK
+原「安装 JDK 21」要求已由 **DEC-WSC-004**（改为 Java 17）取代并关闭。
 2. 重新执行：`mvn -f backend/pom.xml -DskipTests compile`
 3. （可选启动）复制 `application-local.example.yml` → `application-local.yml`（勿提交），或使用默认 H2 profile：`mvn -f backend/pom.xml spring-boot:run`，确认 `/actuator/health` 为 UP
 

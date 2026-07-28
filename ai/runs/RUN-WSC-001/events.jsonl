@@ -21,3 +21,6 @@
 {ts:2026-07-28T17:15:00+08:00,type:DEV_READY,taskId:TASK-WSC-001,report:planning/tasks/DEV-TASK-WSC-001.md}
 {ts:2026-07-28T17:20:00+08:00,type:CODE_REVIEW,taskId:TASK-WSC-001,decision:APPROVE,report:planning/tasks/REV-TASK-WSC-001.md}
 {ts:2026-07-28T17:30:00+08:00,type:TEST_EVIDENCE,taskId:TASK-WSC-001,result:BLOCKED,report:planning/tasks/TESTRUN-TASK-WSC-001.md,blocker:JDK17-need-21}
+{"ts":"2026-07-28T17:26:00+08:00","type":"HUMAN_DECISION","identity":"techLead","action":"CHANGE_STACK_TO_JDK17","decision":"DEC-WSC-004"}
+{"ts":"2026-07-28T17:29:33+08:00","type":"TEST_EVIDENCE","taskId":"TASK-WSC-001","result":"PASSED","evidenceId":"EVID-TASK-WSC-001-2","detail":"backend compile release 17 BUILD SUCCESS"}
+{"ts":"2026-07-28T17:31:00+08:00","type":"TASK_VERIFIED","taskId":"TASK-WSC-001","next":"TASK-WSC-002"}
