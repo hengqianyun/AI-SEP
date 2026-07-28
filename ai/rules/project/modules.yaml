@@ -1,15 +1,41 @@
-# modules.yaml — REQ/TASK/API 等 ID 中的 {MODULE} 码表（实例化时填写）
-# 填写请复制同目录 MODULES-TEMPLATE.yaml。
+# modules.yaml — WSC MODULE 码表
 
-projectId: REPLACE_ME
+projectId: WSC
 
-modules: []
+modules:
+  - code: SHELL
+    name: 工作台壳层与导航
+    paths:
+      - frontend/src/features/shell/**
+      - frontend/src/layouts/**
+      - frontend/src/router/**
+    ownerRole: techLead
 
-# 示例（实例化后改为非空列表）：
-# modules:
-#   - code: USER
-#     name: 用户与账号
-#     paths:
-#       - backend/src/user/**
-#       - frontend/src/features/user/**
-#     ownerRole: techLead
+  - code: RBAC
+    name: 角色与鉴权
+    paths:
+      - frontend/src/features/auth/**
+      - backend/src/main/java/**/rbac/**
+      - backend/src/main/java/**/security/**
+    ownerRole: techLead
+
+  - code: OVW
+    name: 总览与运营指标
+    paths:
+      - frontend/src/features/overview/**
+      - backend/src/main/java/**/overview/**
+    ownerRole: techLead
+
+  - code: CAT
+    name: 数据目录与产品
+    paths:
+      - frontend/src/features/catalog/**
+      - backend/src/main/java/**/catalog/**
+    ownerRole: techLead
+
+  - code: CHAIN
+    name: 上链存证与权属
+    paths:
+      - frontend/src/features/chain/**
+      - backend/src/main/java/**/chain/**
+    ownerRole: techLead

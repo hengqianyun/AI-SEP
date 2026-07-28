@@ -1,0 +1,18 @@
+runId: RUN-WSC-001
+projectId: WSC
+workflowId: ai-software-delivery
+workflowVersion: 1.0.0
+prd: product/prd/wsc-v1.0.md
+createdAt: 2026-07-28T16:10:00+08:00
+createdBy: orchestrator
+mode: semi-automatic-pilot
+notes: |
+  WSC 试点豁免启动。专业结论落盘；主会话仅 orchestrator。
+  与 temp/ Mall 试点隔离。
+artifacts:
+  prd: product/prd/wsc-v1.0.md
+  snapshot: product/requirements/SNAP-WSC-001.md
+  decisions:
+    - design/decisions/DEC-WSC-001.md
+    - design/decisions/DEC-WSC-002.md
+    - design/decisions/DEC-WSC-003.md

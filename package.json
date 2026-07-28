@@ -1,0 +1,15 @@
+{
+  "name": "wsc-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build:frontend": "pnpm --filter frontend build",
+    "typecheck:frontend": "pnpm --filter frontend typecheck",
+    "lint:frontend": "pnpm --filter frontend lint",
+    "test:e2e": "pnpm --filter @wsc/e2e test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

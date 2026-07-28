@@ -1,60 +1,57 @@
 ---
 id: skill.tester
-version: 0.1.0
-status: draft
+version: 1.0.0
+status: active
 owner: tech-lead
 outputSchema: test-evidence@1
 compatibleRoles: [tester]
+appliesTo:
+  paths: ["frontend/**", "backend/**", "e2e/**", "tests/**"]
+relatedRules: [RULE-ORG-STACK, RULE-PROJECT-LAYOUT]
+relatedSkills: [skill.frontend-developer, skill.backend-developer]
+pilot: WSC
 ---
 
-# Tester Skill（实例化时填写）
-
-> 本文件由项目的**测试负责人或测试团队**根据真实环境与命令制定，不由 AI 猜测测试栈。
->
-> - 填写模板：[`TEMPLATE.md`](./TEMPLATE.md)
-> - 已填写示例：[`EXAMPLE.md`](./EXAMPLE.md)（仅展示粒度，不代表默认技术栈）
->
-> **环境不可用时记 `BLOCKED`，绝不可写成 `PASSED`。**
-
-## 责任与审批
-
-| 环节 | 责任人 |
-|---|---|
-| 起草环境、命令矩阵与证据字段 | 测试负责人 / 测试团队 |
-| 实际试跑命令并确认判定规则 | 测试团队 |
-| 与 QA Strategist / 实现 Skill 对齐 | QA + 实现负责人 |
-| 将 `status` 从 `draft` 改为 `active` | 文件 Owner 或 QA Owner |
-
-若命令尚未在本仓库可复制执行，本文件必须保持 `draft`。
-
-## 填写完成标准
-
-- 工作目录、依赖服务、Fixture 与命令矩阵完整
-- `PASSED` / `FAILED` / `BLOCKED` / `SKIPPED` 互斥且可审计
-- 证据模板字段可复现；`blockedIsPass` 等价为 false
-- 不存在 `_待填_`、`REPLACE_ME` 或未解释的示例值
-
-## 激活前检查
-
-- [ ] 测试负责人完成填写并实际试跑
-- [ ] QA Owner 确认证据与门禁
-- [ ] 文件 Owner 批准激活
+# Tester Skill（WSC 试点）
 
 ## 环境
 
-- 依赖服务：_待填_
-- 测试账号 / fixture：_待填（禁止真实生产数据）_
+- 工作目录：仓库根目录
+- 依赖服务：PostgreSQL（Testcontainers 或本地 docker compose）
+- 环境变量样例：`e2e/.env.example`、`frontend/.env.example`、`backend/.../application-local.example.yml`
+- 禁止真实密钥与生产数据
 
-## 命令（按层）
+## 前置条件
 
-| 层 | 命令 | 何时强制 |
-|---|---|---|
-| lint/type | _待填_ | 每任务 |
-| unit | _待填_ | 每任务 |
-| integration | _待填_ | _待填条件_ |
-| e2e | _待填_ | _待填条件_ |
+- 前端：`pnpm install --frozen-lockfile`
+- 后端：`./mvnw -f backend/pom.xml -q -DskipTests dependency:resolve`
+- DB/服务健康检查失败时记 `BLOCKED`，不得写成 `PASSED`
 
-## 证据
+## 执行工作流
 
-- 环境阻塞 → 状态 `BLOCKED`，不得记为通过
-- 输出使用 `ai/schemas/templates/test-evidence.md`，引用 REQ
+1. 读取任务包、变更摘要与实现侧已跑命令。
+2. 按 P0 路径优先执行适用层（unit → integration → e2e）。
+3. 失败即停并记录复现步骤。
+4. 填写 `ai/schemas/templates/test-evidence.md`。
+
+## 验证矩阵
+
+| 层级 | 命令 | 触发条件 | 通过标准 |
+|---|---|---|---|
+| 前端相关单测 | `pnpm --filter frontend test --run <spec>` | FE 行为变化 | 退出码 0 |
+| 后端相关单测 | `./mvnw -f backend/pom.xml -Dtest=<Class> test` | BE 行为变化 | 退出码 0 |
+| 后端集成 | `./mvnw -f backend/pom.xml -Pintegration verify` | API/数据访问 | 退出码 0 |
+| E2E | `pnpm --filter e2e test --grep <用例>` | P0 用户路径 | 退出码 0 |
+
+## P0 路径关注（WSC）
+
+- 角色权限：管理员 / 提供方 / 普通用户写入口差异与 API 403
+- 目录筛选检索 → 详情 → 上链信息
+- 新增/编辑产品产生版本化存证记录
+- 有产品的分类禁止删除
+
+## 禁止事项
+
+- 环境不可用时不得标记 `PASSED`
+- 不得用生产数据或真实用户凭据
+- 不得跳过 P0 路径的强制层

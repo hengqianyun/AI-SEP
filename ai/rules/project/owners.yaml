@@ -1,34 +1,29 @@
-# owners.yaml — 人类决策身份（实例化时填写）
-# 填写请复制同目录 OWNERS-TEMPLATE.yaml。
+# owners.yaml — WSC 试点人类决策身份
+# 试点：一人多身份；每次批准须注明 identity。
 
-# 模板占位：name/contact 保持为空字符串。
-# 小团队可一人多身份（用下方 aliases）；每次批准须注明 identity。
-# 对应 ai/agents/human-owners.md
-
-projectId: REPLACE_ME
+projectId: WSC
 
 owners:
   productOwner:
-    name: ""
-    contact: ""
-    notes: "业务范围、优先级、需求层开放问题"
+    name: "试点操作者"
+    contact: "local"
+    notes: "业务范围、优先级、需求层开放问题；WSC 试点"
 
   techLead:
-    name: ""
-    contact: ""
-    notes: "架构升级、审查超限、技术债接受"
+    name: "试点操作者"
+    contact: "local"
+    notes: "架构升级、审查超限、技术债接受；WSC 试点"
 
   securityOperationsOwner:
-    name: ""
-    contact: ""
-    notes: "高风险接受、合规与生产红线"
+    name: "试点操作者"
+    contact: "local"
+    notes: "高风险接受、合规与生产红线；WSC 试点"
 
   maintainer:
-    name: ""
-    contact: ""
-    notes: "最终集成与发布放行、环境阻塞协调"
+    name: "试点操作者"
+    contact: "local"
+    notes: "最终集成与发布放行、环境阻塞协调；WSC 试点"
 
-# 可选：同一人映射（实例化后按需取消注释并填写）
-# aliases:
-#   - person: ""
-#     identities: [productOwner, techLead, securityOperationsOwner, maintainer]
+aliases:
+  - person: "试点操作者"
+    identities: [productOwner, techLead, securityOperationsOwner, maintainer]

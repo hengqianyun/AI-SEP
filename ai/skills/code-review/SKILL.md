@@ -1,57 +1,56 @@
 ---
 id: skill.code-review
-version: 0.1.0
-status: draft
+version: 1.0.0
+status: active
 owner: tech-lead
 inputSchema: task-package@1
 outputSchema: code-review@1
 compatibleRoles: [codeReviewer]
+appliesTo:
+  paths: ["**/*"]
+relatedRules: [RULE-ORG-STACK, RULE-PROJECT-LAYOUT]
+pilot: WSC
 ---
 
-# Code Review Skill（实例化时填写）
+# Code Review Skill（WSC 试点）
 
-> 本文件由项目的**审查负责人或 Tech Lead**根据真实仓库制定，合并前端与后端审查项，不由 AI 猜测检查细则。
->
-> - 填写模板：[`TEMPLATE.md`](./TEMPLATE.md)
-> - 已填写示例：[`EXAMPLE.md`](./EXAMPLE.md)（仅展示粒度，不代表默认技术栈）
+## 适用范围
 
-## 责任与审批
+- 审查对象：`frontend/**`、`backend/**`、`contracts/openapi/**`
+- 输出模板：`ai/schemas/templates/code-review.md`
+- 技术约定：`skill.frontend-developer`、`skill.backend-developer`、`RULE-ORG-STACK`
+- 工作目录：仓库根目录
 
-| 环节 | 责任人 |
-|---|---|
-| 起草前后端必查项、阻塞与非阻塞边界 | 审查负责人 / Tech Lead |
-| 确认与 Coding / Architecture Rule 一致 | Tech Lead |
-| 将 `status` 从 `draft` 改为 `active` | 文件 Owner 或 Tech Lead |
+## 审查工作流
 
-若前后端检查项尚未按仓库实例化，本文件必须保持 `draft`；Orchestrator 不得当作已激活审查规范装载。
+1. 对照任务包 `allowModify` 与 REQ 映射。
+2. 按变更路径选用前端/后端检查清单。
+3. 可复跑失败的静态/测试命令；不替代实现者自检。
+4. 仅对规则内问题开 P0/P1；P0/P1 清零前不得批准。
 
-## 填写完成标准
+## 前端必查（Vue）
 
-- 通用、前端、后端检查项均已填写，或明确 `N/A` 及原因
-- 阻塞条件可客观判定；纯风格项不得升为 P0/P1（除非已写入 Rule）
-- 输出模板与批准门禁明确
-- 不存在 `_待填_`、`REPLACE_ME` 或未解释的示例值
+- 变更是否落在 `frontend/src/features/<feature>/` 约定目录
+- 是否经 `frontend/src/api/client.ts`；有无硬编码后端 URL
+- 异步页是否覆盖 loading/empty/error
+- 写入口是否仅靠前端隐藏而无后端鉴权（P0）
+- 是否新增第二套状态管理/HTTP Client/UI（无 ADR 则 P0）
 
-## 激活前检查
+## 后端必查（Spring）
 
-- [ ] 审查负责人完成填写
-- [ ] Tech Lead 确认与适用 Rule 无冲突
-- [ ] `context-map.yaml` 已按需装载本 Skill
-- [ ] 文件 Owner 批准激活
+- 分层是否被穿透（Controller → Repository）
+- 密钥/连接串是否入仓
+- 迁移是否在 `db/migration/` 且破坏性变更含回滚说明
+- 上链是否经适配层（DEC-WSC-002）
+- 产品编码唯一校验（DEC-WSC-001）；分类删除保护（DEC-WSC-003）
+- OpenAPI 是否同步 `contracts/openapi/`（若契约已冻结）
 
-## 必查清单（项目）
+## 不可风格阻塞
 
-1. 正确性：是否满足任务目标与 REQ
-2. 范围：是否越出 allowModify / 偷扩需求
-3. 架构：是否违反 RULE-PROJECT-ARCHITECTURE
-4. 安全：密钥、注入、鉴权、数据暴露
-5. 契约：API/数据是否与批准版本一致
-6. 测试：必要层级是否存在且可执行
+- 已由 formatter / lint 统一的格式
+- 未写入 Rule 且无用户影响的命名偏好
 
-## 不可作为 P0/P1 阻塞的风格项
+## 禁止事项
 
-- _待填（与 RULE-ORG-CODING 对齐）_
-
-## 输出
-
-使用 `ai/schemas/templates/code-review.md`；P0/P1 清零前不得批准。
+- 不得把 `REQUEST_CHANGES` 改写为 `APPROVE`
+- 不得在审查意见中粘贴真实密钥或生产数据

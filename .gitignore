@@ -1,0 +1,40 @@
+# Dependencies & build
+node_modules/
+dist/
+target/
+*.class
+*.jar
+*.war
+.pnpm-store/
+
+# Env & secrets (never commit real local/prod secrets)
+.env
+.env.local
+.env.*.local
+**/application-local.yml
+**/application-prod.yml
+!**/*.example.yml
+!**/.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Test / coverage / reports
+coverage/
+test-results/
+playwright-report/
+tests/e2e/reports/
+*.log
+
+# Frontend tooling caches
+.vite/
+*.tsbuildinfo
+
+# Misc
+*.swp
+*.swo
+AI-SEP.zip

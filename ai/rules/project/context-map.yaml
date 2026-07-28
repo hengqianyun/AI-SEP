@@ -1,36 +1,28 @@
-# context-map.yaml — 路径/角色 → 必装规则与技能（最小装载）
-# 填写请复制同目录 CONTEXT-MAP-TEMPLATE.yaml。
+# context-map.yaml — WSC 路径/角色 → 必装规则与技能
 
-projectId: REPLACE_ME
-
-# Orchestrator 装载顺序建议：global → organization → 下列匹配项 → 任务包内声明
+projectId: WSC
 
 defaults:
   rules:
     - RULE-GLOBAL-SECRETS
     - RULE-GLOBAL-CONSENSUS
-  # organization 规则在 status: active 后取消注释
-  # - RULE-ORG-STACK
-  # - RULE-ORG-CODING
-  # - RULE-ORG-SECURITY
-  # - RULE-ORG-RELEASE
+    - RULE-ORG-STACK
 
 byRole:
   developer:
     skills: [skill.developer]
-    rules: [RULE-PROJECT-LAYOUT, RULE-PROJECT-DOMAIN]
+    rules: [RULE-PROJECT-LAYOUT]
   codeReviewer:
     skills: [skill.code-review]
-    rules: [RULE-PROJECT-LAYOUT, RULE-PROJECT-ARCHITECTURE]
+    rules: [RULE-PROJECT-LAYOUT]
   tester:
     skills: [skill.tester]
     rules: [RULE-PROJECT-LAYOUT]
   solutionArchitect:
     skills: [skill.solution-architect]
-    rules: [RULE-PROJECT-ARCHITECTURE]
+    rules: [RULE-PROJECT-LAYOUT]
   apiDataDesigner:
     skills: [skill.api-data-designer]
-    rules: [RULE-PROJECT-DOMAIN]
   qaStrategist:
     skills: [skill.qa-strategist]
   parallelPlanner:
@@ -48,13 +40,10 @@ byRole:
     skills: [skill.integration-review]
 
 byPath:
-  # 每个启用的代码域按真实路径装载对应 Developer Skill。
-  # 技术栈尚未确定或 Skill 仍为 draft 时，不得取消注释。
-  # - pattern: "frontend/**"
-  #   extraSkills: [skill.frontend-developer]
-  # - pattern: "backend/src/**"
-  #   extraSkills: [skill.backend-developer]
-  #   extraRules: [RULE-PROJECT-DOMAIN]
-  # - pattern: "**/migrations/**"
-  #   extraSkills: [skill.migration-review]
-  #   requireRoles: [migrationReviewer]
+  - pattern: "frontend/**"
+    extraSkills: [skill.frontend-developer]
+  - pattern: "backend/**"
+    extraSkills: [skill.backend-developer]
+  - pattern: "**/db/migration/**"
+    extraSkills: [skill.migration-review]
+    requireRoles: [migrationReviewer]

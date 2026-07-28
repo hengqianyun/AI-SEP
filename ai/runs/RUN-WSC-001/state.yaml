@@ -1,0 +1,29 @@
+runId: RUN-WSC-001
+currentNode: DEVELOPMENT
+round: 1
+status: BLOCKED
+blockedBy:
+  - id: BLOCKER-WSC-001-JDK
+    taskId: TASK-WSC-001
+    reason: 本机 JDK 17，后端需 Java 21；tester 结论 BLOCKED
+    unblockWhen: 安装 JDK 21 并设置 JAVA_HOME 后复跑 mvn -f backend/pom.xml -DskipTests compile 为 PASSED，且 TESTRUN 更新为可 VERIFIED
+activeTaskId: TASK-WSC-001
+taskGate:
+  TASK-WSC-001:
+    developer: READY_FOR_REVIEW
+    codeReview: APPROVE
+    tester: BLOCKED
+    verified: false
+activeSnapshotId: SNAP-WSC-001
+activePlanId: PLAN-WSC-1.1
+approvedPlanPath: planning/approved/PLAN-WSC-1.1.md
+nextAction:
+  role: human
+  identity: techLead
+  action: provide-jdk21-or-decide-unblock-path
+artifacts:
+  taskPackage: planning/tasks/TASK-WSC-001.md
+  devReport: planning/tasks/DEV-TASK-WSC-001.md
+  codeReview: planning/tasks/REV-TASK-WSC-001.md
+  testEvidence: planning/tasks/TESTRUN-TASK-WSC-001.md
+updatedAt: 2026-07-28T17:30:00+08:00

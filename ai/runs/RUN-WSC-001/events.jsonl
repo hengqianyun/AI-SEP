@@ -1,0 +1,23 @@
+{"ts":"2026-07-28T16:10:00+08:00","type":"RUN_CREATED","runId":"RUN-WSC-001","node":"PRD_ANALYSIS","detail":"Pilot start; PRD product/prd/wsc-v1.0.md"}
+{"ts":"2026-07-28T16:10:01+08:00","type":"DISPATCH","runId":"RUN-WSC-001","role":"productAnalyst","action":"produce-requirement-snapshot","output":"product/requirements/SNAP-WSC-001.md"}
+{"ts":"2026-07-28T16:18:00+08:00","type":"ARTIFACT_READY","runId":"RUN-WSC-001","artifact":"SNAP-WSC-001","path":"product/requirements/SNAP-WSC-001.md","reqCount":14}
+{"ts":"2026-07-28T16:19:00+08:00","type":"GATE_PASS","runId":"RUN-WSC-001","node":"PRD_ANALYSIS","checks":["snapshotId","p0-acceptance","no-blocking-oq"]}
+{"ts":"2026-07-28T16:20:00+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-001","from":"PRD_ANALYSIS","to":"REQUIREMENT_REVIEW","awaiting":"productOwner"}
+{"ts":"2026-07-28T16:12:00+08:00","type":"HUMAN_DECISION","runId":"RUN-WSC-001","identity":"productOwner","action":"CONFIRM_SNAPSHOT","snapshotId":"SNAP-WSC-001"}
+{"ts":"2026-07-28T16:12:30+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-001","from":"REQUIREMENT_REVIEW","to":"PLAN_DRAFT"}
+{"ts":"2026-07-28T16:13:00+08:00","type":"DISPATCH","runId":"RUN-WSC-001","role":"planEditor","action":"draft-plan","output":"planning/proposals/PLAN-WSC-1.0.md"}
+{"ts":"2026-07-28T16:24:00+08:00","type":"ARTIFACT_READY","runId":"RUN-WSC-001","artifact":"PLAN-WSC-1.0","path":"planning/proposals/PLAN-WSC-1.0.md","taskCount":6,"waveCount":5}
+{"ts":"2026-07-28T16:25:00+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-001","from":"PLAN_DRAFT","to":"PLAN_REVIEW","round":1}
+{"ts":"2026-07-28T16:25:30+08:00","type":"DISPATCH","runId":"RUN-WSC-001","role":"planningCommittee","action":"independent-reviews-round-1"}
+{"ts":"2026-07-28T16:40:00+08:00","type":"CONSENSUS","runId":"RUN-WSC-001","round":1,"result":"NOT_REACHED","summary":"planning/reviews/round-1/SUMMARY.md"}
+{"ts":"2026-07-28T16:41:00+08:00","type":"DISPATCH","runId":"RUN-WSC-001","role":"planEditor","action":"revise-plan","output":"planning/proposals/PLAN-WSC-1.1.md"}
+{"ts":"2026-07-28T16:50:00+08:00","type":"ARTIFACT_READY","runId":"RUN-WSC-001","artifact":"PLAN-WSC-1.1","path":"planning/proposals/PLAN-WSC-1.1.md"}
+{"ts":"2026-07-28T16:50:30+08:00","type":"DISPATCH","runId":"RUN-WSC-001","role":"planningCommittee","action":"independent-reviews-round-2"}
+{"ts":"2026-07-28T17:00:00+08:00","type":"CONSENSUS","runId":"RUN-WSC-001","round":2,"result":"REACHED","requiredApproves":5,"optionalApproves":3}
+{"ts":"2026-07-28T17:00:30+08:00","type":"PLAN_APPROVED","runId":"RUN-WSC-001","planId":"PLAN-WSC-1.1","path":"planning/approved/PLAN-WSC-1.1.md"}
+{"ts":"2026-07-28T17:01:00+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-001","from":"PLAN_REVIEW","to":"PLAN_APPROVED","awaiting":"human-confirm-task-dispatch"}
+{ts:2026-07-28T16:42:00+08:00,type:HUMAN_DECISION,identity:productOwner,action:CONFIRM_TASK_DISPATCH}
+{ts:2026-07-28T16:43:00+08:00,type:TASK_DISPATCHED,taskId:TASK-WSC-001,wave:W1}
+{ts:2026-07-28T17:15:00+08:00,type:DEV_READY,taskId:TASK-WSC-001,report:planning/tasks/DEV-TASK-WSC-001.md}
+{ts:2026-07-28T17:20:00+08:00,type:CODE_REVIEW,taskId:TASK-WSC-001,decision:APPROVE,report:planning/tasks/REV-TASK-WSC-001.md}
+{ts:2026-07-28T17:30:00+08:00,type:TEST_EVIDENCE,taskId:TASK-WSC-001,result:BLOCKED,report:planning/tasks/TESTRUN-TASK-WSC-001.md,blocker:JDK17-need-21}

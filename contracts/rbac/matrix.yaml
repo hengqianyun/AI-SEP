@@ -1,0 +1,33 @@
+# wsc-contracts@1.1.0 — RBAC 可测矩阵
+# 对齐 PLAN-WSC-1.1 §4.1 / REQ-RBAC-001
+
+version: "1.1.0"
+package: wsc-contracts
+
+roles:
+  - ADMIN      # 管理员
+  - PROVIDER   # 提供方
+  - USER       # 普通用户
+
+matrix:
+  - role: ADMIN
+    categoryMaintainUI: visible
+    categoryWriteApi: { expect: 200, on: valid }
+    productWriteUI: visible
+    productWriteApi: { expect: 200, on: valid }
+
+  - role: PROVIDER
+    categoryMaintainUI: hidden
+    categoryWriteApi: { expect: 403, code: ERR_FORBIDDEN }
+    productWriteUI: visible
+    productWriteApi: { expect: 200, on: valid }
+
+  - role: USER
+    categoryMaintainUI: hidden
+    categoryWriteApi: { expect: 403, code: ERR_FORBIDDEN }
+    productWriteUI: hidden
+    productWriteApi: { expect: 403, code: ERR_FORBIDDEN }
+
+notes:
+  - 写 API 以服务端会话角色为准，禁止仅信前端隐藏
+  - 角色/权限变更后旧会话写 API 必须拒绝（见 PLAN §3.2）

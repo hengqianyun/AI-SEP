@@ -5,9 +5,16 @@
 > 原则：优先改 `ai/rules/`、`ai/skills/`、`ai/workflow/`；不要为个性化重写 `ai/agents/*.md` 角色骨架。  
 > 分工：按职责拆分的任务与排期见 [`PROJECT-CUSTOMIZATION-ASSIGNMENTS.md`](./PROJECT-CUSTOMIZATION-ASSIGNMENTS.md)。
 
-**项目代号**：`________________`  
-**开始日期**：`________________`  
-**负责人（Tech Lead）**：`________________`
+**项目代号**：`WSC`  
+**开始日期**：`2026-07-28`  
+**负责人（Tech Lead）**：`试点操作者（一人多身份）`
+
+### 试点豁免声明（WSC）
+
+- **试点范围**：接入端工作台半自动交付流水线（PRD → SNAP → 规划 → …）；主会话扮演 orchestrator。
+- **豁免**：Org CODING/SECURITY/RELEASE 精细化全量填写；规划侧非 P0 Skill 全部 active；Cursor Adapter 一键启动；无人值守全自动。
+- **不豁免**：可读 PRD、owners、`projectId`、STACK 基线、layout/modules/glossary、P0 实现 Skill、run 状态机、规划共识门禁。
+- **状态**：§0 为**试点部分完成**——允许半自动推进至规划/实现门禁，**不得**假设可无人值守跑通全流水线。
 
 ---
 
@@ -15,13 +22,13 @@
 
 全部勾选前，Orchestrator **不得**假设本项目已可自动跑通规划→开发流水线。
 
-- [ ] §1 人类身份已点名
-- [ ] §2 Organization 规则至少有一份 ACTIVE
-- [ ] §3 Project 规则（目录地图 + 领域不变量）已落盘
-- [ ] §4 工作流策略已按本项目裁剪
-- [ ] §5 通用 developer + 各启用代码域 Developer Skill、codeReviewer、tester 已填写
-- [ ] §6 制品 Schema/模板与 MODULE 码表已就绪
-- [ ] §7 至少一份可执行的 PRD（或明确试点范围）
+- [x] §1 人类身份已点名（试点一人多身份）
+- [x] §2 Organization 规则至少有一份 ACTIVE（`RULE-ORG-STACK`；其余 Org 规则试点豁免）
+- [x] §3 Project 规则（目录地图 + modules/glossary；DOMAIN 细则可后续补）已落盘
+- [x] §4 工作流策略已按本项目裁剪（`projectId: WSC`）
+- [x] §5 通用 developer + frontend/backend、codeReviewer、tester 已填写（试点 active）
+- [x] §6 制品 Schema/模板沿用仓库默认；MODULE 码表已就绪
+- [x] §7 至少一份可执行的 PRD（`product/prd/wsc-v1.0.md`）
 
 ---
 
@@ -29,11 +36,11 @@
 
 | 勾选 | 定制项 | 落盘路径 | 填写要点 |
 |---|---|---|---|
-| [ ] | Product Owner | `ai/rules/project/owners.yaml` | 姓名/账号；业务范围与优先级裁决 |
-| [ ] | Tech Lead | 同上 | 架构升级、审查超限、技术债接受 |
-| [ ] | Security/Ops Owner | 同上 | 高风险接受、合规红线 |
-| [ ] | Maintainer | 同上 | 最终集成与发布放行 |
-| [ ] | 升级 SLA / 找谁 | `ai/workflow/policies.yaml` → `escalation` | 超时、轮次耗尽、P0 风险接受 |
+| [x] | Product Owner | `ai/rules/project/owners.yaml` | 试点操作者 |
+| [x] | Tech Lead | 同上 | 试点操作者 |
+| [x] | Security/Ops Owner | 同上 | 试点操作者 |
+| [x] | Maintainer | 同上 | 试点操作者 |
+| [x] | 升级 SLA / 找谁 | `ai/workflow/policies.yaml` → `escalation` | 保持默认 24h |
 
 小团队可一人多身份，但每次人类批准必须**注明当时身份**。
 
@@ -43,10 +50,10 @@
 
 | 勾选 | 定制项 | 落盘路径 |
 |---|---|---|
-| [ ] | 官方技术栈与版本边界 | `ai/rules/organization/RULE-ORG-STACK.md` |
-| [ ] | 编码 / API / 日志约定 | `ai/rules/organization/RULE-ORG-CODING.md` |
-| [ ] | 安全与合规红线（不可被 Project 覆盖） | `ai/rules/organization/RULE-ORG-SECURITY.md` |
-| [ ] | 分支 / PR / 发布惯例 | `ai/rules/organization/RULE-ORG-RELEASE.md` |
+| [x] | 官方技术栈与版本边界 | `ai/rules/organization/RULE-ORG-STACK.md` |
+| [ ] | 编码 / API / 日志约定 | `ai/rules/organization/RULE-ORG-CODING.md`（试点豁免） |
+| [ ] | 安全与合规红线（不可被 Project 覆盖） | `ai/rules/organization/RULE-ORG-SECURITY.md`（试点豁免） |
+| [ ] | 分支 / PR / 发布惯例 | `ai/rules/organization/RULE-ORG-RELEASE.md`（试点豁免） |
 
 ---
 
@@ -54,12 +61,12 @@
 
 | 勾选 | 定制项 | 落盘路径 |
 |---|---|---|
-| [ ] | 目录与模块地图、默认读写边界 | `ai/rules/project/RULE-PROJECT-LAYOUT.md` |
-| [ ] | 领域不变量 / 业务规则索引 | `ai/rules/project/RULE-PROJECT-DOMAIN.md` + `product/business-rules/` |
-| [ ] | 术语表 | `product/glossary.md` |
-| [ ] | MODULE 码表（ID 前缀） | `ai/rules/project/modules.yaml` |
-| [ ] | 路径 → 规则匹配表（装载用） | `ai/rules/project/context-map.yaml` |
-| [ ] | 既有架构约束 / ADR 入口 | `ai/rules/project/RULE-PROJECT-ARCHITECTURE.md` |
+| [x] | 目录与模块地图、默认读写边界 | `ai/rules/project/RULE-PROJECT-LAYOUT.md` |
+| [ ] | 领域不变量 / 业务规则索引 | `ai/rules/project/RULE-PROJECT-DOMAIN.md` + `product/business-rules/`（试点后置；DEC-WSC-* 已落盘） |
+| [x] | 术语表 | `product/glossary.md` |
+| [x] | MODULE 码表（ID 前缀） | `ai/rules/project/modules.yaml` |
+| [x] | 路径 → 规则匹配表（装载用） | `ai/rules/project/context-map.yaml` |
+| [ ] | 既有架构约束 / ADR 入口 | `ai/rules/project/RULE-PROJECT-ARCHITECTURE.md`（试点后置） |
 
 ---
 
@@ -69,11 +76,11 @@
 
 | 勾选 | 定制项 | 说明 |
 |---|---|---|
-| [ ] | 规划委员会角色启用/省略 | 省略 UX/API/Security 须写原因 |
-| [ ] | `maxRounds`（规划 / 代码审查） | 默认 5，可改 |
-| [ ] | 强制 Security / Migration Reviewer 的条件 | 风险标签、数据触达等 |
-| [ ] | 发布是否强制人类 `maintainer` 批准 | `release.requireHumanApproval` |
-| [ ] | 学习晋升阈值与审批人 | `learning.*` |
+| [x] | 规划委员会角色启用/省略 | 可选角色保持 enabled（`policies.yaml`） |
+| [x] | `maxRounds`（规划 / 代码审查） | 默认 5 |
+| [x] | 强制 Security / Migration Reviewer 的条件 | 保持模板风险标签 |
+| [x] | 发布是否强制人类 `maintainer` 批准 | true |
+| [x] | 学习晋升阈值与审批人 | 保持模板 |
 
 ---
 
@@ -83,11 +90,11 @@
 
 | 勾选 | Skill ID | 优先级 | 路径 |
 |---|---|---|---|
-| [ ] | `skill.developer`（通用基线） | P0 | `ai/skills/developer/SKILL.md` |
-| [ ] | `skill.frontend-developer`（项目有前端时） | P0/按需 | `ai/skills/frontend-developer/SKILL.md` |
-| [ ] | `skill.backend-developer`（项目有后端时） | P0/按需 | `ai/skills/backend-developer/SKILL.md` |
-| [ ] | `skill.code-review` | P0 | `ai/skills/code-review/SKILL.md` |
-| [ ] | `skill.tester` | P0 | `ai/skills/tester/SKILL.md` |
+| [x] | `skill.developer`（通用基线） | P0 | `ai/skills/developer/SKILL.md` |
+| [x] | `skill.frontend-developer`（项目有前端时） | P0/按需 | `ai/skills/frontend-developer/SKILL.md` |
+| [x] | `skill.backend-developer`（项目有后端时） | P0/按需 | `ai/skills/backend-developer/SKILL.md` |
+| [x] | `skill.code-review` | P0 | `ai/skills/code-review/SKILL.md` |
+| [x] | `skill.tester` | P0 | `ai/skills/tester/SKILL.md` |
 | [ ] | `skill.solution-architect` | P1 | `ai/skills/solution-architect/SKILL.md` |
 | [ ] | `skill.api-data-designer` | P1 | `ai/skills/api-data-designer/SKILL.md` |
 | [ ] | `skill.qa-strategist` | P1 | `ai/skills/qa-strategist/SKILL.md` |
@@ -118,9 +125,9 @@
 
 | 勾选 | 定制项 | 落盘路径 |
 |---|---|---|
-| [ ] | PRD | `product/prd/` |
-| [ ] | Out of Scope / 非目标 | 写在 PRD 或 `product/requirements/` |
-| [ ] | 已有设计决策（若有） | `design/decisions/` |
+| [x] | PRD | `product/prd/wsc-v1.0.md` |
+| [x] | Out of Scope / 非目标 | 写在 PRD |
+| [x] | 已有设计决策（若有） | `design/decisions/DEC-WSC-001..003.md` |
 
 ---
 

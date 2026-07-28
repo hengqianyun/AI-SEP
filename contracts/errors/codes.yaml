@@ -1,0 +1,36 @@
+# wsc-contracts@1.1.0 — 错误码目录（最小集）
+# 与 contracts/openapi/openapi.yaml 示例及统一响应包装一致
+
+version: "1.1.0"
+package: wsc-contracts
+
+codes:
+  ERR_PRODUCT_CODE_FORMAT:
+    httpStatus: 400
+    code: ERR_PRODUCT_CODE_FORMAT
+    message: "产品编码格式非法，须符合 {DOMAIN}-{FEATURE}-{NNNN}"
+    refs: [DEC-WSC-001, REQ-CAT-004, REQ-CAT-005]
+
+  ERR_PRODUCT_CODE_CONFLICT:
+    httpStatus: 409
+    code: ERR_PRODUCT_CODE_CONFLICT
+    message: "产品编码已存在"
+    refs: [DEC-WSC-001, REQ-CAT-005]
+
+  ERR_CATEGORY_HAS_PRODUCTS:
+    httpStatus: 409
+    code: ERR_CATEGORY_HAS_PRODUCTS
+    message: "分类下仍有挂载产品，禁止删除"
+    # data 须含 reason 与 productCount（挂载数量）
+    dataFields: [reason, productCount]
+    refs: [DEC-WSC-003, REQ-CAT-006]
+
+  ERR_FORBIDDEN:
+    httpStatus: 403
+    code: ERR_FORBIDDEN
+    message: "当前角色无权执行该写操作"
+    refs: [REQ-RBAC-001]
+
+envelope:
+  fields: [code, message, data, correlationId]
+  successCode: "0"

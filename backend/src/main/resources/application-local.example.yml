@@ -1,0 +1,16 @@
+# Copy to application-local.yml (gitignored). Do NOT commit real secrets.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wsc
+    username: wsc
+    password: change-me
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    com.wsc: INFO

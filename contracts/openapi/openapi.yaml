@@ -1,0 +1,969 @@
+openapi: 3.0.3
+info:
+  title: WSC Access Workbench API
+  version: 1.1.0
+  description: |
+    wsc-contracts@1.1.0 — 接入端工作台最小冻结契约。
+    统一响应包装：{ code, message, data, correlationId }；成功时 code="0"。
+    产品编码格式（DEC-WSC-001）：`{DOMAIN}-{FEATURE}-{NNNN}`，DOMAIN/FEATURE 为大写字母与数字，NNNN 至少 4 位数字。
+    OQ-004：产品类型为 OTHER（其他数据产品）时无类型专属字段；服务端忽略或拒绝（400）多余专属字段载荷。
+    认证：V1 采用服务端会话（Cookie）为主；亦声明 Bearer 以便网关/文档等价说明——Bearer 须对应可吊销的服务端会话，写 API 以服务端会话角色为准。
+
+servers:
+  - url: /api/v1
+    description: V1 API base
+
+tags:
+  - name: auth
+  - name: overview
+  - name: catalog
+  - name: chain
+
+security:
+  - SessionCookie: []
+
+paths:
+  /auth/session:
+    get:
+      tags: [auth]
+      summary: 获取当前会话
+      operationId: getSession
+      responses:
+        "200":
+          description: 当前会话
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseSession"
+              examples:
+                ok:
+                  value:
+                    code: "0"
+                    message: OK
+                    data:
+                      userId: "u-1"
+                      displayName: "演示用户"
+                      role: ADMIN
+                      enterpriseName: "演示企业"
+                    correlationId: "corr-auth-1"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [auth]
+      summary: 登录建立会话
+      operationId: createSession
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: 登录成功（Set-Cookie 会话）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseSession"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    delete:
+      tags: [auth]
+      summary: 登出（立即失效会话）
+      operationId: deleteSession
+      responses:
+        "200":
+          description: 已登出
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEmpty"
+
+  /overview/metrics:
+    get:
+      tags: [overview]
+      summary: 总览核心指标（REQ-OVW-001）
+      operationId: getOverviewMetrics
+      responses:
+        "200":
+          description: 指标卡片
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOverviewMetrics"
+
+  /overview/trend:
+    get:
+      tags: [overview]
+      summary: 近 30 天上链趋势（REQ-OVW-002）
+      operationId: getOverviewTrend
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 90
+      responses:
+        "200":
+          description: 趋势序列
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOverviewTrend"
+
+  /overview/top:
+    get:
+      tags: [overview]
+      summary: 产品上链次数 TOP（REQ-OVW-003）
+      operationId: getOverviewTop
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 10
+      responses:
+        "200":
+          description: TOP 列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOverviewTop"
+
+  /overview/stream:
+    get:
+      tags: [overview]
+      summary: 最新上链动态流（REQ-OVW-004）
+      operationId: getOverviewStream
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: 动态流（V1 来自投影/fixture，不依赖未实现业务 API）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOverviewStream"
+
+  /overview/distribution:
+    get:
+      tags: [overview]
+      summary: 行业与地域分布（REQ-OVW-005）
+      operationId: getOverviewDistribution
+      responses:
+        "200":
+          description: 分布数据
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOverviewDistribution"
+
+  /catalog/categories:
+    get:
+      tags: [catalog]
+      summary: 行业分类树
+      operationId: listCategories
+      responses:
+        "200":
+          description: 一二级分类
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseCategoryList"
+    post:
+      tags: [catalog]
+      summary: 新增行业分类（管理员）
+      operationId: createCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryWrite"
+      responses:
+        "200":
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseCategory"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /catalog/categories/{categoryId}:
+    put:
+      tags: [catalog]
+      summary: 更新行业分类（管理员）
+      operationId: updateCategory
+      parameters:
+        - $ref: "#/components/parameters/CategoryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryWrite"
+      responses:
+        "200":
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseCategory"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    delete:
+      tags: [catalog]
+      summary: 删除行业分类（管理员；有挂载产品则禁止）
+      operationId: deleteCategory
+      parameters:
+        - $ref: "#/components/parameters/CategoryId"
+      responses:
+        "200":
+          description: 已删除
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEmpty"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: 分类下仍有产品
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                hasProducts:
+                  value:
+                    code: ERR_CATEGORY_HAS_PRODUCTS
+                    message: 分类下仍有挂载产品，禁止删除
+                    data:
+                      reason: 分类下仍有 3 个产品
+                      productCount: 3
+                    correlationId: "corr-cat-del-1"
+
+  /catalog/products:
+    get:
+      tags: [catalog]
+      summary: 产品列表（筛选/搜索）
+      operationId: listProducts
+      parameters:
+        - name: l1CategoryId
+          in: query
+          schema: { type: string }
+        - name: l2CategoryId
+          in: query
+          schema: { type: string }
+        - name: dataSource
+          in: query
+          schema: { $ref: "#/components/schemas/DataSource" }
+        - name: productType
+          in: query
+          schema: { $ref: "#/components/schemas/ProductType" }
+        - name: involvesPublicData
+          in: query
+          schema: { type: boolean }
+        - name: deliveryMethod
+          in: query
+          schema: { $ref: "#/components/schemas/DeliveryMethod" }
+        - name: q
+          in: query
+          description: 产品名/编码包含匹配（大小写不敏感）
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        "200":
+          description: 分页列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProductPage"
+    post:
+      tags: [catalog]
+      summary: 新增数据产品（管理员/提供方）
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductWrite"
+            examples:
+              dataset:
+                summary: 数据集
+                value:
+                  productCode: MED-EMR-0002
+                  productName: 电子病历数据集
+                  productType: DATASET
+                  l2CategoryId: "cat-l2-1"
+                  typeSpecific:
+                    dataset:
+                      recordCount: 1000
+              other:
+                summary: 其他数据产品（无专属字段）
+                value:
+                  productCode: GEN-MISC-0001
+                  productName: 其他产品示例
+                  productType: OTHER
+                  l2CategoryId: "cat-l2-1"
+      responses:
+        "200":
+          description: 已创建并产生第 1 版上链
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProduct"
+        "400":
+          description: 格式非法或 OQ-004 拒绝多余专属字段
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                badCode:
+                  value:
+                    code: ERR_PRODUCT_CODE_FORMAT
+                    message: 产品编码格式非法，须符合 {DOMAIN}-{FEATURE}-{NNNN}
+                    data: null
+                    correlationId: "corr-prod-fmt-1"
+                otherExtraFields:
+                  summary: OTHER 类型携带专属字段被拒绝（可选策略；亦可忽略）
+                  value:
+                    code: ERR_PRODUCT_CODE_FORMAT
+                    message: 其他数据产品不得携带类型专属字段
+                    data: null
+                    correlationId: "corr-oq004-1"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: 编码冲突
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                conflict:
+                  value:
+                    code: ERR_PRODUCT_CODE_CONFLICT
+                    message: 产品编码已存在
+                    data: null
+                    correlationId: "corr-prod-dup-1"
+
+  /catalog/products/{productId}:
+    get:
+      tags: [catalog]
+      summary: 产品详情
+      operationId: getProduct
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: 详情（分组字段）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProduct"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [catalog]
+      summary: 编辑数据产品
+      operationId: updateProduct
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductWrite"
+      responses:
+        "200":
+          description: 已更新并追加上链版本
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseProduct"
+        "400":
+          description: 编码格式或 OQ-004
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                badCode:
+                  value:
+                    code: ERR_PRODUCT_CODE_FORMAT
+                    message: 产品编码格式非法，须符合 {DOMAIN}-{FEATURE}-{NNNN}
+                    data: null
+                    correlationId: "corr-prod-fmt-2"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: 编码冲突
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                conflict:
+                  value:
+                    code: ERR_PRODUCT_CODE_CONFLICT
+                    message: 产品编码已存在
+                    data: null
+                    correlationId: "corr-prod-dup-2"
+
+  /chain/products/{productId}/versions:
+    get:
+      tags: [chain]
+      summary: 产品上链版本列表（最新优先）
+      operationId: listChainVersions
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: 版本列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseChainVersionList"
+
+  /chain/versions/{versionId}/snapshot:
+    get:
+      tags: [chain]
+      summary: 按 versionId 读取完整目录快照
+      operationId: getChainSnapshot
+      parameters:
+        - name: versionId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: 不可变目录快照
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseChainSnapshot"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: WSC_SESSION
+      description: |
+        服务端会话 Cookie。登录后写入；登出立即失效。
+        角色绑定在会话中；写 API 以服务端会话角色为准。
+        角色/权限变更后须吊销或强制刷新旧会话。
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-or-JWT
+      description: |
+        可选等价方案：Bearer 令牌必须映射可吊销的服务端会话表。
+        非「纯无状态 JWT」；吊销后写 API 必须拒绝。
+
+  parameters:
+    CategoryId:
+      name: categoryId
+      in: path
+      required: true
+      schema: { type: string }
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema: { type: string }
+
+  responses:
+    Unauthorized:
+      description: 未认证
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseError"
+          examples:
+            unauth:
+              value:
+                code: "401"
+                message: 未登录或会话已失效
+                data: null
+                correlationId: "corr-401"
+    Forbidden:
+      description: 无权限
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseError"
+          examples:
+            forbidden:
+              value:
+                code: ERR_FORBIDDEN
+                message: 当前角色无权执行该写操作
+                data: null
+                correlationId: "corr-403"
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseError"
+
+  schemas:
+    ApiEnvelope:
+      type: object
+      required: [code, message, data, correlationId]
+      properties:
+        code:
+          type: string
+          description: 成功为 "0"；业务错误为 ERR_* 或 HTTP 语义码字符串
+        message:
+          type: string
+        data:
+          nullable: true
+        correlationId:
+          type: string
+
+    ApiResponseEmpty:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              nullable: true
+
+    ApiResponseError:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            code:
+              type: string
+              enum:
+                - ERR_PRODUCT_CODE_FORMAT
+                - ERR_PRODUCT_CODE_CONFLICT
+                - ERR_CATEGORY_HAS_PRODUCTS
+                - ERR_FORBIDDEN
+                - "401"
+                - "404"
+            data:
+              nullable: true
+              description: ERR_CATEGORY_HAS_PRODUCTS 时含 reason、productCount
+
+    Role:
+      type: string
+      enum: [ADMIN, PROVIDER, USER]
+
+    ProductType:
+      type: string
+      enum: [DATASET, REPORT, API, OTHER]
+      description: |
+        DATASET=数据集, REPORT=数据报告, API=数据接口, OTHER=其他数据产品。
+        OTHER（OQ-004）：无类型专属字段；typeSpecific 应省略或为空对象；
+        服务端可忽略多余专属字段，或返回 400 拒绝。
+
+    DataSource:
+      type: string
+      enum: [SELF_PRODUCED, PUBLIC_COLLECT, AGREEMENT, DERIVED]
+
+    DeliveryMethod:
+      type: string
+      enum: [API, FILE, SANDBOX, PRIVACY_COMPUTE]
+
+    UpdateFrequency:
+      type: string
+      enum: [REALTIME, DAILY, WEEKLY, MONTHLY, YEARLY, ON_DEMAND]
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+        role:
+          $ref: "#/components/schemas/Role"
+
+    Session:
+      type: object
+      required: [userId, displayName, role]
+      properties:
+        userId: { type: string }
+        displayName: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        enterpriseName: { type: string }
+
+    ApiResponseSession:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Session"
+
+    OverviewMetrics:
+      type: object
+      required: [assetTotal, activeEnterprises, todayAttestations, updatedAt]
+      properties:
+        assetTotal: { type: integer, format: int64 }
+        activeEnterprises: { type: integer, format: int64 }
+        todayAttestations: { type: integer, format: int64 }
+        updatedAt: { type: string, format: date-time }
+
+    ApiResponseOverviewMetrics:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OverviewMetrics"
+
+    TrendPoint:
+      type: object
+      required: [date, count]
+      properties:
+        date: { type: string, format: date }
+        count: { type: integer }
+
+    OverviewTrend:
+      type: object
+      required: [points]
+      properties:
+        points:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrendPoint"
+
+    ApiResponseOverviewTrend:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OverviewTrend"
+
+    TopItem:
+      type: object
+      required: [productName, count]
+      properties:
+        productId: { type: string }
+        productName: { type: string }
+        count: { type: integer }
+
+    OverviewTop:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/TopItem"
+
+    ApiResponseOverviewTop:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OverviewTop"
+
+    StreamEventType:
+      type: string
+      enum: [CATALOG_REGISTER, DATA_REGISTER, TRADE_ORDER]
+
+    StreamEvent:
+      type: object
+      required: [type, subject, actionSummary, relativeTime, occurredAt, chainRecordId]
+      properties:
+        type: { $ref: "#/components/schemas/StreamEventType" }
+        subject: { type: string }
+        actionSummary: { type: string }
+        relativeTime: { type: string }
+        occurredAt: { type: string, format: date-time }
+        chainRecordId: { type: string }
+
+    OverviewStream:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StreamEvent"
+
+    ApiResponseOverviewStream:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OverviewStream"
+
+    DistributionSlice:
+      type: object
+      required: [name, value]
+      properties:
+        name: { type: string }
+        value: { type: number }
+
+    OverviewDistribution:
+      type: object
+      required: [byIndustry, byRegion]
+      properties:
+        byIndustry:
+          type: array
+          items:
+            $ref: "#/components/schemas/DistributionSlice"
+        byRegion:
+          type: array
+          items:
+            $ref: "#/components/schemas/DistributionSlice"
+
+    ApiResponseOverviewDistribution:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OverviewDistribution"
+
+    Category:
+      type: object
+      required: [id, name, level]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        level:
+          type: string
+          enum: [L1, L2]
+        parentId:
+          type: string
+          nullable: true
+
+    CategoryWrite:
+      type: object
+      required: [name, level]
+      properties:
+        name: { type: string }
+        level:
+          type: string
+          enum: [L1, L2]
+        parentId:
+          type: string
+          nullable: true
+          description: L2 必填父级 L1 id
+
+    ApiResponseCategory:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Category"
+
+    ApiResponseCategoryList:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Category"
+
+    ProductCode:
+      type: string
+      pattern: '^[A-Z0-9]+-[A-Z0-9]+-[0-9]{4,}$'
+      description: DEC-WSC-001 `{DOMAIN}-{FEATURE}-{NNNN}`
+      example: MED-EMR-0002
+
+    TypeSpecificFields:
+      type: object
+      description: |
+        按 productType 择一填充。OTHER 时必须省略或为空对象（OQ-004）。
+        若 OTHER 仍携带 dataset/report/api 专属字段，服务端可忽略或 400 拒绝。
+      properties:
+        dataset:
+          type: object
+          additionalProperties: true
+          description: 数据集专属字段（可空列落地）
+        report:
+          type: object
+          additionalProperties: true
+          description: 数据报告专属字段
+        api:
+          type: object
+          additionalProperties: true
+          description: 数据接口专属字段
+
+    ProductWrite:
+      type: object
+      required: [productCode, productName, productType, l2CategoryId]
+      properties:
+        productCode:
+          $ref: "#/components/schemas/ProductCode"
+        productName: { type: string }
+        productType:
+          $ref: "#/components/schemas/ProductType"
+        l2CategoryId: { type: string }
+        businessCategory: { type: string }
+        businessSubCategory: { type: string }
+        dataSource: { $ref: "#/components/schemas/DataSource" }
+        updateFrequency: { $ref: "#/components/schemas/UpdateFrequency" }
+        deliveryMethod: { $ref: "#/components/schemas/DeliveryMethod" }
+        involvesPersonalInfo: { type: boolean }
+        involvesPublicData: { type: boolean }
+        billingMethod: { type: string }
+        price: { type: string }
+        supplierName: { type: string }
+        supplierCreditCode:
+          type: string
+          description: 供应商信用代码（敏感；日志禁止明文）
+        propertyRightsType: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        summary: { type: string }
+        scenario: { type: string }
+        typeSpecific:
+          $ref: "#/components/schemas/TypeSpecificFields"
+
+    Product:
+      allOf:
+        - $ref: "#/components/schemas/ProductWrite"
+        - type: object
+          required: [id, chainCount]
+          properties:
+            id: { type: string }
+            chainCount: { type: integer }
+            categoryPath: { type: string }
+            latestVersionNo: { type: integer }
+
+    ProductPage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer, format: int64 }
+
+    ApiResponseProduct:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Product"
+
+    ApiResponseProductPage:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ProductPage"
+
+    ChainVersion:
+      type: object
+      required: [versionId, versionNo, timestamp, metadataHash, ownerDID, certificate]
+      properties:
+        versionId: { type: string }
+        versionNo: { type: integer }
+        timestamp: { type: string, format: date-time }
+        metadataHash:
+          type: string
+          description: 日志禁止明文或仅截断指纹
+        ownerDID:
+          type: string
+          description: 日志禁止明文或仅截断指纹
+        certificate:
+          type: object
+          required: [owner]
+          properties:
+            owner: { type: string }
+            timestamp: { type: string, format: date-time }
+
+    ApiResponseChainVersionList:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ChainVersion"
+
+    CatalogSnapshot:
+      type: object
+      description: |
+        版本化不可变目录快照。字段覆盖 REQ-CAT-004 分组或文档化子集：
+        基础信息、供应商、数据产权、类型专属（OTHER 无专属）、标签、简介、场景。
+      required: [versionId, productCode, productName, productType, capturedAt]
+      properties:
+        versionId: { type: string }
+        productCode: { $ref: "#/components/schemas/ProductCode" }
+        productName: { type: string }
+        productType: { $ref: "#/components/schemas/ProductType" }
+        categoryPath: { type: string }
+        basicInfo:
+          type: object
+          additionalProperties: true
+        supplierInfo:
+          type: object
+          additionalProperties: true
+        propertyRights:
+          type: object
+          additionalProperties: true
+        typeSpecific:
+          $ref: "#/components/schemas/TypeSpecificFields"
+        tags:
+          type: array
+          items: { type: string }
+        summary: { type: string }
+        scenario: { type: string }
+        capturedAt: { type: string, format: date-time }
+        attestation:
+          type: object
+          properties:
+            metadataHash: { type: string }
+            ownerDID: { type: string }
+            timestamp: { type: string, format: date-time }
+            certificate:
+              type: object
+              properties:
+                owner: { type: string }
+
+    ApiResponseChainSnapshot:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CatalogSnapshot"

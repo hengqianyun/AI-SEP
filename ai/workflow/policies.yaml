@@ -1,7 +1,7 @@
-# 项目工作流策略（实例化时按项目裁剪）
+# 项目工作流策略 — WSC 试点
 # 填写请复制同目录 POLICIES-TEMPLATE.yaml。
 
-projectId: REPLACE_ME
+projectId: WSC
 workflowId: ai-software-delivery
 workflowVersion: 1.0.0
 
@@ -14,7 +14,6 @@ planningCommittee:
     - parallelPlanner
     - planEditor
   optionalRoles:
-    # enabled=false 时必须填写 omitReason
     uxUiPlanner:
       enabled: true
       omitReason: ""
@@ -30,7 +29,6 @@ codeReview:
   passWhen: no-p0-or-p1
 
 riskTriggers:
-  # 实例化时按真实变更类型增删
   securityReviewer:
     - auth-model-change
     - new-public-endpoint
@@ -53,8 +51,8 @@ escalation:
   responseSlaHours: 24
 
 isolation:
-  mode: branch # branch | worktree | other
-  notes: ""
+  mode: branch
+  notes: "WSC 试点：半自动编排，不依赖 Adapter 一键启动"
 
 learning:
   minIndependentEvents: 3

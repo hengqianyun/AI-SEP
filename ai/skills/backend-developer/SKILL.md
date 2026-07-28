@@ -1,43 +1,65 @@
 ---
 id: skill.backend-developer
-version: 0.1.0
-status: draft
-owner: backend-lead
+version: 1.0.0
+status: active
+owner: tech-lead
 inputSchema: task-package@1
 compatibleRoles: [developer]
+appliesTo:
+  paths: [backend/**]
+relatedRules: [RULE-ORG-STACK, RULE-PROJECT-LAYOUT]
+pilot: WSC
 ---
 
-# Backend Developer Skill（实例化时填写）
+# Backend Developer Skill（WSC 试点）
 
-> 本文件由项目的**后端负责人或后端团队**根据真实仓库制定，不由 AI 猜测技术栈。
->
-> - 填写模板：[`TEMPLATE.md`](./TEMPLATE.md)
-> - Spring Boot 已填写示例：[`BACKEND-EXAMPLE-SPRING.md`](./BACKEND-EXAMPLE-SPRING.md)（仅展示粒度，不代表默认技术栈）
+## 适用范围
 
-## 责任与审批
+- 服务：`backend/`
+- 技术栈：以 `RULE-ORG-STACK` 为准（Java 21 / Spring Boot 3.3 / PostgreSQL / Flyway）
+- 构建工具：Maven Wrapper；清单：`backend/pom.xml`
+- 工作目录：仓库根目录
 
-| 环节 | 责任人 |
-|---|---|
-| 起草技术栈做法、目录约定与命令 | 后端负责人 / 后端团队 |
-| 确认可执行命令与测试触发条件 | 后端团队 + 测试人员 |
-| 检查与 Org/Project Rule、架构约束一致 | Tech Lead |
-| 将 `status` 从 `draft` 改为 `active` | 文件 Owner 或 Tech Lead |
+## 前置条件
 
-若项目尚未确定后端技术栈，本文件必须保持 `draft`；Orchestrator 不得装载，Developer 不得自行选择语言、框架或其他方案。
+- 执行 `./mvnw -f backend/pom.xml -q -DskipTests dependency:resolve`
+- 从 `backend/src/main/resources/application-local.example.yml` 创建本地配置；不得提交真实密钥
+- 本地 PostgreSQL 可达；连接信息仅来自本地配置或环境变量
+- OpenAPI 契约以 `contracts/openapi/` 为准（契约任务完成后）
 
-## 填写完成标准
+## 实现工作流
 
-- 已写明适用后端路径、包管理器/构建工具、运行时版本来源与工作目录
-- 安装、Lint、类型/编译、单测、集成测、构建、迁移、启动等适用命令可直接执行
-- 目录、API、数据访问、迁移与测试约定指向真实路径或现有范例
-- “必须”“禁止”可由 Code Reviewer / Tester 客观检查
-- 不适用项明确写 `N/A` 及原因
-- 不存在 `_待填_`、`REPLACE_ME` 或未解释的示例值
+1. 读取任务包、REQ、冻结 API/数据契约与适用 Rule。
+2. 确认修改路径均在 `allowModify`。
+3. 分层：`web` → `application` → `domain` → `infrastructure`；禁止 Controller 直接访问 Repository。
+4. 上链逻辑仅通过 `chain` 适配层接口（见 DEC-WSC-002）。
+5. 涉及 schema 时先写 Flyway 脚本并完成迁移验证/回滚说明。
+6. 补充测试后实施最小变更；执行验证矩阵并报告实际结果。
 
-## 激活前检查
+## 验证矩阵
 
-- [ ] 后端负责人完成填写并实际执行命令
-- [ ] 测试人员确认测试命令与证据要求
-- [ ] Tech Lead 确认与适用 Rule 无冲突
-- [ ] `context-map.yaml` 已按真实后端路径装载 `skill.backend-developer`
-- [ ] 文件 Owner 批准激活
+| 场景 | 命令 | 必须执行条件 | 通过标准 |
+|---|---|---|---|
+| 安装/解析依赖 | `./mvnw -f backend/pom.xml -q -DskipTests dependency:resolve` | 首次/pom 变化 | 退出码 0 |
+| 编译 | `./mvnw -f backend/pom.xml -DskipTests compile` | 每任务 | 退出码 0 |
+| 相关单测 | `./mvnw -f backend/pom.xml -Dtest=<Class> test` | 每任务 | 退出码 0 |
+| 全量单测 | `./mvnw -f backend/pom.xml test` | 共享模块/合并前 | 退出码 0 |
+| 集成测试 | `./mvnw -f backend/pom.xml -Pintegration verify` | API/数据访问变化 | 退出码 0 |
+| 构建 | `./mvnw -f backend/pom.xml -DskipTests package` | 每任务 | 退出码 0 |
+| 迁移 up | `./mvnw -f backend/pom.xml flyway:migrate` | schema/数据变更 | 退出码 0 |
+| 迁移验证 | `./mvnw -f backend/pom.xml flyway:validate` | 有迁移任务 | validate 通过 |
+| 本地启动 | `./mvnw -f backend/pom.xml spring-boot:run -Dspring-boot.run.profiles=local` | 联调/冒烟 | `/actuator/health` 为 UP |
+
+## 目录与实现约定
+
+- 源码根建议：`backend/src/main/java/com/wsc/`
+- Feature 包：`rbac` / `overview` / `catalog` / `chain`
+- 迁移：`backend/src/main/resources/db/migration/`，命名 `VYYYYMMDDHHMM__<desc>.sql`
+- 写 API 必须鉴权；角色校验与 REQ-RBAC-001 一致
+
+## 禁止事项
+
+- 不得引入第二套 Web 框架、ORM 或迁移工具（无 ADR）
+- 不得业务层直连区块链 SDK
+- 不得提交 `target/`、真实本地配置、真实密钥
+- 不得扩大 `allowModify`

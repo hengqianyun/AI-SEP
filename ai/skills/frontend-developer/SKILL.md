@@ -1,43 +1,65 @@
 ---
 id: skill.frontend-developer
-version: 0.1.0
-status: draft
-owner: frontend-lead
+version: 1.0.0
+status: active
+owner: tech-lead
 inputSchema: task-package@1
 compatibleRoles: [developer]
+appliesTo:
+  paths: [frontend/**]
+relatedRules: [RULE-ORG-STACK, RULE-PROJECT-LAYOUT]
+pilot: WSC
 ---
 
-# Frontend Developer Skill（实例化时填写）
+# Frontend Developer Skill（WSC 试点）
 
-> 本文件由项目的**前端负责人或前端团队**根据真实仓库制定，不由 AI 猜测技术栈。
->
-> - 填写模板：[`FRONTEND-TEMPLATE.md`](./FRONTEND-TEMPLATE.md)
-> - Vue 3 已填写示例：[`FRONTEND-EXAMPLE-VUE.md`](./FRONTEND-EXAMPLE-VUE.md)（仅展示粒度，不代表默认技术栈）
+## 适用范围
 
-## 责任与审批
+- 应用：`frontend/`
+- 技术栈：以 `RULE-ORG-STACK` 为准（Vue 3 + TypeScript + Vite + pnpm + Pinia + Ant Design Vue）
+- 包管理器：pnpm；锁文件：`pnpm-lock.yaml`（脚手架后生成）
+- Node.js：读取根目录 `.nvmrc`（目标 20.x）
+- 工作目录：仓库根目录
 
-| 环节 | 责任人 |
-|---|---|
-| 起草技术栈做法、目录约定与命令 | 前端负责人 / 前端团队 |
-| 确认可执行命令与测试触发条件 | 前端团队 + 测试人员 |
-| 检查与 Org/Project Rule、架构约束一致 | Tech Lead |
-| 将 `status` 从 `draft` 改为 `active` | 文件 Owner 或 Tech Lead |
+## 前置条件
 
-若项目尚未确定前端技术栈，本文件必须保持 `draft`；Orchestrator 不得装载，Developer 不得自行选择 Vue、React 或其他方案。
+- 执行 `pnpm install --frozen-lockfile`（无锁文件时首次可用 `pnpm install`）
+- 从 `frontend/.env.example` 创建本地变量；不得提交真实密钥
+- API 地址仅通过 `VITE_API_BASE_URL` 注入
 
-## 填写完成标准
+## 实现工作流
 
-- 已写明适用前端路径、包管理器、运行时版本来源与工作目录
-- 安装、格式、Lint、类型检查、单测、构建、启动等适用命令可直接执行
-- 页面、路由、组件、状态、API、样式和测试约定指向真实路径或现有范例
-- “必须”“禁止”可由 Code Reviewer / Tester 客观检查
-- 不适用项明确写 `N/A` 及原因
-- 不存在 `_待填_`、`REPLACE_ME` 或未解释的示例值
+1. 读取任务包、REQ、冻结 API/UI 契约与适用 Rule。
+2. 确认修改路径均在 `allowModify`。
+3. 业务代码放在 `frontend/src/features/<feature>/`（shell / auth / overview / catalog / chain）。
+4. 新组件默认使用 Vue 3 `<script setup lang="ts">`。
+5. 补充测试或明确验收场景后实施最小变更。
+6. 执行验证矩阵并报告实际结果。
 
-## 激活前检查
+## 验证矩阵
 
-- [ ] 前端负责人完成填写并实际执行命令
-- [ ] 测试人员确认测试命令与证据要求
-- [ ] Tech Lead 确认与适用 Rule 无冲突
-- [ ] `context-map.yaml` 已按真实前端路径装载 `skill.frontend-developer`
-- [ ] 文件 Owner 批准激活
+| 场景 | 命令 | 必须执行条件 | 通过标准 |
+|---|---|---|---|
+| 安装依赖 | `pnpm install --frozen-lockfile` | 首次/锁文件变化 | 退出码 0 |
+| Lint | `pnpm --filter frontend lint` | 每任务 | 退出码 0 |
+| 类型检查 | `pnpm --filter frontend typecheck` | 每任务 | 退出码 0 |
+| 相关测试 | `pnpm --filter frontend test --run <测试文件>` | 每任务 | 退出码 0 |
+| 全量单测 | `pnpm --filter frontend test --run` | 共享模块/合并前 | 退出码 0 |
+| 构建 | `pnpm --filter frontend build` | 每任务 | 退出码 0 |
+| 本地启动 | `pnpm --filter frontend dev` | 浏览器验证 | Vite 启动且无阻塞错误 |
+| E2E | 见 `skill.tester` | P0 用户路径变化 | tester 证据为 PASSED |
+
+## 目录与实现约定
+
+- 页面：`frontend/src/features/<feature>/pages/`
+- Feature API：`frontend/src/features/<feature>/api.ts`；统一经 `frontend/src/api/client.ts`
+- 跨页状态用 Pinia；禁止硬编码后端 URL
+- 异步页必须提供 loading、empty、error、success
+- 写操作按钮按角色权限显示，且不得仅靠前端隐藏作为安全边界
+
+## 禁止事项
+
+- 不得引入第二套状态管理、HTTP Client、UI 框架（无 ADR）
+- 不得使用 `any` / `@ts-ignore` 掩盖错误
+- 不得提交 `dist/`、真实 `.env`、无关全库格式化
+- 不得扩大 `allowModify`
