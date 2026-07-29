@@ -234,6 +234,7 @@ PRD：product/prd/<file>.md
 
 | 文档 | 用途 |
 |---|---|
+| [`docs/AI-SEP-架构培训手册.md`](./docs/AI-SEP-架构培训手册.md) | **对外培训单一入口**：背景、目录、工作流、操作与样例 |
 | [`design.md`](./design.md) | 完整架构：制品链、DAG、对抗、学习、控制面 |
 | [`base_design.md`](./base_design.md) | 原始设想 |
 | [`product/prd/v1.0.md`](./product/prd/v1.0.md) | 本模板作为「平台产品」的需求说明 |

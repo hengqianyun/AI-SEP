@@ -29,3 +29,8 @@
 {"ts":"2026-07-28T17:42:00+08:00","type":"TEST_EVIDENCE","taskId":"TASK-WSC-002","result":"PASSED"}
 {"ts":"2026-07-28T17:45:00+08:00","type":"TASK_VERIFIED","taskId":"TASK-WSC-002","nextWave":"W3","parallel":["TASK-WSC-003","TASK-WSC-004","TASK-WSC-006"]}
 {"ts":"2026-07-28T18:00:00+08:00","type":"MEMORY_RECORDED","runId":"RUN-WSC-001","memoryId":"MEM-ORCH-WSC-001","path":"ai/memory/incidents/MEM-ORCH-WSC-001.md","detail":"fixed events.jsonl L19-23 invalid JSON from PowerShell escaping"}
+{"ts":"2026-07-29T15:52:00+08:00","type":"TASK_DISPATCHED","runId":"RUN-WSC-001","wave":"W3","tasks":["TASK-WSC-003","TASK-WSC-004","TASK-WSC-006"]}
+{"ts":"2026-07-29T16:40:00+08:00","type":"CODE_REVIEW","runId":"RUN-WSC-001","tasks":["TASK-WSC-003","TASK-WSC-004","TASK-WSC-006"],"decision":"APPROVE"}
+{"ts":"2026-07-29T16:46:48+08:00","type":"TEST_EVIDENCE","runId":"RUN-WSC-001","wave":"W3","result":"PASSED","note":"reconfirm after REV APPROVE; backend 22 tests green"}
+{"ts":"2026-07-29T16:50:00+08:00","type":"WAVE_VERIFIED","runId":"RUN-WSC-001","wave":"W3","tasks":["TASK-WSC-003","TASK-WSC-004","TASK-WSC-006"],"next":"TASK-WSC-005"}
+{"ts":"2026-07-29T16:50:30+08:00","type":"MEMORY_RECORDED","runId":"RUN-WSC-001","memoryId":"MEM-ORCH-WSC-002","path":"ai/memory/incidents/MEM-ORCH-WSC-002.md"}

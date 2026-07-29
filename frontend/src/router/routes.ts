@@ -10,14 +10,14 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/overview',
     name: 'overview',
-    component: PlaceholderView,
-    meta: { title: '总览', hint: '占位：总览指标/趋势/流/分布由 TASK-WSC-003 实现。' },
+    component: () => import('@/features/overview/OverviewPage.vue'),
+    meta: { title: '总览' },
   },
   {
     path: '/catalog',
     name: 'catalog',
-    component: PlaceholderView,
-    meta: { title: '数据目录', hint: '占位：目录浏览由 TASK-WSC-004 实现。' },
+    component: () => import('@/features/catalog/browse/CatalogBrowsePage.vue'),
+    meta: { title: '数据目录' },
   },
   {
     path: '/catalog/products/:productId',
@@ -40,8 +40,8 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/chain/products/:productId',
     name: 'chain',
-    component: PlaceholderView,
-    meta: { title: '上链信息', hint: '占位：上链列表与快照由 TASK-WSC-006 实现。' },
+    component: () => import('@/features/chain/ChainPage.vue'),
+    meta: { title: '上链信息' },
   },
   {
     path: '/unavailable/:feature?',

@@ -10,7 +10,8 @@ completedNodes:
   - PLAN_REVIEW
   - PLAN_APPROVED
   - TASK_DISPATCH
-activeTaskId: null
+activeWave: null
+activeTaskIds: []
 activeSnapshotId: SNAP-WSC-001
 activePlanId: PLAN-WSC-1.1
 approvedPlanPath: planning/approved/PLAN-WSC-1.1.md
@@ -19,18 +20,28 @@ taskGate:
     verified: true
     evidence: planning/tasks/TESTRUN-TASK-WSC-001.md
   TASK-WSC-002:
-    developer: READY_FOR_REVIEW
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-002.md
+  TASK-WSC-003:
     codeReview: APPROVE
     tester: PASSED
     verified: true
-    evidence: planning/tasks/TESTRUN-TASK-WSC-002.md
+    evidence: planning/tasks/TESTRUN-TASK-WSC-003.md
+  TASK-WSC-004:
+    codeReview: APPROVE
+    tester: PASSED
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-004.md
+  TASK-WSC-006:
+    codeReview: APPROVE
+    tester: PASSED
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-006.md
 nextAction:
   role: orchestrator
   action: TASK_DISPATCH
-  wave: W3
-  parallelTasks:
-    - TASK-WSC-003
-    - TASK-WSC-004
-    - TASK-WSC-006
-  note: W2 VERIFIED；待「继续」派发 W3 并行束
-updatedAt: 2026-07-28T17:45:00+08:00
+  wave: W4
+  tasks:
+    - TASK-WSC-005
+  note: W3 全部 VERIFIED；待「继续」派发 W4 详情/编辑/分类
+updatedAt: 2026-07-29T16:50:00+08:00
