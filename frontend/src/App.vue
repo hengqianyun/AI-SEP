@@ -3,15 +3,7 @@ import { RouterView } from 'vue-router'
 </script>
 
 <template>
-  <div class="app-root">
-    <header class="app-header">
-      <strong>接入端工作台</strong>
-      <span class="muted">WSC scaffold · contracts 1.1.0</span>
-    </header>
-    <main>
-      <RouterView />
-    </main>
-  </div>
+  <RouterView />
 </template>
 
 <style>
@@ -22,23 +14,5 @@ import { RouterView } from 'vue-router'
 }
 body {
   margin: 0;
-}
-.app-root {
-  min-height: 100vh;
-}
-.app-header {
-  display: flex;
-  gap: 12px;
-  align-items: baseline;
-  padding: 16px 24px;
-  border-bottom: 1px solid #e5e5e0;
-  background: #fff;
-}
-.muted {
-  color: #666;
-  font-size: 13px;
-}
-main {
-  padding: 24px;
 }
 </style>

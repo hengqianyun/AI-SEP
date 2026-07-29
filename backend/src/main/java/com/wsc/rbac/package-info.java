@@ -1,5 +1,4 @@
 /**
- * Package placeholder for rbac feature (TASK-WSC-001 scaffold).
- * Business implementation is out of scope for this task (see TASK-WSC-002).
+ * RBAC 写权限矩阵与拦截器（TASK-WSC-002 / REQ-RBAC-001）。
  */
 package com.wsc.rbac;
