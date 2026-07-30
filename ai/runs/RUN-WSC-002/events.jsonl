@@ -7,3 +7,11 @@
 {"ts":"2026-07-30T14:08:02+08:00","type":"DISPATCH","runId":"RUN-WSC-002","role":"planEditor","action":"draft-plan","output":"planning/proposals/PLAN-WSC-2.0.md"}
 {"ts":"2026-07-30T14:10:00+08:00","type":"ARTIFACT_READY","runId":"RUN-WSC-002","artifact":"PLAN-WSC-2.0","path":"planning/proposals/PLAN-WSC-2.0.md","taskCount":7,"waveCount":5}
 {"ts":"2026-07-30T14:10:01+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-002","from":"PLAN_DRAFT","to":"PLAN_REVIEW","round":1}
+{"ts":"2026-07-30T14:20:00+08:00","type":"DISPATCH","runId":"RUN-WSC-002","role":"planningCommittee","action":"independent-reviews-round-1"}
+{"ts":"2026-07-30T14:22:00+08:00","type":"CONSENSUS","runId":"RUN-WSC-002","round":1,"result":"NOT_REACHED","summary":"planning/reviews/wsc-2.0/round-1/SUMMARY.md","issueCount":12}
+{"ts":"2026-07-30T14:25:00+08:00","type":"DISPATCH","runId":"RUN-WSC-002","role":"planEditor","action":"revise-plan","output":"planning/proposals/PLAN-WSC-2.1.md"}
+{"ts":"2026-07-30T14:28:00+08:00","type":"ARTIFACT_READY","runId":"RUN-WSC-002","artifact":"PLAN-WSC-2.1","path":"planning/proposals/PLAN-WSC-2.1.md"}
+{"ts":"2026-07-30T14:28:30+08:00","type":"DISPATCH","runId":"RUN-WSC-002","role":"planningCommittee","action":"independent-reviews-round-2"}
+{"ts":"2026-07-30T14:35:00+08:00","type":"CONSENSUS","runId":"RUN-WSC-002","round":2,"result":"REACHED","requiredApproves":5,"optionalApproves":3}
+{"ts":"2026-07-30T14:35:01+08:00","type":"PLAN_APPROVED","runId":"RUN-WSC-002","planId":"PLAN-WSC-2.1","path":"planning/approved/PLAN-WSC-2.1.md"}
+{"ts":"2026-07-30T14:35:02+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-002","from":"PLAN_REVIEW","to":"PLAN_APPROVED","awaiting":"human-confirm-task-dispatch"}

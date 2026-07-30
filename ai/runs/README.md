@@ -13,6 +13,6 @@
 | runId | PRD | 状态 |
 |---|---|---|
 | [`RUN-WSC-001`](./RUN-WSC-001/) | `product/prd/wsc-v1.0.md` | COMPLETED |
-| [`RUN-WSC-002`](./RUN-WSC-002/) | `product/prd/wsc-v1.1.md` | ACTIVE（PLAN_REVIEW · PLAN-WSC-2.0） |
+| [`RUN-WSC-002`](./RUN-WSC-002/) | `product/prd/wsc-v1.1.md` | ACTIVE（PLAN_APPROVED · PLAN-WSC-2.1） |
 
 勿手改 `events.jsonl` 历史；恢复协议见 `ai/workflow/resume.md`。
