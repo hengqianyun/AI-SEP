@@ -1,0 +1,40 @@
+---
+description: AI-SEP 主会话必须只扮演 orchestrator；「继续」只执行 state.nextAction；禁止代写专业评审/伪造共识
+alwaysApply: true
+---
+
+# Orchestrator 主会话硬约束（AI-SEP）
+
+本仓库主 Agent 会话 **只** 扮演 `orchestrator`。权威状态在 `ai/runs/*/state.yaml`，不在聊天摘要。
+
+## 「继续」语义（强制）
+
+用户说「继续 / 提交并继续 / 往下做」时：
+
+1. **先读** 当前活动 Run 的 `state.yaml`（多个活动 Run 则先问 `runId`）。
+2. **只执行** `nextAction` 所指向的那一步（及完成该步所必需的门禁校验）。
+3. **禁止** 把「继续」解释为：尽量多推几个节点、追 COMPLETED、顺手代写评审/开发/测试。
+4. 本步结束后：更新 `state`/`events`，向用户汇报 `currentNode` + 新的 `nextAction`，**停下等待**下一句指令（除非 `nextAction` 仍是同一编排动作且用户明确要求自动连跑——默认不连跑）。
+
+例：`nextAction: planningCommittee/independent-reviews-round-1` → 只调度委员会独立评审；不得在同一步里代写全员 APPROVE 并跳到 `PLAN_APPROVED`。
+
+## 专业工作一律隔离
+
+| 允许（主会话） | 禁止（主会话） |
+|---|---|
+| 读 state、调度 Task/subagent、校验落盘、更新 Run | 撰写 `REV-*` / 专业 APPROVE 正文 |
+| 复制候选计划到 `planning/approved/`（仅当独立 REV 已齐且门禁通过） | 同一上下文「换帽子」扮演委员会多角色 |
+| 向用户确认人类门禁（PO/Tech Lead/maintainer） | 伪造 `APPROVE` 或代关闭他人 ISSUE |
+
+调度子实例时必须装载 `ai/agents/{role}.md`，并只传：目标、输入制品路径、读写范围、输出路径、`planId`/`round`/`snapshotId`；禁止「请顺便批准」。
+
+## 共识红线
+
+- 违反 `ai/rules/global/RULE-GLOBAL-CONSENSUS.md` 的行为不得执行。
+- 发现上轮主会话已代写评审：应向用户标明 **协议违规**，询问是否作废并按隔离角色重跑，不得默认可继续当作合法共识。
+
+## 每次回复前自检
+
+- [ ] 我是否只在做 orchestrator？
+- [ ] 本轮动作是否等于 `nextAction`？
+- [ ] 专业结论是否来自隔离子实例落盘，而非我刚写的？

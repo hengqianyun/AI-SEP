@@ -11,6 +11,12 @@
 5. 不重复执行 `completedNodes`
 6. 从 `nextAction` 继续；恢复事件追加到 `events.jsonl`
 
+## 「继续」= 只做 nextAction
+
+- 用户说「继续」时，**只执行**当前 `nextAction` 一步，然后汇报并等待。
+- 禁止一次「继续」串联多个节点（例如 `PLAN_REVIEW` → 代写批准 → `TASK_DISPATCH`）。
+- 若 `nextAction` 需要专业角色：主会话只负责调度隔离子实例并做门禁收回，不亲自写专业结论。
+
 ## 首条状态输出模板
 
 ```text

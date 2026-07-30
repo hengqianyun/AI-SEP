@@ -40,3 +40,7 @@ PRD：product/prd/<file>.md
 PRD：product/prd/wsc-v1.1.md
 （可选）基于 Run：RUN-WSC-001
 ```
+
+## 「继续」指令
+
+启动后用户再说「继续」时：Orchestrator **只执行**该 Run `state.yaml` 的 `nextAction` 一步（见 `resume.md` 与 `ai/agents/orchestrator.md`），不得跨节点追进度或主会话代写专业评审。
