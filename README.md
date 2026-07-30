@@ -85,7 +85,6 @@ AI-SEP 的目标是建立一条**可追踪、可并行、可审计、可回滚**
 AI-SEP/
 ├── README.md                          # 本文件
 ├── design.md                          # 架构规范（真理源）
-├── base_design.md                     # 早期设想保留
 ├── PROJECT-CUSTOMIZATION.md           # 实例化勾选清单
 ├── PROJECT-CUSTOMIZATION-ASSIGNMENTS.md  # 人工任务分配（RACI）
 ├── product/                           # 产品层（模板自身 PRD + 占位）
@@ -234,9 +233,8 @@ PRD：product/prd/<file>.md
 
 | 文档 | 用途 |
 |---|---|
-| [`docs/AI-SEP-架构培训手册.md`](./docs/AI-SEP-架构培训手册.md) | **对外培训单一入口**：背景、目录、工作流、操作与样例 |
+| [`docs/AI-SEP-架构说明.md`](./docs/AI-SEP-架构说明.md) | **架构单一入口说明**：背景、目录、工作流、操作与 **WSC/Console 已完成闭环**样例 |
 | [`design.md`](./design.md) | 完整架构：制品链、DAG、对抗、学习、控制面 |
-| [`base_design.md`](./base_design.md) | 原始设想 |
 | [`product/prd/v1.0.md`](./product/prd/v1.0.md) | 本模板作为「平台产品」的需求说明 |
 | [`PROJECT-CUSTOMIZATION.md`](./PROJECT-CUSTOMIZATION.md) | 实例化必填项勾选 |
 | [`PROJECT-CUSTOMIZATION-ASSIGNMENTS.md`](./PROJECT-CUSTOMIZATION-ASSIGNMENTS.md) | 谁写哪份规范 |

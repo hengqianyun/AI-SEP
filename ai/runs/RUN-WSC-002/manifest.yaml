@@ -1,0 +1,24 @@
+runId: RUN-WSC-002
+projectId: WSC
+workflowId: ai-software-delivery
+workflowVersion: 1.0.0
+prd: product/prd/wsc-v1.1.md
+createdAt: 2026-07-30T14:05:00+08:00
+createdBy: orchestrator
+mode: semi-automatic-pilot
+basedOnRun: RUN-WSC-001
+notes: |
+  WSC V1.1 新 PRD 版本对应新 Run（不得在 COMPLETED 的 RUN-WSC-001 上续派发）。
+  快照 SNAP-WSC-002 已在 Run 起草前解析落盘；本 Run 自 REQUIREMENT_REVIEW 起等待 PO 确认后进入规划。
+  后端基线：DEC-WSC-005（data-chain）。
+artifacts:
+  prd: product/prd/wsc-v1.1.md
+  snapshot: product/requirements/SNAP-WSC-002.md
+  prototype: design/prototypes/wsc-v1.1/index.html
+  decisions:
+    - design/decisions/DEC-WSC-001.md
+    - design/decisions/DEC-WSC-002.md
+    - design/decisions/DEC-WSC-003.md
+    - design/decisions/DEC-WSC-004.md
+    - design/decisions/DEC-WSC-005.md
+  previousRun: ai/runs/RUN-WSC-001/

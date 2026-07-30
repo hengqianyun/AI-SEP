@@ -1,0 +1,17 @@
+runId: RUN-WSC-002
+currentNode: PLAN_REVIEW
+round: 1
+status: ACTIVE
+blockedBy: []
+completedNodes:
+  - PRD_ANALYSIS
+  - REQUIREMENT_REVIEW
+  - PLAN_DRAFT
+activeWave: null
+activeTaskIds: []
+activeSnapshotId: SNAP-WSC-002
+activePlanId: PLAN-WSC-2.0
+candidatePlanPath: planning/proposals/PLAN-WSC-2.0.md
+approvedPlanPath: null
+nextAction: planningCommittee/independent-reviews-round-1
+updatedAt: 2026-07-30T14:10:00+08:00

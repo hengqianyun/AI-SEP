@@ -4,10 +4,10 @@ title: 有挂载产品的行业分类禁止删除
 status: APPROVED
 date: 2026-07-28
 owner: productOwner
-source: WSC 试点默认裁决（plan Phase 0）
+source: WSC 试点默认裁决（plan Phase 0）；V1.1 延伸说明 2026-07-30
 closes: [OQ-005]
 affects: [REQ-CAT-006]
-snapshotRefs: []
+snapshotRefs: [SNAP-WSC-001, SNAP-WSC-002]
 supersedes: []
 ---
 
@@ -19,9 +19,10 @@ OQ-005：分类删除时已挂载产品如何处理未定。
 
 ## 决策
 
-- 一级或二级分类下**仍存在数据产品**时，禁止删除该分类。
+- 分类下**仍存在数据产品（或已关联目录条目）**时，禁止删除该分类。
+- **V1.1**：适用于三级模型中的一级（空间）、二级（行业）、三级（子类）任一节点（SNAP-WSC-002 / REQ-CAT-006）。
 - API/UI 须返回明确原因（如「分类下仍有 N 个产品」）。
-- V1 不提供自动迁移或归档删除；需先移动/删除产品后再删分类。
+- 不提供自动迁移或归档删除；需先移动/删除产品后再删分类。
 
 ## 未选择方案
 

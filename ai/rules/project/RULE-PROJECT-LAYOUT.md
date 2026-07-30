@@ -1,6 +1,6 @@
 ---
 id: RULE-PROJECT-LAYOUT
-version: 1.0.0
+version: 1.1.0
 status: active
 owner: techLead
 override: allowed
@@ -17,10 +17,11 @@ pilot: WSC
 | 路径 | 职责 | 默认可写角色 |
 |---|---|---|
 | `product/` | 需求与业务 | productAnalyst, planEditor（制品） |
-| `design/` | 设计决策与 UI | uxUiPlanner, solutionArchitect |
+| `design/` | 设计决策、UI、原型 | uxUiPlanner, solutionArchitect |
+| `design/prototypes/` | 可交互 HTML 等原型参考 | productOwner, uxUiPlanner |
 | `planning/` | 计划、任务、评审 | 规划委员会 |
 | `frontend/` | 前端实现 | developer（任务 allowModify 内） |
-| `backend/` | 后端实现 | developer（任务 allowModify 内） |
+| `backend/` | 后端实现（Maven 多模块根，对齐 data-chain） | developer（任务 allowModify 内） |
 | `contracts/` | OpenAPI 等共享契约 | apiDataDesigner, developer（契约任务） |
 | `tests/` / `e2e/` | 测试与证据 | developer, tester |
 | `ai/` | Agent 契约与控制面 | orchestrator；规则变更须人类审批 |
@@ -40,15 +41,39 @@ pilot: WSC
 - 共享 API client：`frontend/src/api/`；修改须独立任务或与契约同步
 - 共享组件：`frontend/src/components/`；跨 feature 变更串行
 
-## 后端布局与写边界
+## 后端布局（data-chain 多模块）
+
+目标结构（权威；V1.0 遗留扁平 `backend/src` 迁骨架前仅只读维护，见 DEC-WSC-005）：
+
+```text
+backend/
+├── pom.xml
+└── app/
+    └── <service-module>/          # 例：wsc-service（骨架名 data-chain-service）
+        ├── pom.xml
+        └── src/
+            ├── main/
+            │   ├── java/...
+            │   └── resources/
+            │       ├── application.yml
+            │       └── sql/
+            │           ├── init/       # 空库建库 + Flyway baseline
+            │           └── migration/ # 业务表与初始数据（Flyway）
+            └── test/
+```
+
+## 后端写边界
 
 | 路径/glob | 内容职责 | Owner | 允许写入角色 | 并行写规则 |
 |---|---|---|---|---|
-| `backend/src/main/java/**/rbac/**` | 角色鉴权 | techLead | developer | 与 SHELL 协调 |
-| `backend/src/main/java/**/overview/**` | 总览指标 | techLead | developer | 可读 catalog 聚合 |
-| `backend/src/main/java/**/catalog/**` | 目录与产品 | techLead | developer | 独占写集 |
-| `backend/src/main/java/**/chain/**` | 存证适配 | techLead | developer | 与 CAT 编辑同事务时串行 |
-| `backend/src/main/resources/db/migration/**` | Schema 迁移 | techLead | developer | 串行；触发 migrationReviewer |
+| `backend/app/*/src/main/java/**/rbac/**` | 角色鉴权 | techLead | developer | 与 SHELL 协调 |
+| `backend/app/*/src/main/java/**/overview/**` | 总览指标 | techLead | developer | 可读 catalog 聚合 |
+| `backend/app/*/src/main/java/**/catalog/**` | 目录与产品 | techLead | developer | 独占写集 |
+| `backend/app/*/src/main/java/**/chain/**` | 存证适配 | techLead | developer | 与 CAT 编辑同事务时串行 |
+| `backend/app/*/src/main/resources/sql/migration/**` | Schema 迁移 | techLead | developer | 串行；触发 migrationReviewer |
+| `backend/app/*/src/main/resources/sql/init/**` | 空库 init / baseline | techLead | developer | 串行；与 migration 同属 schema 任务 |
+
+> 遗留路径 `backend/src/main/resources/db/migration/**`：仅 V1.0 历史；新迁移禁止写入。
 
 ## 默认 denyModify
 

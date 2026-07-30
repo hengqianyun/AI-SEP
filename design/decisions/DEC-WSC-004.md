@@ -21,7 +21,7 @@ supersedes: []
 
 - 组织/项目后端基线改为 **Java 17 LTS**。
 - `backend/pom.xml` 的 `java.version`、`RULE-ORG-STACK`、相关 Skill 与批准计划中的栈表述同步为 17。
-- 仍使用 Spring Boot 3.3.x（官方支持 Java 17）。
+- ~~仍使用 Spring Boot 3.3.x（官方支持 Java 17）。~~ **已由 [DEC-WSC-005](./DEC-WSC-005.md) 取代**：后端框架改为 Spring Boot 2.7.18；本 DEC 仅保留 **Java 17 LTS** 约束。
 
 ## 未选择方案
 

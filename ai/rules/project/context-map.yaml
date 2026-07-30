@@ -44,6 +44,12 @@ byPath:
     extraSkills: [skill.frontend-developer]
   - pattern: "backend/**"
     extraSkills: [skill.backend-developer]
-  - pattern: "**/db/migration/**"
+  - pattern: "**/sql/migration/**"
+    extraSkills: [skill.migration-review]
+    requireRoles: [migrationReviewer]
+  - pattern: "**/sql/init/**"
+    extraSkills: [skill.migration-review]
+    requireRoles: [migrationReviewer]
+  - pattern: "**/db/migration/**"  # V1.0 遗留；新迁移勿写入
     extraSkills: [skill.migration-review]
     requireRoles: [migrationReviewer]

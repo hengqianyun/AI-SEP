@@ -1,0 +1,9 @@
+{"ts":"2026-07-30T14:05:00+08:00","type":"RUN_CREATED","runId":"RUN-WSC-002","node":"PRD_ANALYSIS","detail":"New PRD version wsc-v1.1; supersedes delivery scope of RUN-WSC-001 for V1.1 work"}
+{"ts":"2026-07-30T14:05:01+08:00","type":"ARTIFACT_READY","runId":"RUN-WSC-002","artifact":"SNAP-WSC-002","path":"product/requirements/SNAP-WSC-002.md","reqCount":17,"note":"Snapshot produced prior to run formalization; linked at start"}
+{"ts":"2026-07-30T14:05:02+08:00","type":"GATE_PASS","runId":"RUN-WSC-002","node":"PRD_ANALYSIS","checks":["snapshotId","p0-acceptance","oq-v11-001-002-closed"]}
+{"ts":"2026-07-30T14:05:03+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-002","from":"PRD_ANALYSIS","to":"REQUIREMENT_REVIEW","awaiting":"productOwner"}
+{"ts":"2026-07-30T14:08:00+08:00","type":"HUMAN_DECISION","runId":"RUN-WSC-002","identity":"productOwner","action":"CONFIRM_SNAPSHOT","snapshotId":"SNAP-WSC-002"}
+{"ts":"2026-07-30T14:08:01+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-002","from":"REQUIREMENT_REVIEW","to":"PLAN_DRAFT"}
+{"ts":"2026-07-30T14:08:02+08:00","type":"DISPATCH","runId":"RUN-WSC-002","role":"planEditor","action":"draft-plan","output":"planning/proposals/PLAN-WSC-2.0.md"}
+{"ts":"2026-07-30T14:10:00+08:00","type":"ARTIFACT_READY","runId":"RUN-WSC-002","artifact":"PLAN-WSC-2.0","path":"planning/proposals/PLAN-WSC-2.0.md","taskCount":7,"waveCount":5}
+{"ts":"2026-07-30T14:10:01+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-002","from":"PLAN_DRAFT","to":"PLAN_REVIEW","round":1}
