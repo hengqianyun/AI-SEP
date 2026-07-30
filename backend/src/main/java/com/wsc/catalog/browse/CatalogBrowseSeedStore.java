@@ -6,14 +6,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.stereotype.Component;
 
-/** 内存种子目录数据（至少 2 个 L1、各有 L2、多种 productType）。 */
+/**
+ * 内存目录数据（浏览 + 写路径共用）。
+ *
+ * <p>SCOPE_AMEND（TASK-WSC-005）：增加可变 API，供 editor/admin 写路径与 browse 只读共享同一状态。
+ */
 @Component
 public class CatalogBrowseSeedStore {
 
   private final List<CatalogCategory> categories = new CopyOnWriteArrayList<>();
   private final List<CatalogProduct> products = new CopyOnWriteArrayList<>();
+  private final AtomicInteger productSeq = new AtomicInteger(100);
+  private final AtomicInteger categorySeq = new AtomicInteger(100);
 
   public CatalogBrowseSeedStore() {
     seed();
@@ -29,6 +36,70 @@ public class CatalogBrowseSeedStore {
 
   public Optional<CatalogProduct> findProduct(String id) {
     return products.stream().filter(p -> p.id().equals(id)).findFirst();
+  }
+
+  public Optional<CatalogProduct> findProductByCode(String productCode) {
+    if (productCode == null) {
+      return Optional.empty();
+    }
+    return products.stream().filter(p -> productCode.equals(p.productCode())).findFirst();
+  }
+
+  public Optional<CatalogCategory> findCategory(String id) {
+    return categories.stream().filter(c -> c.id().equals(id)).findFirst();
+  }
+
+  public synchronized String nextProductId() {
+    return "prod-gen-" + productSeq.incrementAndGet();
+  }
+
+  public synchronized String nextCategoryId() {
+    return "cat-gen-" + categorySeq.incrementAndGet();
+  }
+
+  public synchronized void upsertProduct(CatalogProduct product) {
+    products.removeIf(p -> p.id().equals(product.id()));
+    products.add(product);
+  }
+
+  public synchronized void addCategory(CatalogCategory category) {
+    categories.add(category);
+  }
+
+  public synchronized void replaceCategory(CatalogCategory category) {
+    categories.removeIf(c -> c.id().equals(category.id()));
+    categories.add(category);
+  }
+
+  public synchronized boolean removeCategory(String categoryId) {
+    return categories.removeIf(c -> c.id().equals(categoryId));
+  }
+
+  /** 挂载计数：L2 按 l2CategoryId；L1 按 l1CategoryId（含其下所有产品）。 */
+  public int countMountedProducts(CatalogCategory category) {
+    if ("L1".equals(category.level())) {
+      return (int) products.stream().filter(p -> category.id().equals(p.l1CategoryId())).count();
+    }
+    return (int) products.stream().filter(p -> category.id().equals(p.l2CategoryId())).count();
+  }
+
+  public String resolveCategoryPath(String l2CategoryId) {
+    Optional<CatalogCategory> l2 = findCategory(l2CategoryId);
+    if (l2.isEmpty()) {
+      return "";
+    }
+    String l1Name =
+        l2.get().parentId() == null
+            ? ""
+            : findCategory(l2.get().parentId()).map(CatalogCategory::name).orElse("");
+    if (l1Name.isEmpty()) {
+      return l2.get().name();
+    }
+    return l1Name + " / " + l2.get().name();
+  }
+
+  public String resolveL1Id(String l2CategoryId) {
+    return findCategory(l2CategoryId).map(CatalogCategory::parentId).orElse(null);
   }
 
   private void seed() {
@@ -60,7 +131,13 @@ public class CatalogBrowseSeedStore {
             "华康数据科技",
             "91310000MA1KXXXX1A",
             List.of("病历", "脱敏"),
-            Map.of("dataset", Map.of("recordCount", 120000))));
+            Map.of("dataset", Map.of("recordCount", 120000)),
+            "卫生",
+            "病历",
+            "DAY",
+            "按次",
+            "面议",
+            "数据使用权"));
 
     products.add(
         product(
@@ -82,7 +159,13 @@ public class CatalogBrowseSeedStore {
             "影像云服务",
             "91310000MA1KXXXX2B",
             List.of("影像", "报告"),
-            Map.of("report", Map.of("pageCount", 12))));
+            Map.of("report", Map.of("pageCount", 12)),
+            "卫生",
+            "影像",
+            "WEEK",
+            "包年",
+            "面议",
+            "数据使用权"));
 
     products.add(
         product(
@@ -104,7 +187,13 @@ public class CatalogBrowseSeedStore {
             "信达征信",
             "91310000MA1KXXXX3C",
             List.of("征信", "评分"),
-            Map.of("api", Map.of("endpoint", "/v1/credit/score"))));
+            Map.of("api", Map.of("endpoint", "/v1/credit/score")),
+            "金融",
+            "征信",
+            "REALTIME",
+            "按调用",
+            "面议",
+            "数据使用权"));
 
     products.add(
         product(
@@ -126,7 +215,13 @@ public class CatalogBrowseSeedStore {
             "汇通支付",
             "91310000MA1KXXXX4D",
             List.of("支付", "流水"),
-            Map.of("dataset", Map.of("recordCount", 50000))));
+            Map.of("dataset", Map.of("recordCount", 50000)),
+            "金融",
+            "支付",
+            "DAY",
+            "免费试用",
+            "0",
+            "数据使用权"));
 
     products.add(
         product(
@@ -148,7 +243,13 @@ public class CatalogBrowseSeedStore {
             "示例供应商",
             "91310000MA1KXXXX5E",
             List.of("其他"),
-            Map.of()));
+            Map.of(),
+            "通用",
+            "其他",
+            "MONTH",
+            "面议",
+            "面议",
+            "数据使用权"));
   }
 
   private static CatalogProduct product(
@@ -170,7 +271,13 @@ public class CatalogBrowseSeedStore {
       String supplier,
       String creditCode,
       List<String> tags,
-      Map<String, Object> typeSpecific) {
+      Map<String, Object> typeSpecific,
+      String businessCategory,
+      String businessSubCategory,
+      String updateFrequency,
+      String billingMethod,
+      String price,
+      String propertyRightsType) {
     return new CatalogProduct(
         id,
         code,
@@ -190,6 +297,12 @@ public class CatalogBrowseSeedStore {
         supplier,
         creditCode,
         new ArrayList<>(tags),
-        new LinkedHashMap<>(typeSpecific));
+        new LinkedHashMap<>(typeSpecific),
+        businessCategory,
+        businessSubCategory,
+        updateFrequency,
+        billingMethod,
+        price,
+        propertyRightsType);
   }
 }

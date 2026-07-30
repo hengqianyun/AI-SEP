@@ -34,3 +34,15 @@
 {"ts":"2026-07-29T16:46:48+08:00","type":"TEST_EVIDENCE","runId":"RUN-WSC-001","wave":"W3","result":"PASSED","note":"reconfirm after REV APPROVE; backend 22 tests green"}
 {"ts":"2026-07-29T16:50:00+08:00","type":"WAVE_VERIFIED","runId":"RUN-WSC-001","wave":"W3","tasks":["TASK-WSC-003","TASK-WSC-004","TASK-WSC-006"],"next":"TASK-WSC-005"}
 {"ts":"2026-07-29T16:50:30+08:00","type":"MEMORY_RECORDED","runId":"RUN-WSC-001","memoryId":"MEM-ORCH-WSC-002","path":"ai/memory/incidents/MEM-ORCH-WSC-002.md"}
+{"ts":"2026-07-29T17:45:00+08:00","type":"TASK_DISPATCHED","runId":"RUN-WSC-001","wave":"W4","tasks":["TASK-WSC-005"]}
+{"ts":"2026-07-29T17:55:00+08:00","type":"DEV_READY","runId":"RUN-WSC-001","taskId":"TASK-WSC-005","report":"planning/tasks/DEV-TASK-WSC-005.md"}
+{"ts":"2026-07-29T18:05:00+08:00","type":"CODE_REVIEW","runId":"RUN-WSC-001","taskId":"TASK-WSC-005","decision":"APPROVE","report":"planning/tasks/REV-TASK-WSC-005.md"}
+{"ts":"2026-07-29T18:10:00+08:00","type":"TEST_EVIDENCE","runId":"RUN-WSC-001","taskId":"TASK-WSC-005","result":"PASSED","report":"planning/tasks/TESTRUN-TASK-WSC-005.md"}
+{"ts":"2026-07-29T18:10:30+08:00","type":"TASK_VERIFIED","runId":"RUN-WSC-001","taskId":"TASK-WSC-005","next":"W5-P0-E2E"}
+{"ts":"2026-07-29T17:59:31+08:00","type":"RESUME","runId":"RUN-WSC-001","currentNode":"DEVELOPMENT","round":1,"nextAction":"WAVE_DISPATCH","wave":"W5","note":"resumed from state.yaml; awaiting human continue for P0 E2E"}
+{"ts":"2026-07-29T18:00:30+08:00","type":"WAVE_DISPATCHED","runId":"RUN-WSC-001","wave":"W5","action":"P0-E2E","role":"tester","actorInstance":"tester-wsc-e2e-p0","scope":["tests/e2e/**","planning/tasks/TESTRUN-WSC-E2E-P0.md"],"note":"independent tester; PLAN §5.4"}
+{"ts":"2026-07-30T09:13:19+08:00","type":"CONTINUE","runId":"RUN-WSC-001","wave":"W5","action":"EXECUTE_P0_E2E","role":"tester","actorInstance":"tester-wsc-e2e-p0","note":"human continue; dispatch independent tester for PLAN §5.4"}
+{"ts":"2026-07-30T09:51:35+08:00","type":"CONTINUE","runId":"RUN-WSC-001","wave":"W5","action":"EXECUTE_P0_E2E","role":"tester","actorInstance":"tester-wsc-e2e-p0","note":"human continue; dispatch independent tester for PLAN §5.4"}
+{"ts":"2026-07-30T10:27:39+08:00","type":"CONTINUE","runId":"RUN-WSC-001","wave":"W5","action":"EXECUTE_P0_E2E","role":"tester","actorInstance":"tester-wsc-e2e-p0","note":"human continue after interrupt; start env + execute P0 E2E"}
+{"ts":"2026-07-30T10:44:53+08:00","type":"TEST_EVIDENCE","runId":"RUN-WSC-001","wave":"W5","taskId":"W5-P0-E2E","result":"PASSED","evidenceId":"TESTRUN-WSC-E2E-P0","report":"planning/tasks/TESTRUN-WSC-E2E-P0.md","exitCode":0,"detail":"6 passed (5.4s); HTML tests/e2e/reports/p0-wsc/"}
+{"ts":"2026-07-30T10:44:53+08:00","type":"WAVE_VERIFIED","runId":"RUN-WSC-001","wave":"W5","tasks":["W5-P0-E2E"],"next":"INTEGRATION"}

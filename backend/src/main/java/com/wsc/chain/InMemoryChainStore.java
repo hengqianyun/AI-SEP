@@ -45,6 +45,40 @@ public class InMemoryChainStore {
     return Optional.ofNullable(byVersionId.get(versionId));
   }
 
+  /**
+   * SCOPE_AMEND（TASK-WSC-005）：写入新产品/编辑产生的上链版本；只读 API 不变。
+   *
+   * @return 已存储版本
+   */
+  public synchronized StoredVersion appendVersion(
+      String versionId,
+      String productId,
+      int versionNo,
+      String metadataHash,
+      String ownerDID,
+      Instant timestamp,
+      String certOwner,
+      String snapshotJson) {
+    StoredVersion stored =
+        stored(
+            versionId,
+            productId,
+            versionNo,
+            metadataHash,
+            ownerDID,
+            timestamp,
+            certOwner,
+            snapshotJson);
+    byProduct.computeIfAbsent(productId, k -> new ArrayList<>()).add(stored);
+    byVersionId.put(versionId, stored);
+    return stored;
+  }
+
+  /** 当前产品最大版本号；无记录返回 0。 */
+  public int latestVersionNo(String productId) {
+    return listByProductId(productId).stream().mapToInt(StoredVersion::versionNo).max().orElse(0);
+  }
+
   private void seed() {
     Instant t1 = Instant.parse("2026-07-20T08:00:00Z");
     Instant t2 = Instant.parse("2026-07-22T10:30:00Z");

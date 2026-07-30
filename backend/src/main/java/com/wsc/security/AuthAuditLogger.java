@@ -29,6 +29,29 @@ public class AuthAuditLogger {
         correlationId);
   }
 
+  /** §6.1 产品提交成功/失败（禁止日志明文输出信用代码等敏感字段）。 */
+  public void productSubmit(
+      String userId, String productCode, String result, String errorCode, String correlationId) {
+    log.info(
+        "event=PRODUCT_SUBMIT userId={} productCode={} result={} errorCode={} correlationId={}",
+        sanitize(userId),
+        sanitize(productCode),
+        result,
+        errorCode == null ? "-" : errorCode,
+        correlationId);
+  }
+
+  /** §6.1 分类删除拒绝。 */
+  public void categoryDeleteRejected(
+      String userId, String categoryId, int productCount, String correlationId) {
+    log.warn(
+        "event=CATEGORY_DELETE_REJECTED userId={} categoryId={} productCount={} code=ERR_CATEGORY_HAS_PRODUCTS correlationId={}",
+        sanitize(userId),
+        sanitize(categoryId),
+        productCount,
+        correlationId);
+  }
+
   private static String sanitize(String value) {
     if (value == null) {
       return "-";

@@ -22,20 +22,26 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/catalog/products/:productId',
     name: 'catalog-detail',
-    component: PlaceholderView,
-    meta: { title: '产品详情', hint: '占位：详情由 TASK-WSC-005 实现。' },
+    component: () => import('@/features/catalog/detail/ProductDetailPage.vue'),
+    meta: { title: '产品详情' },
   },
   {
     path: '/catalog/products/:productId/edit',
     name: 'catalog-edit',
-    component: PlaceholderView,
-    meta: { title: '编辑产品', hint: '占位：编辑由 TASK-WSC-005 实现。' },
+    component: () => import('@/features/catalog/editor/ProductEditorPage.vue'),
+    meta: { title: '编辑产品' },
   },
   {
     path: '/catalog/products/new',
     name: 'catalog-create',
-    component: PlaceholderView,
-    meta: { title: '新增产品', hint: '占位：新增由 TASK-WSC-005 实现。' },
+    component: () => import('@/features/catalog/editor/ProductEditorPage.vue'),
+    meta: { title: '新增产品' },
+  },
+  {
+    path: '/catalog/admin/categories',
+    name: 'catalog-admin-categories',
+    component: () => import('@/features/catalog/admin/CategoryAdminPage.vue'),
+    meta: { title: '维护行业分类' },
   },
   {
     path: '/chain/products/:productId',

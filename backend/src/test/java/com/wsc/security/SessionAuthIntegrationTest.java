@@ -39,7 +39,7 @@ class SessionAuthIntegrationTest {
             post("/api/v1/catalog/categories")
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
+                .content("{\"name\":\"矩阵测试一级\",\"level\":\"L1\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
     mockMvc
@@ -47,7 +47,8 @@ class SessionAuthIntegrationTest {
             post("/api/v1/catalog/products")
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
+                .content(
+                    "{\"productCode\":\"TST-ADM-0001\",\"productName\":\"矩阵管理员产品\",\"productType\":\"OTHER\",\"l2CategoryId\":\"cat-l2-emr\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
   }
@@ -60,7 +61,7 @@ class SessionAuthIntegrationTest {
             post("/api/v1/catalog/categories")
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
+                .content("{\"name\":\"应被拒绝\",\"level\":\"L1\"}"))
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.code").value("ERR_FORBIDDEN"))
         .andExpect(jsonPath("$.correlationId").isNotEmpty());
@@ -69,7 +70,8 @@ class SessionAuthIntegrationTest {
             post("/api/v1/catalog/products")
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
+                .content(
+                    "{\"productCode\":\"TST-PRV-0001\",\"productName\":\"矩阵提供方产品\",\"productType\":\"OTHER\",\"l2CategoryId\":\"cat-l2-emr\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
   }

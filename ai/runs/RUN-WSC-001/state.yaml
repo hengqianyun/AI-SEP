@@ -1,5 +1,5 @@
 runId: RUN-WSC-001
-currentNode: DEVELOPMENT
+currentNode: INTEGRATION
 round: 1
 status: IN_PROGRESS
 blockedBy: []
@@ -10,6 +10,7 @@ completedNodes:
   - PLAN_REVIEW
   - PLAN_APPROVED
   - TASK_DISPATCH
+  - DEVELOPMENT
 activeWave: null
 activeTaskIds: []
 activeSnapshotId: SNAP-WSC-001
@@ -32,16 +33,22 @@ taskGate:
     tester: PASSED
     verified: true
     evidence: planning/tasks/TESTRUN-TASK-WSC-004.md
+  TASK-WSC-005:
+    codeReview: APPROVE
+    tester: PASSED
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-005.md
   TASK-WSC-006:
     codeReview: APPROVE
     tester: PASSED
     verified: true
     evidence: planning/tasks/TESTRUN-TASK-WSC-006.md
+  W5-P0-E2E:
+    tester: PASSED
+    verified: true
+    evidence: planning/tasks/TESTRUN-WSC-E2E-P0.md
 nextAction:
-  role: orchestrator
-  action: TASK_DISPATCH
-  wave: W4
-  tasks:
-    - TASK-WSC-005
-  note: W3 全部 VERIFIED；待「继续」派发 W4 详情/编辑/分类
-updatedAt: 2026-07-29T16:50:00+08:00
+  role: integrationReviewer
+  action: INTEGRATION_REVIEW
+  note: W5 P0 E2E PASSED；policies.requireIntegrationReview=true；待「继续」派发集成审查
+updatedAt: 2026-07-30T10:44:53+08:00

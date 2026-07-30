@@ -109,6 +109,12 @@ public class CatalogBrowseService {
     m.put("supplierName", p.supplierName());
     m.put("supplierCreditCode", p.supplierCreditCode());
     m.put("tags", p.tags() == null ? List.of() : new ArrayList<>(p.tags()));
+    m.put("businessCategory", p.businessCategory());
+    m.put("businessSubCategory", p.businessSubCategory());
+    m.put("updateFrequency", p.updateFrequency());
+    m.put("billingMethod", p.billingMethod());
+    m.put("price", p.price());
+    m.put("propertyRightsType", p.propertyRightsType());
     if (p.typeSpecific() != null && !p.typeSpecific().isEmpty()) {
       m.put("typeSpecific", new LinkedHashMap<>(p.typeSpecific()));
     }
