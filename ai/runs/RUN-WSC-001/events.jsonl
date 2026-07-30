@@ -46,3 +46,16 @@
 {"ts":"2026-07-30T10:27:39+08:00","type":"CONTINUE","runId":"RUN-WSC-001","wave":"W5","action":"EXECUTE_P0_E2E","role":"tester","actorInstance":"tester-wsc-e2e-p0","note":"human continue after interrupt; start env + execute P0 E2E"}
 {"ts":"2026-07-30T10:44:53+08:00","type":"TEST_EVIDENCE","runId":"RUN-WSC-001","wave":"W5","taskId":"W5-P0-E2E","result":"PASSED","evidenceId":"TESTRUN-WSC-E2E-P0","report":"planning/tasks/TESTRUN-WSC-E2E-P0.md","exitCode":0,"detail":"6 passed (5.4s); HTML tests/e2e/reports/p0-wsc/"}
 {"ts":"2026-07-30T10:44:53+08:00","type":"WAVE_VERIFIED","runId":"RUN-WSC-001","wave":"W5","tasks":["W5-P0-E2E"],"next":"INTEGRATION"}
+{"ts":"2026-07-30T10:54:07+08:00","type":"CONTINUE","runId":"RUN-WSC-001","node":"INTEGRATION","action":"DISPATCH_INTEGRATION_REVIEW","role":"integrationReviewer","actorInstance":"integration-reviewer-wsc-001","note":"human continue; dispatch independent subagent"}
+{"ts":"2026-07-30T10:57:45+08:00","type":"DISPATCH","runId":"RUN-WSC-001","role":"integrationReviewer","actorInstance":"integration-reviewer-wsc-001","action":"INTEGRATION_REVIEW","output":"planning/reviews/integration/REV-WSC-INTEGRATION-001.md"}
+{"ts":"2026-07-30T10:57:45+08:00","type":"INTEGRATION_REVIEW","runId":"RUN-WSC-001","decision":"APPROVE","report":"planning/reviews/integration/REV-WSC-INTEGRATION-001.md","p0":0,"p1":0}
+{"ts":"2026-07-30T10:57:45+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-001","from":"INTEGRATION","to":"RELEASE_REVIEW","awaiting":"maintainer-release-gates"}
+{"ts":"2026-07-30T11:02:49+08:00","type":"CONTINUE","runId":"RUN-WSC-001","node":"RELEASE_REVIEW","action":"CLOSE_RELEASE_GAPS","roles":["tester"],"note":"dispatch independent tester for Flyway empty-db + rollback drill evidence; maintainer approval still human-gated"}
+{"ts":"2026-07-30T11:33:12+08:00","type":"DISPATCH","runId":"RUN-WSC-001","role":"tester","actorInstance":"tester-wsc-release-gates","action":"CLOSE_RELEASE_EVIDENCE_GAPS"}
+{"ts":"2026-07-30T11:33:12+08:00","type":"TEST_EVIDENCE","runId":"RUN-WSC-001","evidenceId":"TESTRUN-WSC-RELEASE-GATES","result":"PASSED","flywayEmptyDbApply":"PASSED","rollbackDrill":"PASSED","report":"planning/tasks/TESTRUN-WSC-RELEASE-GATES.md"}
+{"ts":"2026-07-30T11:33:12+08:00","type":"RELEASE_GAP_CLOSED","runId":"RUN-WSC-001","closed":["FLYWAY_EMPTY_DB_APPLY_EVIDENCE","ROLLBACK_DRILL_EVIDENCE"],"remaining":["MAINTAINER_HUMAN_APPROVAL"]}
+{"ts":"2026-07-30T11:33:12+08:00","type":"ESCALATED","runId":"RUN-WSC-001","node":"RELEASE_REVIEW","identity":"maintainer","action":"RELEASE_GATE_APPROVAL","reason":"policies.requireHumanApproval; awaiting explicit human APPROVE"}
+{"ts":"2026-07-30T11:41:44+08:00","type":"HUMAN_DECISION","runId":"RUN-WSC-001","identity":"maintainer","action":"APPROVE_RELEASE","decision":"APPROVE","utterance":"批准发布包","approvalId":"APPR-WSC-RELEASE-001","path":"ai/runs/RUN-WSC-001/approvals.yaml"}
+{"ts":"2026-07-30T11:41:44+08:00","type":"RELEASE_GATE_PASSED","runId":"RUN-WSC-001","gates":["integration","e2e-p0","flyway-empty-db","rollback-drill","maintainer-approval"]}
+{"ts":"2026-07-30T11:41:44+08:00","type":"NODE_ADVANCED","runId":"RUN-WSC-001","from":"RELEASE_REVIEW","to":"COMPLETED"}
+{"ts":"2026-07-30T11:41:44+08:00","type":"RUN_COMPLETED","runId":"RUN-WSC-001","planId":"PLAN-WSC-1.1","status":"COMPLETED"}

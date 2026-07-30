@@ -1,0 +1,22 @@
+# RUN-WSC-001 发布批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
+
+approvals:
+  - id: APPR-WSC-RELEASE-001
+    runId: RUN-WSC-001
+    planId: PLAN-WSC-1.1
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-07-30T11:38:00+08:00
+    source: chat
+    utterance: 批准发布包
+    scope: release-package
+    basedOn:
+      - planning/approved/PLAN-WSC-1.1.md
+      - planning/reviews/integration/REV-WSC-INTEGRATION-001.md
+      - planning/tasks/TESTRUN-WSC-E2E-P0.md
+      - planning/tasks/TESTRUN-WSC-RELEASE-GATES.md
+    notes: |
+      policies.release.requireHumanApproval=true；approverIdentity=maintainer。
+      技术门禁（集成审查、P0 E2E、Flyway 空库、回滚演练）已齐后的发布包人类批准。

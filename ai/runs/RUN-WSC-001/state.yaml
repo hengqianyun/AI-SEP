@@ -1,7 +1,7 @@
 runId: RUN-WSC-001
-currentNode: INTEGRATION
+currentNode: COMPLETED
 round: 1
-status: IN_PROGRESS
+status: COMPLETED
 blockedBy: []
 completedNodes:
   - PRD_ANALYSIS
@@ -11,11 +11,27 @@ completedNodes:
   - PLAN_APPROVED
   - TASK_DISPATCH
   - DEVELOPMENT
+  - INTEGRATION
+  - RELEASE_REVIEW
+  - COMPLETED
 activeWave: null
 activeTaskIds: []
 activeSnapshotId: SNAP-WSC-001
 activePlanId: PLAN-WSC-1.1
 approvedPlanPath: planning/approved/PLAN-WSC-1.1.md
+integrationReview:
+  decision: APPROVE
+  report: planning/reviews/integration/REV-WSC-INTEGRATION-001.md
+releaseEvidence:
+  flywayEmptyDbApply: PASSED
+  rollbackDrill: PASSED
+  evidence: planning/tasks/TESTRUN-WSC-RELEASE-GATES.md
+  detailPath: ops/evidence/release/
+releaseApproval:
+  identity: maintainer
+  decision: APPROVE
+  approvalId: APPR-WSC-RELEASE-001
+  path: ai/runs/RUN-WSC-001/approvals.yaml
 taskGate:
   TASK-WSC-001:
     verified: true
@@ -47,8 +63,5 @@ taskGate:
     tester: PASSED
     verified: true
     evidence: planning/tasks/TESTRUN-WSC-E2E-P0.md
-nextAction:
-  role: integrationReviewer
-  action: INTEGRATION_REVIEW
-  note: W5 P0 E2E PASSED；policies.requireIntegrationReview=true；待「继续」派发集成审查
-updatedAt: 2026-07-30T10:44:53+08:00
+nextAction: null
+updatedAt: 2026-07-30T11:41:44+08:00
