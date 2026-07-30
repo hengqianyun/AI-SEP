@@ -1,20 +1,25 @@
 runId: RUN-WSC-002
-currentNode: PLAN_REVIEW
-round: 1
+currentNode: PLAN_APPROVED
+round: 2
 status: ACTIVE
 blockedBy: []
 completedNodes:
   - PRD_ANALYSIS
   - REQUIREMENT_REVIEW
   - PLAN_DRAFT
+  - PLAN_REVIEW
 activeWave: null
 activeTaskIds: []
 activeSnapshotId: SNAP-WSC-002
-activePlanId: PLAN-WSC-2.1
-candidatePlanPath: planning/proposals/PLAN-WSC-2.1.md
-approvedPlanPath: null
-reviewPath: planning/reviews/wsc-2.1/round-1/
-reviewSummary: planning/reviews/wsc-2.1/round-1/SUMMARY.md
-consensus: NOT_REACHED
-nextAction: planEditor/revise-plan
-updatedAt: 2026-07-30T14:50:00+08:00
+activePlanId: PLAN-WSC-2.2
+candidatePlanPath: planning/proposals/PLAN-WSC-2.2.md
+approvedPlanPath: planning/approved/PLAN-WSC-2.2.md
+priorReviewPath: planning/reviews/wsc-2.1/round-1/
+reviewPath: planning/reviews/wsc-2.2/round-2/
+nextAction: human/CONFIRM_TASK_DISPATCH
+dispatch:
+  awaiting: human-confirm-task-dispatch
+  firstWave: W1
+  firstTaskId: TASK-WSC-101
+  approvedPlanPath: planning/approved/PLAN-WSC-2.2.md
+updatedAt: 2026-07-30T16:30:00+08:00
