@@ -1,0 +1,21 @@
+﻿{
+  "evidenceId": "EVID-TASK-WSC-101-4",
+  "taskId": "TASK-WSC-101",
+  "actorInstance": "tester-wsc-101-r6",
+  "status": "PASSED",
+  "supersedes": "EVID-TASK-WSC-101-3",
+  "executedAt": "2026-07-31T14:55:00+08:00",
+  "layers": {
+    "ports": "PASSED",
+    "pom-flyway-mysql": "PASSED",
+    "mysql-auth": "PASSED",
+    "mysql-empty-db-init": "PASSED",
+    "spring-boot-local-flyway": "PASSED",
+    "health-doc": "PASSED",
+    "overview-smoke-local": "PASSED_AUTH_GATED_401",
+    "contract-check": "DEFERRED_PIN_1.1.0"
+  },
+  "cleared": "BUG-WSC-101-001 Unsupported Database MySQL 8.0 / missing flyway-mysql",
+  "module": "backend/app/data-chain-service (was wsc-service)",
+  "evidenceDir": "ai/runs/RUN-WSC-002/tester-wsc-101-r6/"
+}

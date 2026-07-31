@@ -1,0 +1,4 @@
+﻿[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.769 s - in com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.212 s - in com.shdata.datachain.chain.ChainApiIntegrationTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

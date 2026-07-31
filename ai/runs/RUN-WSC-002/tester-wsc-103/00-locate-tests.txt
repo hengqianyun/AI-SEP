@@ -1,0 +1,17 @@
+﻿@Test
+void crud_threeLevels() throws Exception {
+@Test
+void delete_mountedL3_andL2_andL1_forbidden_emptyOk() throws Exception {
+@Test
+void nonAdmin_cannotReachCategoryWrite() throws Exception {
+void setUp() {
+@Test
+void createL3_underL2_and_deleteExtraEmptyL3_ok() {
+@Test
+void deleteL2_withL3Child_forbidden() {
+@Test
+void deleteMountedL3_forbidden() {
+@Test
+void lastL3_globally_forbidden() {
+@Test
+void rejectInvalidL3Parent() {

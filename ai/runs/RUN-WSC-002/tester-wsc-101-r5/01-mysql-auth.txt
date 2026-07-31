@@ -1,0 +1,7 @@
+﻿# MySQL auth (tester-wsc-101-r5)
+parsed_username=root
+password: not logged (len=6 after YAML quote strip)
+mysql_cli=C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.EXE
+result: PASSED — SELECT 1 ok via MYSQL_PWD and defaults-extra-file (127.0.0.1 and localhost)
+note: first attempt failed when surrounding YAML double-quotes were left on password value; stripped quotes -> OK
+clears prior EVID-TASK-WSC-101-2 mysql-auth-1045 for live gitignored application-local.yml

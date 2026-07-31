@@ -1,0 +1,9 @@
+[INFO] Running com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest
+2026-07-31 16:36:25.286  WARN 15672 --- [           main] wsc.audit                                : event=CATEGORY_DELETE_REJECTED userId=u-admin categoryId=cat-l3-emr-desense productCount=20 code=ERR_CATEGORY_HAS_PRODUCTS correlationId=corr-7524799536e0
+2026-07-31 16:36:25.295  WARN 15672 --- [           main] wsc.audit                                : event=CATEGORY_DELETE_REJECTED userId=u-admin categoryId=cat-l2-emr productCount=21 code=ERR_CATEGORY_HAS_PRODUCTS correlationId=corr-2fbe40b6598d
+2026-07-31 16:36:25.301  WARN 15672 --- [           main] wsc.audit                                : event=CATEGORY_DELETE_REJECTED userId=u-admin categoryId=cat-l1-health productCount=22 code=ERR_CATEGORY_HAS_PRODUCTS correlationId=corr-44562dd8b311
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.313 s - in com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest
+[INFO] Running com.shdata.datachain.catalog.admin.CategoryAdminServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.449 s - in com.shdata.datachain.catalog.admin.CategoryAdminServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

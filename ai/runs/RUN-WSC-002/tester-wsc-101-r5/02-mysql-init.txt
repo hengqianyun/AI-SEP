@@ -1,0 +1,19 @@
+before_show_wsc exit=0
+
+
+drop_wsc exit=0
+
+
+run 00_create_database.sql exit=0
+
+
+run 01_flyway_baseline.sql exit=0
+
+
+after_tables exit=0
+Tables_in_wsc
+flyway_schema_history
+installed_rank	version	description	type	script	checksum	installed_by	installed_on	execution_time	success
+0	0	<< Flyway Baseline >>	BASELINE	<< Flyway Baseline >>	NULL	root@localhost	2026-07-31 13:13:49	0	1
+
+

@@ -1,0 +1,22 @@
+Static contract skim for TASK-WSC-101
+contracts/VERSION=2.0.0
+check-contracts.mjs currently pins expected VERSION 1.1.0 -> fails against 2.0.0 (tool lag)
+openapi.yaml contains 'page': True
+openapi.yaml contains 'pageSize': True
+openapi.yaml contains 'total': True
+openapi.yaml contains 'import': True
+openapi.yaml contains 'l3': True
+openapi.yaml contains 'L3': True
+pattern hit: pageSize
+pattern hit: /catalog
+pattern hit: import
+pattern hit: l3
+pattern hit: L3
+pattern hit: /overview
+path /catalog/products nearby keys present
+path /catalog/maintenance/entries nearby keys present
+path /catalog/maintenance/entries/batch nearby keys present
+path /catalog/products/import/template nearby keys present
+path /catalog/products/import nearby keys present
+path /catalog/products/import/reports/{reportId} nearby keys present
+EXIT:0

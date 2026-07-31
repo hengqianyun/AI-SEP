@@ -1,0 +1,5 @@
+﻿UI E2E for CategoryAdminPage not in TASK-WSC-103 writeSet executable E2E tooling.
+writeSet: frontend/src/features/catalog/admin/** + backend catalog/admin + corresponding unit/integration tests.
+No playwright/cypress e2e harness invoked for this task.
+result: SKIPPED (not faked PASS)
+non-admin UI gate covered by CategoryAdminPage onMounted (static/review) + backend nonAdmin_cannotReachCategoryWrite (403) re-run PASSED.

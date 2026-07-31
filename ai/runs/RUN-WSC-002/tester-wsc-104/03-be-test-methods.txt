@@ -1,0 +1,22 @@
+﻿@Test
+void unauthenticated_getCategories_401() throws Exception {
+@Test
+void listCategories_containsL1L2L3() throws Exception {
+@Test
+void listProducts_filterByL1AndProductType() throws Exception {
+@Test
+void listProducts_filterByL3() throws Exception {
+@Test
+void listProducts_filterByL2_includesChildL3Products() throws Exception {
+@Test
+void listProducts_filterNoMatch_returnsEmptyList() throws Exception {
+@Test
+void listProducts_keywordCaseInsensitive_onNameAndCode() throws Exception {
+@Test
+void getProduct_previewFieldsAndThreeLevelPath() throws Exception {
+@Test
+void getProduct_notFound() throws Exception {
+@Test
+void listProducts_combinedFilters_dataSourceAndPublicData() throws Exception {
+@Test
+void listProducts_pagination_pagePageSizeTotal_andFilterPreservedOnPage2() throws Exception {

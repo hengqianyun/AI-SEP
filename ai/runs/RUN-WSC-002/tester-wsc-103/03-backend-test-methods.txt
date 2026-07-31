@@ -1,0 +1,14 @@
+﻿CategoryAdminIntegrationTest (3):
+- crud_threeLevels
+- delete_mountedL3_andL2_andL1_forbidden_emptyOk
+- nonAdmin_cannotReachCategoryWrite
+
+CategoryAdminServiceTest (5):
+- createL3_underL2_and_deleteExtraEmptyL3_ok
+- deleteL2_withL3Child_forbidden
+- deleteMountedL3_forbidden
+- lastL3_globally_forbidden
+- rejectInvalidL3Parent
+
+Re-run: Tests run: 8, Failures: 0, Errors: 0, Skipped: 0 / BUILD SUCCESS / EXIT=0
+Evidence: 04-mvn-admin.txt, 04-mvn-exit.txt, 04-mvn-summary.txt

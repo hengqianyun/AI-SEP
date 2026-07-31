@@ -1,0 +1,21 @@
+﻿{
+  "evidenceId": "EVID-TASK-WSC-101-3",
+  "taskId": "TASK-WSC-101",
+  "actorInstance": "tester-wsc-101-r5",
+  "status": "BLOCKED",
+  "supersedes": "EVID-TASK-WSC-101-2",
+  "executedAt": "2026-07-31T13:20:00+08:00",
+  "layers": {
+    "ports": "PASSED",
+    "mysql-auth": "PASSED",
+    "mysql-empty-db-init": "PASSED",
+    "spring-boot-local-flyway": "BLOCKED",
+    "health-doc": "BLOCKED",
+    "overview-smoke-local": "BLOCKED",
+    "contract-check": "FAILED_DEFERRED_PIN",
+    "static-contract-notes": "PASSED"
+  },
+  "blocker": "Flyway Unsupported Database: MySQL 8.0 (missing flyway-mysql dependency; flyway-core 8.5.13 only)",
+  "cleared": "mysql-auth-1045",
+  "evidenceDir": "ai/runs/RUN-WSC-002/tester-wsc-101-r5/"
+}

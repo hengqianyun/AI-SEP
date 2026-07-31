@@ -1,0 +1,15 @@
+﻿{
+  "evidenceId": "EVID-TASK-WSC-105-1",
+  "taskId": "TASK-WSC-105",
+  "actorInstance": "tester-wsc-105",
+  "status": "PASSED",
+  "executedAt": "2026-07-31T17:51:39+08:00",
+  "layers": {
+    "backend-product-editor-integration": {"result": "PASSED", "tests": 5, "exitCode": 0},
+    "backend-chain-api-integration": {"result": "PASSED", "tests": 6, "exitCode": 0},
+    "frontend-vitest": {"result": "PASSED", "tests": 9, "exitCode": 0},
+    "frontend-typecheck": {"result": "PASSED", "exitCode": 0},
+    "ui-e2e": {"result": "SKIPPED"}
+  },
+  "totals": {"backendTests": 11, "frontendTests": 9}
+}

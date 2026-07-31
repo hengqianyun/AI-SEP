@@ -1,0 +1,5 @@
+﻿# Static contract notes (tester-wsc-101-r5)
+check-contracts.mjs: FAILED — VERSION expected 1.1.0, got 2.0.0 (pin mismatch)
+Static observation: repository contracts/version now at 2.0.0; script still pins 1.1.0
+Per task guidance: pin failure alone may be DEFERRED/non-blocking if code review accepted P2
+Static 2.0.0 presence: CONFIRMED by check-contracts output (got 2.0.0)

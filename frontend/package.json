@@ -1,23 +1,32 @@
 {
-  "name": "frontend",
+  "name": "data-chain-static",
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "description": "接入端工作台（WSC / Workspace Console）前端静态站 — 可独立仓库部署",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit -p tsconfig.json && vite build",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json --pretty false",
-    "lint": "echo \"lint placeholder: no eslint config in scaffold\" && exit 0",
+    "lint": "echo \"lint placeholder: no eslint config yet\" && exit 0",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
     "ant-design-vue": "^4.2.6",
+    "dayjs": "^1.11.13",
     "pinia": "^2.3.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@types/node": "^22.10.5",
     "@vitejs/plugin-vue": "^5.2.1",
     "typescript": "~5.6.3",
     "vite": "^5.4.11",

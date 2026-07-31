@@ -1,0 +1,4 @@
+﻿actorInstance: tester-wsc-105
+taskId: TASK-WSC-105
+strategy: shell-specialist-file-based-evidence
+startedAt: 2026-07-31T17:45:00+08:00

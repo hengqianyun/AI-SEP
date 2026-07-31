@@ -1,0 +1,281 @@
+﻿# 浠诲姟鍖?TASK-WSC-103
+
+```yaml
+taskId: TASK-WSC-103
+planId: PLAN-WSC-2.2
+snapshotId: SNAP-WSC-002
+runId: RUN-WSC-002
+status: DISPATCHED
+wave: W3
+parallelWith:
+  - TASK-WSC-104
+goal: |
+  绌洪棿/琛屼笟/瀛愮被缁存姢寮圭獥涓?API锛涘緟淇濆瓨鎻愮ず锛涙湁鎸傝浇绂佹鍒狅紙DEC-WSC-003锛夛紱鑷冲皯淇濈暀涓€涓笁绾с€?reqs:
+  - REQ-CAT-006
+dependsOn:
+  - TASK-WSC-102
+denyModify:
+  - contracts/**
+  - frontend/src/api/**
+  - "**/sql/**"
+  - frontend/src/features/catalog/browse/**
+  - frontend/src/features/catalog/detail/**
+  - frontend/src/features/catalog/editor/**
+  - frontend/src/features/catalog/maintenance/**
+  - frontend/src/features/catalog/import/**
+  - backend/app/*/src/main/java/**/catalog/browse/**
+  - backend/app/*/src/main/java/**/catalog/detail/**
+  - backend/app/*/src/main/java/**/catalog/editor/**
+  - backend/app/*/src/main/java/**/catalog/maintenance/**
+  - backend/app/*/src/main/java/**/catalog/import/**
+  - frontend/src/features/chain/**
+  - frontend/src/features/overview/**
+  - backend/app/*/src/main/java/**/chain/**
+  - backend/app/*/src/main/java/**/overview/**
+  - ai/rules/**
+  - product/**
+  - planning/**
+readSet:
+  - contracts/**锛堝彧璇伙級
+  - frontend/src/api/**锛堝彧璇伙級
+  - product/requirements/SNAP-WSC-002.md
+  - design/decisions/DEC-WSC-003.md
+  - planning/approved/PLAN-WSC-2.2.md
+writeSet:
+  - frontend/src/features/catalog/admin/**
+  - backend/app/*/src/main/java/**/catalog/admin/**
+  - 瀵瑰簲娴嬭瘯
+riskTags: []
+actorInstance: developer-wsc-103
+codeReviewerMustDiffer: true
+mergeConstraint: 绂佹涓?TASK-WSC-104 娣峰啓鍚屼竴 PR
+```
+
+## 楠屾敹瑕佺偣
+
+瑙?`planning/approved/PLAN-WSC-2.2.md` 搂 TASK-WSC-103銆?
+- 涓夌骇鍒嗘爮澧炴敼锛涚骇鑱斿埛鏂帮紱闈炵鐞嗗憳涓嶅彲杈?- 鍒犳寕杞藉垎绫昏繑鍥炴槑纭敊璇爜锛涜嚦灏戜繚鐣欎竴涓笁绾?- testScope锛欳RUD锛涚姝㈠垹闄よ礋渚嬶紱闈炵鐞嗗憳 403锛涜嚦灏戜繚鐣欎竴涓笁绾?
+## 娲惧彂璁板綍
+
+- runId: RUN-WSC-002
+- dispatchedAt: 2026-07-31T16:04:00+08:00
+- wave: W3 骞惰锛堚垾 TASK-WSC-104锛?- dependsOnVerified: TASK-WSC-102
+# DEV-TASK-WSC-103
+
+```yaml
+taskId: TASK-WSC-103
+actorInstance: developer-wsc-103
+planId: PLAN-WSC-2.2
+snapshotId: SNAP-WSC-002
+contracts: wsc-contracts@2.0.0
+status: READY_FOR_REVIEW
+completedAt: 2026-07-31T16:14:00+08:00
+reqs:
+  - REQ-CAT-006
+```
+
+## 鎽樿
+
+鍦?`backend/app/data-chain-service`锛坄com.shdata.datachain.catalog.admin`锛夊疄鐜颁笁绾у垎绫伙紙绌洪棿 L1 / 琛屼笟 L2 / 瀛愮被 L3锛夊啓 API锛欳RUD銆佹湁鎸傝浇绂佹鍒狅紙`ERR_CATEGORY_HAS_PRODUCTS`锛孌EC-WSC-003锛夈€佹湁瀛愯妭鐐圭姝㈠垹銆佸叏灞€鑷冲皯淇濈暀涓€涓笁绾с€傚墠绔?`catalog/admin` 鍗囩骇涓轰笁鍒嗘爮缁存姢闈㈡澘锛堝緟淇濆瓨鎻愮ず銆佺骇鑱旈€夋嫨鍒锋柊銆侀潪绠＄悊鍛樿烦杞洰褰曪級銆傛湭瑙︾ `catalog/browse/**` 涓?TASK-WSC-104 writeSet锛涙寕杞借鏁板鎵樻棦鏈?`CatalogBrowseSeedStore#countMountedProducts`锛堜笌骞惰 104 鍗囩骇鍚庣殑 L3 绉嶅瓙鍏煎锛夈€?
+## 鍙樻洿鏂囦欢鍒楄〃
+
+### 鍚庣锛坵riteSet锛?
+| 璺緞 | REQ | 璇存槑 |
+|---|---|---|
+| `backend/app/data-chain-service/src/main/java/com/shdata/datachain/catalog/admin/CategoryAdminService.java` | REQ-CAT-006 | L1/L2/L3 鏍￠獙锛涘垹鎸傝浇/瀛愯妭鐐?鏈€鍚庝笁绾?鈫?409 `ERR_CATEGORY_HAS_PRODUCTS` |
+| `backend/app/data-chain-service/src/main/java/com/shdata/datachain/catalog/admin/CategoryAdminController.java` | REQ-CAT-006 | 娉ㄩ噴瀵归綈涓夌骇锛涚鐐逛笉鍙?|
+| `backend/app/data-chain-service/src/main/java/com/shdata/datachain/catalog/admin/package-info.java` | 鈥?| 鍖呰鏄庡榻?103 |
+| `backend/app/data-chain-service/src/test/java/com/shdata/datachain/catalog/admin/CategoryAdminIntegrationTest.java` | REQ-CAT-006 | CRUD锛涙寕杞?L3/L2/L1 璐熶緥锛涢潪绠＄悊鍛?403 |
+| `backend/app/data-chain-service/src/test/java/com/shdata/datachain/catalog/admin/CategoryAdminServiceTest.java` | REQ-CAT-006 | 瀛愯妭鐐圭鍒狅紱鎸傝浇 L3锛涘叏灞€鏈€鍚庝笁绾э紙mock锛夛紱闈炴硶 parent |
+
+### 鍓嶇锛坵riteSet锛?
+| 璺緞 | REQ | 璇存槑 |
+|---|---|---|
+| `frontend/src/features/catalog/admin/CategoryAdminPage.vue` | REQ-CAT-006 | 涓夊垎鏍忥紙绌洪棿/琛屼笟/瀛愮被锛夛紱寰呬繚瀛樻彁绀猴紱闈炵鐞嗗憳涓嶅彲杈?|
+| `frontend/src/features/catalog/admin/composables/useCategoryAdmin.ts` | REQ-CAT-006 | L3 CRUD锛汱1鈫扡2鈫扡3 绾ц仈閫夋嫨锛涘垹闄ら敊璇?reason 灞曠ず |
+| `frontend/src/features/catalog/admin/composables/useCategoryAdmin.spec.ts` | REQ-CAT-006 | 鍔犺浇涓夌骇銆乨irty銆佸 L3銆佸垹闄ゆ嫆缁濆師鍥?|
+
+## REQ 鏄犲皠
+
+| REQ | 瀹炵幇瑕佺偣 |
+|---|---|
+| **REQ-CAT-006** | 涓夊垎鏍忓鏀癸紱寰呬繚瀛樻彁绀猴紱淇濆瓨鍚?`load()` 鍒锋柊绾ц仈鍒楄〃锛涢潪绠＄悊鍛樺墠绔烦杞?+ 鍐?API `ERR_FORBIDDEN`锛涙湁鎸傝浇/瀛愯妭鐐圭姝㈠垹 `ERR_CATEGORY_HAS_PRODUCTS`锛堝惈 reason/productCount锛夛紱鍏ㄥ眬鑷冲皯淇濈暀涓€涓笁绾?|
+
+## 宸茬煡杈圭晫 / 鍚庣画浠诲姟
+
+- GET `/catalog/categories` 浠嶇敱 browse 鎻愪緵锛堝彧璇讳緷璧栵級锛涙湰浠诲姟鏈敼 browse銆?- 绉嶅瓙 L3/浜у搧鎸傝浇鐢卞苟琛?TASK-WSC-104 缁存姢锛沘dmin 鍒犻櫎鎸傝浇妫€娴嬭皟鐢ㄥ叡浜?store銆?- 銆岃嚦灏戜繚鐣欎竴涓笁绾с€嶄负鍏ㄥ眬璁℃暟锛涚瀛愬凡鏈夊涓寕杞?L3 鏃讹紝璇ュ垎鏀富瑕佺敱鍗曟祴锛坢ock 浠呬竴鏋?L3锛夎鐩栥€?- 鏈吋浠?codeReviewer锛涙湭鑷鏍囪 VERIFIED銆?
+## 鑷祴鍛戒护涓庣粨鏋?
+### 鍚庣
+
+```text
+mvn -f backend/pom.xml "-Dtest=com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest,com.shdata.datachain.catalog.admin.CategoryAdminServiceTest" test
+```
+
+| 绫?| Tests | 缁撴灉 |
+|---|---|---|
+| `CategoryAdminIntegrationTest` | 3 | **PASSED** |
+| `CategoryAdminServiceTest` | 5 | **PASSED** |
+| **鍚堣** | **8** | **BUILD SUCCESS** |
+
+瑕嗙洊锛氫笁绾?CRUD锛涙寕杞?L3/L2/L1 绂佸垹锛涚┖鏍戝彲鍒狅紱闈炵鐞嗗憳 403锛涘瓙鑺傜偣绂佸垹锛涘叏灞€鏈€鍚庝笁绾э紱闈炴硶 L3 parent銆?
+### 鍓嶇
+
+```text
+cd frontend
+pnpm exec vitest run src/features/catalog/admin/composables/useCategoryAdmin.spec.ts
+pnpm typecheck
+```
+
+| 鍛戒护 | 缁撴灉 |
+|---|---|
+| vitest `useCategoryAdmin.spec.ts` | **PASSED**锛? tests锛?|
+| `pnpm typecheck` | **PASSED** |
+
+## SCOPE / denyModify
+
+- 鏈慨鏀?`contracts/**`銆乣frontend/src/api/**`銆乣**/sql/**`
+- **鏈Е纰?* `frontend/src/features/catalog/browse/**` 涓?`backend/**/catalog/browse/**`
+- 鏈慨鏀?maintenance/import/detail/editor/overview/chain銆乣ai/rules/**`銆乣product/**`銆乣planning/approved/**`
+- 鏈?DEV 鎶ュ憡鎸夋淳鍙戣姹傚啓鍏?`planning/tasks/`
+# 浠ｇ爜瀹℃煡
+
+```yaml
+reviewId: REV-CODE-TASK-WSC-103-R1
+taskId: TASK-WSC-103
+round: 1
+decision: APPROVE
+actorInstance: code-reviewer-wsc-103
+planId: PLAN-WSC-2.2
+contracts: wsc-contracts@2.0.0
+reviewedAt: 2026-07-31T16:26:00+08:00
+basedOn:
+  - planning/tasks/TASK-WSC-103.md
+  - planning/tasks/DEV-TASK-WSC-103.md
+  - planning/approved/PLAN-WSC-2.2.md
+  - product/requirements/SNAP-WSC-002.md
+  - design/decisions/DEC-WSC-003.md
+```
+
+## 缁撹
+
+**APPROVE** 鈥?鏈疆 **P0=0锛孭1=0**銆傚彉鏇磋惤鍦?`writeSet`锛歚frontend/src/features/catalog/admin/**` 涓?`backend/.../catalog/admin/**`锛堝惈瀵圭О娴嬭瘯锛夈€傛湭鏀?`contracts/**`銆乣frontend/src/api/**`銆乣**/sql/**`銆乣catalog/browse/**`锛堟湰浠诲姟浜や粯闈紱宸ヤ綔鍖哄彟鏈夊苟琛?TASK-WSC-104 / 鏃㈡湁濂戠害鏀瑰姩涓嶅綊鏈疆锛夈€備笁绾?CRUD銆佹寕杞界鍒狅紙DEC-WSC-003锛夈€佹湁瀛愯妭鐐圭鍒犮€佸叏灞€鑷冲皯淇濈暀涓€涓笁绾с€侀潪绠＄悊鍛樺墠绔烦杞?+ 鍐?API `ERR_FORBIDDEN` 鍧囨湁瀹炵幇涓庢祴璇曟敮鎾戙€傚鏌ュ璺戝悗绔?8 娴嬩笌 vitest 4 娴嬪潎 **PASSED**銆傛寮?VERIFIED 浠嶉』鐙珛 tester 鎵ц `testScope`銆?
+## Findings
+
+| id | severity | evidence | closeWhen | relatedReqs |
+|---|---|---|---|---|
+| FIND-WSC-103-R1-001 | P2 | `CategoryAdminService#delete` 瀵广€屾寕杞戒骇鍝併€嶃€屾湁瀛愬垎绫汇€嶃€屽叏灞€鏈€鍚庝竴鏋?L3銆嶅潎杩斿洖 `ERR_CATEGORY_HAS_PRODUCTS`锛涘绾?OpenAPI 绀轰緥灏嗚鐮佽涔夌粦鍦ㄦ寕杞戒骇鍝併€俙message`/`data.reason` 宸插尯鍒嗭紝浣嗕粎鐪?`code` 鐨勫鎴风鍙兘璇垽 | 鍚庣画濂戠害鎵╁睍鐙珛鐮侊紙濡?leaf-required / has-children锛夋垨鍦?`codes.yaml` 娉ㄦ槑澶氬師鍥犲鐢紱瀹㈡埛绔互 `reason` 涓哄噯 | REQ-CAT-006, DEC-WSC-003 |
+| FIND-WSC-103-R1-002 | P2 | 銆岃嚦灏戜繚鐣欎竴涓笁绾с€嶉泦鎴愯矾寰勫湪绉嶅瓙澶?L3 涓嬮毦瑙﹀彂锛涜鐩栦緷璧?`CategoryAdminServiceTest#lastL3_globally_forbidden`锛坢ock 浠呬竴鏋?L3锛夈€侱EV 宸插０鏄庤竟鐣?| tester 鎸夊崟娴嬭矾寰勯獙鏀讹紱鎴栬ˉ鍙帶澶瑰叿闆嗘垚娴?| REQ-CAT-006 |
+| FIND-WSC-103-R1-003 | P3 | 闈炵鐞嗗憳 UI 涓嶅彲杈剧敱 `CategoryAdminPage` `onMounted` + `categoryMaintainVisible` 瀹炵幇锛涙棤椤甸潰绾х粍浠舵祴锛堝悗绔?403 宸茶鐩栵級 | 鍙€夛細鍔犻〉闈㈡祴鎴?E2E 闈炵鐞嗗憳鐩撮摼璺宠浆 | REQ-CAT-006 |
+| FIND-WSC-103-R1-004 | P3 | `dirty` 鍦ㄨ緭鍏ユ椂缃綅锛屾垚鍔?`saveRename`/`load` 鍚庢竻闆讹紱鐢ㄦ埛鏀瑰洖鍘熷悕涓嶄細鑷姩鍙栨秷銆屽緟淇濆瓨銆嶆彁绀?| 鍙€夛細涓?`renameMap` 瀵规瘮鍘熷鍚嶅啀绠?dirty | REQ-CAT-006 |
+
+P0/P1 鏈竻闆朵笉寰?`APPROVE`銆傛湰杞?**P0=0锛孭1=0**銆?
+## 妫€鏌ユ竻鍗曪紙瀵圭収閲嶇偣锛?
+### 1. 鑼冨洿 / writeSet
+
+| 椤?| 缁撴灉 |
+|---|---|
+| 鏈换鍔′氦浠?鈯?`writeSet`锛坄catalog/admin/**` + 瀵瑰簲娴嬭瘯锛?| PASS锛堝鐓?DEV 鍙樻洿娓呭崟锛?|
+| 鏈敼 `contracts/**`銆乣frontend/src/api/**`銆乣**/sql/**` | PASS锛堟湰浠诲姟浜や粯闈級 |
+| 鏈敼 `catalog/browse/**` | PASS锛堝彧璇讳緷璧?`CatalogBrowseSeedStore`锛涙湭鍒楀叆 DEV 鍙樻洿锛?|
+| 鏈敼 detail/editor/maintenance/import/overview/chain銆乣ai/rules/**`銆乣product/**`銆乣planning/approved/**` | PASS |
+
+### 2. REQ-CAT-006 / DEC-WSC-003
+
+| 椤?| 璇佹嵁 | 缁撴灉 |
+|---|---|---|
+| 涓夌骇鍒嗘爮澧炴敼锛堢┖闂?琛屼笟/瀛愮被锛?| `CategoryAdminPage` 涓夊垎鏍忥紱`useCategoryAdmin` L1/L2/L3 CRUD | PASS |
+| 寰呬繚瀛樻彁绀?| `dirty` + `data-testid="dirty-hint"` | PASS |
+| 淇濆瓨鍚庣骇鑱斿埛鏂?| 鍐欐垚鍔熷悗 `load()`锛沗selectL1`鈫抈syncL2Selection` | PASS |
+| 鏈夋寕杞界姝㈠垹 + 鏄庣‘鍘熷洜 | `countMountedProducts`鈫?09/`ERR_CATEGORY_HAS_PRODUCTS` + `reason`/`productCount`锛涢泦鎴愭祴 L3/L2/L1 | PASS |
+| 鑷冲皯淇濈暀涓€涓笁绾?| 鍏ㄥ眬 `countCategoriesByLevel("L3")<=1`锛涘崟娴?mock | PASS |
+| 鏈夊瓙鑺傜偣绂佸垹 | `countDirectChildren`锛涢泦鎴愬垹 L2 鏈?L3鈫?09锛涘崟娴?| PASS |
+| 闈炵鐞嗗憳涓嶅彲杈?| 椤靛唴 `router.replace('/catalog')`锛涢泦鎴?PROVIDER/USER鈫?03 `ERR_FORBIDDEN` | PASS |
+
+### 3. 鏋舵瀯 / 瀹夊叏
+
+| 椤?| 缁撴灉 |
+|---|---|
+| Controller 鈫?Service 鈫?SeedStore锛堟湭绌块€忓埌鏃犲叧灞傦級 | PASS |
+| 鍐欐潈闄愪緷璧栦細璇濇嫤鎴櫒锛圕ATEGORY锛? UI 闈炲敮涓€闃叉姢 | PASS锛堥泦鎴?403锛涘墠绔棬绂侊級 |
+| 鏃犲瘑閽ュ叆浠擄紱鏃犳湰浠诲姟 SQL/濂戠害鏀瑰姩 | PASS |
+
+### 4. 娴嬭瘯瑕嗙洊锛堟敮鎾戦獙鏀讹紝涓嶄唬鏇?tester锛?
+| 椤?| 缁撴灉 |
+|---|---|
+| CRUD 涓夌骇 | PASS 鈥?`crud_threeLevels`锛涘墠绔?add L3 + reload |
+| 绂佹鍒犻櫎璐熶緥锛堟寕杞?/ 瀛愯妭鐐癸級 | PASS 鈥?闆嗘垚 + `CategoryAdminServiceTest` |
+| 闈炵鐞嗗憳 403 | PASS 鈥?`nonAdmin_cannotReachCategoryWrite` |
+| 鑷冲皯淇濈暀涓€涓笁绾?| PASS 鈥?`lastL3_globally_forbidden`锛堝崟娴嬶級 |
+| 瀹℃煡澶嶈窇 | 鍚庣 8 tests PASSED锛泇itest 4 tests PASSED |
+
+## 娈嬩綑椋庨櫓锛堜氦 tester锛?
+- 宸ヤ綔鍖哄苟瀛?TASK-WSC-104 browse / 濂戠害绛夋敼鍔紱鍙栬瘉鏃朵互 `catalog/admin` 涓?DEV 娓呭崟涓?103 鍩虹嚎锛屽嬁鎶?104 鍥炲綊绠楄繘鏈换鍔°€?- 鎸傝浇璁℃暟濮旀墭 `CatalogBrowseSeedStore#countMountedProducts`锛堝惈 L3锛夛紱鑻ュ苟琛?104 鍙樻洿绉嶅瓙褰㈢姸锛岄渶鍥炲綊鎸傝浇绂佸垹鏂█銆?- 銆屾渶鍚庝竴鏋?L3銆嶄互鍗曟祴涓轰富锛汦2E/闆嗘垚鍕垮亣璁剧瀛愪粎涓€鏋?L3銆?
+## 鍐崇瓥鏉冨０鏄?
+- 瀹℃煡鑰呮湭淇敼琚涓氬姟浠ｇ爜銆?- 鏈吋浠?developer锛涙湭浠ｆ浛 tester 瀹ｇО娴嬭瘯閫氳繃 / VERIFIED銆?- **decision: APPROVE**锛堣繘鍏ョ嫭绔?tester 闂ㄧ锛夈€?
+## 璁℃暟
+
+| 绾у埆 | 鏁伴噺 |
+|---|---|
+| P0 | 0 |
+| P1 | 0 |
+| P2 | 2 |
+| P3 | 2 |
+# 娴嬭瘯璇佹嵁
+
+```yaml
+evidenceId: EVID-TASK-WSC-102-1
+taskId: TASK-WSC-102
+planId: PLAN-WSC-2.2
+actorInstance: tester-wsc-102
+contracts: wsc-contracts@2.0.0
+basedOn:
+  - planning/tasks/TASK-WSC-102.md
+  - planning/tasks/DEV-TASK-WSC-102.md
+  - planning/tasks/REV-TASK-WSC-102.md
+  - planning/approved/PLAN-WSC-2.2.md
+reviewDecision: APPROVE
+executedAt: 2026-07-31T16:02:10+08:00
+status: PASSED
+```
+
+## 缁撹鎽樿
+
+**PASSED** 鈥?鐙珛 tester-wsc-102 鎸?testScope 澶嶈窇锛氬悗绔?RbacMatrixTest + SessionAuthIntegrationTest 鍏?12 娴?BUILD SUCCESS锛涘墠绔?useCanWrite.spec.ts 3 娴?+ typecheck + build 閫€鍑虹爜 0銆傜櫥鍑?瑙掕壊鍙樻洿鍚庡啓 API 鎷掔粷鐢遍泦鎴愭祴 logout_thenImportWriteApiRejected (401) 涓?roleSwitch_oldSessionImportRejected (鏃т細璇濇嫆缁?+ 鏂?USER 403) 瑕嗙洊骞跺璺戦€氳繃銆傚３灞傘€岄潪绠＄悊鍛樹笉鍙鐩綍缁存姢銆嶄互 useCanWrite/canMaintainCatalog 鍗曟祴涓鸿瘉鎹紱WorkbenchLayout UI E2E 涓嶅湪鏈换鍔?writeSet/testScope 鍙墽琛?E2E 鑼冨洿鍐?-> SKIPPED锛堜笉浼€?PASS锛夈€?
+
+- 妯″潡锛歜ackend/app/data-chain-service (com.shdata.datachain)
+- 瀹℃煡锛歊EV-TASK-WSC-102 APPROVE, P0/P1=0
+- 鏈満 3306/6379 绔彛鎺㈤拡浠呬俊鎭褰曪紝涓嶈鍏?PASSED锛涢泦鎴愭祴 H2+鎺掗櫎 Redis锛屾棤闇€ live MySQL/Redis
+- 鏈慨鏀逛笟鍔′唬鐮佹垨瀹℃煡鎶ュ憡锛涙湭鑷瀹ｇО VERIFIED
+
+璇佹嵁鐩綍锛歚ai/runs/RUN-WSC-002/tester-wsc-102/`
+
+## Layers
+
+| name | command | result | notes / evidence |
+| --- | --- | --- | --- |
+| backend-rbac-unit | mvn -f backend/pom.xml -Dtest=RbacMatrixTest,SessionAuthIntegrationTest test | PASSED | Tests run: 6 鈥?04-mvn-rbac-session.txt, 04-mvn-exit.txt (exitCode=0) |
+| backend-session-integration | same run / SessionAuthIntegrationTest | PASSED | Tests run: 6; total 12 / BUILD SUCCESS 鈥?04-mvn-rbac-session.txt, 03-session-test-methods.txt |
+| session-denial-proof | logout_thenImportWriteApiRejected + roleSwitch_oldSessionImportRejected | PASSED | logout->401; roleSwitch old reject / new USER 403 鈥?03-session-test-methods.txt, 03-session-denial-log.txt (MockMvc+H2) |
+| frontend-useCanWrite | pnpm exec vitest run src/features/auth/composables/useCanWrite.spec.ts | PASSED | 3 tests 鈥?05-vitest-useCanWrite.txt, 05-vitest-exit.txt |
+| frontend-typecheck | pnpm typecheck | PASSED | exitCode=0 鈥?05-typecheck.txt |
+| frontend-build | pnpm build | PASSED | exitCode=0 鈥?05-frontend-build.txt |
+| shell-catalog-maintenance-visibility | unit canMaintainCatalog + static WorkbenchLayout v-if | PASSED (unit) | 05-vitest-cases.txt, 06-shell-visibility-static.txt |
+| shell-ui-e2e | (none in scope) | SKIPPED | no UI E2E in writeSet/testScope 鈥?06-e2e-probe.txt; not faked PASS |
+| env-mysql-redis-probe | local port probe (info) | NOT SCORED | 00-ports-probe.txt; not marked PASSED |
+
+## testScope 瀵圭収
+
+| # | 瑕佹眰 | 缁撴灉 |
+|---|---|---|
+| 1 | BE unit/integration 搂4 matrix + session | PASSED (12/12) |
+| 2 | FE useCanWrite vitest + typecheck/build | PASSED |
+| 3 | logout/role-change write API denial | PASSED (integration re-run) |
+| 4 | non-admin hide catalog maintenance | PASSED (unit); UI E2E SKIPPED |
+
+## 璇佹嵁绾㈢嚎
+
+- env/port probe not marked PASSED
+- no self VERIFIED claim (TESTRUN only)
+- no business code or REV edits
+- no passwords / application-local.yml printed
+- actorInstance=tester-wsc-102 (differs from developer-wsc-102 / code-reviewer-wsc-102)

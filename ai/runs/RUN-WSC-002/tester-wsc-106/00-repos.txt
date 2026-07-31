@@ -1,0 +1,4 @@
+﻿backend module: backend/app/data-chain-service
+frontend: frontend/
+E2E: tests/e2e (W5; SKIPPED if not in executable scope for TASK-WSC-106)
+parallel TASK-WSC-105 detail/editor/chain NOT counted as failure surface

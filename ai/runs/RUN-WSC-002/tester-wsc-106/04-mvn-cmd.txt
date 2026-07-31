@@ -1,0 +1,1 @@
+﻿mvn -f backend/pom.xml "-Dtest=com.shdata.datachain.catalog.maintenance.CatalogMaintenanceIntegrationTest" test

@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
   title: WSC Access Workbench API
-  version: 1.1.0
+  version: 2.0.0
   description: |
-    wsc-contracts@1.1.0 — 接入端工作台最小冻结契约。
+    wsc-contracts@2.0.0 — 接入端工作台 V1.1 冻结契约（三级分类/目录维护/批量导入）。
     统一响应包装：{ code, message, data, correlationId }；成功时 code="0"。
     产品编码格式（DEC-WSC-001）：`{DOMAIN}-{FEATURE}-{NNNN}`，DOMAIN/FEATURE 为大写字母与数字，NNNN 至少 4 位数字。
     OQ-004：产品类型为 OTHER（其他数据产品）时无类型专属字段；服务端忽略或拒绝（400）多余专属字段载荷。
@@ -173,7 +173,7 @@ paths:
       operationId: listCategories
       responses:
         "200":
-          description: 一二级分类
+          description: 一二三级分类（空间/行业/子类）
           content:
             application/json:
               schema:
@@ -263,6 +263,11 @@ paths:
         - name: l2CategoryId
           in: query
           schema: { type: string }
+          description: 行业（二级）；可选
+        - name: l3CategoryId
+          in: query
+          schema: { type: string }
+          description: 子类（三级）；可选
         - name: dataSource
           in: query
           schema: { $ref: "#/components/schemas/DataSource" }
@@ -309,7 +314,7 @@ paths:
                   productCode: MED-EMR-0002
                   productName: 电子病历数据集
                   productType: DATASET
-                  l2CategoryId: "cat-l2-1"
+                  l3CategoryId: "cat-l3-1"
                   typeSpecific:
                     dataset:
                       recordCount: 1000
@@ -319,7 +324,7 @@ paths:
                   productCode: GEN-MISC-0001
                   productName: 其他产品示例
                   productType: OTHER
-                  l2CategoryId: "cat-l2-1"
+                  l3CategoryId: "cat-l3-1"
       responses:
         "200":
           description: 已创建并产生第 1 版上链
@@ -462,6 +467,263 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /catalog/maintenance/entries:
+    get:
+      tags: [catalog]
+      summary: 目录维护列表（条目≡数据产品；REQ-CAT-007）
+      operationId: listMaintenanceEntries
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ALL, MAINTAINED, PENDING]
+            default: ALL
+        - name: l1CategoryId
+          in: query
+          schema: { type: string }
+        - name: l2CategoryId
+          in: query
+          schema: { type: string }
+        - name: l3CategoryId
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        "200":
+          description: 分页列表（page/pageSize/total）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenancePage"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /catalog/maintenance/entries/{productId}:
+    put:
+      tags: [catalog]
+      summary: 单条目录维护关联（挂三级）
+      operationId: updateMaintenanceEntry
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaintenanceAssociate"
+      responses:
+        "200":
+          description: 已关联
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenanceEntry"
+        "400":
+          description: 非三级叶节点
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                leafRequired:
+                  value:
+                    code: ERR_CATEGORY_LEAF_REQUIRED
+                    message: 产品须挂载三级分类节点
+                    data: null
+                    correlationId: "corr-maint-leaf-1"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /catalog/maintenance/entries/batch:
+    post:
+      tags: [catalog]
+      summary: 批量目录维护关联
+      operationId: batchUpdateMaintenanceEntries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaintenanceBatchAssociate"
+      responses:
+        "200":
+          description: 批量结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenanceBatchResult"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /catalog/products/import/template:
+    get:
+      tags: [catalog]
+      summary: 下载批量导入模板（xlsx/csv 列头）
+      operationId: getImportTemplate
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [xlsx, csv]
+            default: xlsx
+      responses:
+        "200":
+          description: 模板文件
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+                format: binary
+
+  /catalog/products/import:
+    post:
+      tags: [catalog]
+      summary: 同步批量导入产品（REQ-CAT-008；V1.1 无异步 job）
+      description: |
+        请求级失败（整单拒绝）：文件 >10MB → ERR_IMPORT_FILE_TOO_LARGE；
+        无法解析/非 xlsx|csv → ERR_IMPORT_FORMAT_INVALID。HTTP 为错误响应，无部分写入。
+        行级失败：文件已接受并处理完后返回成功 envelope + successCount/failureCount/reportId；
+        failureCount>0 时 reportId 必填。ERR_IMPORT_ROW_INVALID 仅作报告内原因码。
+        行业分类列语义：须解析到可挂载三级（三级 id 或「空间/行业/子类」完整路径）；
+        仅二级标签而无三级 → 行级失败。
+      operationId: importProducts
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: ≤10MB；xlsx 或 csv
+      responses:
+        "200":
+          description: 同步导入完成（可含部分行级失败）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseImportResult"
+              examples:
+                allSuccess:
+                  summary: 全成功
+                  value:
+                    code: "0"
+                    message: OK
+                    data:
+                      successCount: 10
+                      failureCount: 0
+                      reportId: null
+                    correlationId: "corr-imp-ok"
+                partial:
+                  summary: 部分成功（行级）
+                  value:
+                    code: "0"
+                    message: OK
+                    data:
+                      successCount: 7
+                      failureCount: 3
+                      reportId: "rep-20260730-001"
+                    correlationId: "corr-imp-partial"
+                allRowFail:
+                  summary: 全失败（行级）
+                  value:
+                    code: "0"
+                    message: OK
+                    data:
+                      successCount: 0
+                      failureCount: 5
+                      reportId: "rep-20260730-002"
+                    correlationId: "corr-imp-rows"
+        "400":
+          description: 请求级拒绝（整单无写入）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                tooLarge:
+                  summary: 文件超限
+                  value:
+                    code: ERR_IMPORT_FILE_TOO_LARGE
+                    message: 导入文件超过 10MB
+                    data: null
+                    correlationId: "corr-imp-size"
+                badFormat:
+                  summary: 格式无法解析
+                  value:
+                    code: ERR_IMPORT_FORMAT_INVALID
+                    message: 无法解析文件或非 xlsx/csv
+                    data: null
+                    correlationId: "corr-imp-fmt"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /catalog/products/import/reports/{reportId}:
+    get:
+      tags: [catalog]
+      summary: 下载导入错误报告（TTL≤24h；白名单字段）
+      operationId: getImportErrorReport
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: 错误报告（行号+产品编码+原因码/文案）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseImportErrorReport"
+              examples:
+                rows:
+                  value:
+                    code: "0"
+                    message: OK
+                    data:
+                      reportId: "rep-20260730-001"
+                      expiresAt: "2026-07-31T08:00:00Z"
+                      rows:
+                        - rowNumber: 4
+                          productCode: "MED-EMR-0099"
+                          reasonCode: ERR_IMPORT_ROW_INVALID
+                          reasonMessage: 行业分类仅二级标签，缺少三级
+                        - rowNumber: 8
+                          productCode: "BAD-CODE"
+                          reasonCode: ERR_PRODUCT_CODE_FORMAT
+                          reasonMessage: 产品编码格式非法
+                    correlationId: "corr-imp-rep"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: 过期或未知 reportId
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                notFound:
+                  value:
+                    code: ERR_IMPORT_REPORT_NOT_FOUND
+                    message: 错误报告不存在或已过期
+                    data: null
+                    correlationId: "corr-imp-rep-404"
+
+
 components:
   securitySchemes:
     SessionCookie:
@@ -560,6 +822,11 @@ components:
                 - ERR_PRODUCT_CODE_FORMAT
                 - ERR_PRODUCT_CODE_CONFLICT
                 - ERR_CATEGORY_HAS_PRODUCTS
+                - ERR_CATEGORY_LEAF_REQUIRED
+                - ERR_MAINTENANCE_FORBIDDEN
+                - ERR_IMPORT_FILE_TOO_LARGE
+                - ERR_IMPORT_FORMAT_INVALID
+                - ERR_IMPORT_REPORT_NOT_FOUND
                 - ERR_FORBIDDEN
                 - "401"
                 - "404"
@@ -752,10 +1019,15 @@ components:
         name: { type: string }
         level:
           type: string
-          enum: [L1, L2]
+          enum: [L1, L2, L3]
+          description: L1=空间 L2=行业 L3=子类
         parentId:
           type: string
           nullable: true
+        pathLabels:
+          type: array
+          items: { type: string }
+          description: 可选；自根到本节点的名称路径
 
     CategoryWrite:
       type: object
@@ -764,11 +1036,11 @@ components:
         name: { type: string }
         level:
           type: string
-          enum: [L1, L2]
+          enum: [L1, L2, L3]
         parentId:
           type: string
           nullable: true
-          description: L2 必填父级 L1 id
+          description: L2 父为 L1；L3 父为 L2；L1 省略
 
     ApiResponseCategory:
       allOf:
@@ -818,14 +1090,16 @@ components:
 
     ProductWrite:
       type: object
-      required: [productCode, productName, productType, l2CategoryId]
+      required: [productCode, productName, productType, l3CategoryId]
       properties:
         productCode:
           $ref: "#/components/schemas/ProductCode"
         productName: { type: string }
         productType:
           $ref: "#/components/schemas/ProductType"
-        l2CategoryId: { type: string }
+        l3CategoryId:
+          type: string
+          description: 须挂载可挂载的三级节点（L3）
         businessCategory: { type: string }
         businessSubCategory: { type: string }
         dataSource: { $ref: "#/components/schemas/DataSource" }
@@ -931,7 +1205,16 @@ components:
         productCode: { $ref: "#/components/schemas/ProductCode" }
         productName: { type: string }
         productType: { $ref: "#/components/schemas/ProductType" }
-        categoryPath: { type: string }
+        categoryPath:
+          type: string
+          description: 三级分类完整路径，如「可信空间/金融/征信」
+        categoryPathParts:
+          type: object
+          description: 存证快照三级路径字段（L1/L2/L3）
+          properties:
+            l1: { type: string }
+            l2: { type: string }
+            l3: { type: string }
         basicInfo:
           type: object
           additionalProperties: true
@@ -967,3 +1250,163 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/CatalogSnapshot"
+
+    MaintenanceStatus:
+      type: string
+      enum: [PENDING, MAINTAINED]
+      description: 待关联 / 已维护；目录维护条目 ≡ 数据产品
+
+    MaintenanceEntry:
+      type: object
+      description: 与 Product 同一资源 id/productCode（不得拆两套冲突实体）
+      required: [id, productCode, productName, maintenanceStatus]
+      properties:
+        id: { type: string }
+        productCode: { $ref: "#/components/schemas/ProductCode" }
+        productName: { type: string }
+        maintenanceStatus: { $ref: "#/components/schemas/MaintenanceStatus" }
+        l3CategoryId: { type: string, nullable: true }
+        categoryPath: { type: string, nullable: true }
+
+    MaintenancePage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaintenanceEntry"
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer, format: int64 }
+
+    MaintenanceAssociate:
+      type: object
+      required: [l3CategoryId]
+      properties:
+        l3CategoryId:
+          type: string
+          description: 目标三级节点 id
+
+    MaintenanceBatchAssociate:
+      type: object
+      required: [productIds, l3CategoryId]
+      properties:
+        productIds:
+          type: array
+          items: { type: string }
+          minItems: 1
+        l3CategoryId: { type: string }
+
+    MaintenanceBatchResult:
+      type: object
+      required: [successCount, failureCount]
+      properties:
+        successCount: { type: integer }
+        failureCount: { type: integer }
+        failures:
+          type: array
+          items:
+            type: object
+            properties:
+              productId: { type: string }
+              reasonCode: { type: string }
+              reasonMessage: { type: string }
+
+    ApiResponseMaintenanceEntry:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/MaintenanceEntry"
+
+    ApiResponseMaintenancePage:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/MaintenancePage"
+
+    ApiResponseMaintenanceBatchResult:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/MaintenanceBatchResult"
+
+    ImportResult:
+      type: object
+      required: [successCount, failureCount]
+      properties:
+        successCount: { type: integer }
+        failureCount: { type: integer }
+        reportId:
+          type: string
+          nullable: true
+          description: failureCount>0 时必填；全成功可空
+
+    ImportTemplateColumns:
+      type: object
+      description: |
+        导入模板列最小集（ISSUE-PA-R1-004）：
+        产品名称、产品编码、产品类型、行业分类、数据来源、更新频率、
+        涉及个人信息、涉及公共数据、交付方式、计费方式、价格。
+        行业分类列：三级 id 或「空间/行业/子类」完整路径。
+      properties:
+        columns:
+          type: array
+          items: { type: string }
+          example:
+            - 产品名称
+            - 产品编码
+            - 产品类型
+            - 行业分类
+            - 数据来源
+            - 更新频率
+            - 涉及个人信息
+            - 涉及公共数据
+            - 交付方式
+            - 计费方式
+            - 价格
+
+    ImportErrorRow:
+      type: object
+      required: [rowNumber, reasonCode, reasonMessage]
+      properties:
+        rowNumber: { type: integer }
+        productCode: { type: string, nullable: true }
+        reasonCode:
+          type: string
+          description: 报告内原因码；含 ERR_IMPORT_ROW_INVALID（不作整单 HTTP code）
+        reasonMessage: { type: string }
+
+    ImportErrorReport:
+      type: object
+      required: [reportId, expiresAt, rows]
+      properties:
+        reportId: { type: string }
+        expiresAt: { type: string, format: date-time }
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportErrorRow"
+
+    ApiResponseImportResult:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ImportResult"
+
+    ApiResponseImportErrorReport:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ImportErrorReport"
+

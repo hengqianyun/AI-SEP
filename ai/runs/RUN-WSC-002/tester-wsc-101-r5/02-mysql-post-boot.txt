@@ -1,0 +1,7 @@
+exit=0
+Tables_in_wsc
+flyway_schema_history
+version	description	success
+0	<< Flyway Baseline >>	1
+
+

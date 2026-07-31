@@ -1,0 +1,1 @@
+mvn -f backend/pom.xml "-Dtest=com.shdata.datachain.security.SessionAuthIntegrationTest,com.shdata.datachain.rbac.RbacMatrixTest" test

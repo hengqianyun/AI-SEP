@@ -1,0 +1,18 @@
+﻿testScope coverage map (tester-wsc-104)
+1. tag switch (L1/L2) -> product set
+   BE: listCategories_containsL1L2L3; listProducts_filterByL1AndProductType; listProducts_filterByL2_includesChildL3Products; listProducts_filterByL3
+   FE: resolveIndustryQuery maps L2 and L3; default filters include industryFilterId
+2. filter empty
+   BE: listProducts_filterNoMatch_returnsEmptyList
+   FE: empty message is explicit and stable (testid catalog-empty)
+3. scroll/load-more page/pageSize/total
+   BE: listProducts_pagination_pagePageSizeTotal_andFilterPreservedOnPage2
+   FE: groupProductsByL3 preserves filter semantics for load-more append order (no mock page flip - REV P2 noted; BE covers pagination)
+4. filter retained after load-more
+   BE: listProducts_pagination_pagePageSizeTotal_andFilterPreservedOnPage2
+   FE: groupProductsByL3 preserves filter semantics for load-more append order
+5. preview three-level path + ACL entry
+   BE: getProduct_previewFieldsAndThreeLevelPath
+   FE: product type labels; (write visibility is WSC-102 useCanWrite - browse page uses productWriteVisible)
+6. UI Playwright E2E
+   SKIPPED - not in writeSet/testScope executable E2E

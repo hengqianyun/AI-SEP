@@ -1,0 +1,28 @@
+# Local-only overrides (gitignored). Do NOT commit.
+# Redis: human-confirmed option B for TASK-WSC-101 retest.
+# MySQL: localhost defaults (root/root) — human stated MySQL is running.
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/wsc?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: ***REDACTED***
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    host: 58.33.102.13
+    port: 16379
+    password: ***REDACTED***
+    database: 0
+    timeout: 5000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:sql/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+
+logging:
+  level:
+    com.wsc: INFO

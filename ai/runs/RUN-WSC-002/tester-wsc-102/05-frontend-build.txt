@@ -1,0 +1,26 @@
+
+> data-chain-static@0.1.0 build C:\WorkSpace\AI-SEP\frontend
+> vue-tsc --noEmit -p tsconfig.json && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 92 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                               0.40 kB │ gzip:  0.31 kB
+dist/assets/CategoryAdminPage-CQaGbC6C.css    1.37 kB │ gzip:  0.53 kB
+dist/assets/ProductEditorPage-BuQwkms2.css    1.40 kB │ gzip:  0.54 kB
+dist/assets/ProductDetailPage-B3QMuw-N.css    1.60 kB │ gzip:  0.62 kB
+dist/assets/ChainPage-DaQsoncR.css            2.73 kB │ gzip:  0.88 kB
+dist/assets/index-CiHsJ14Y.css                3.58 kB │ gzip:  1.12 kB
+dist/assets/CatalogBrowsePage-Bga-mny-.css    3.61 kB │ gzip:  1.09 kB
+dist/assets/OverviewPage-Dc0OLp2Q.css         4.72 kB │ gzip:  1.35 kB
+dist/assets/catalog-CvWV9p8e.js               0.80 kB │ gzip:  0.36 kB
+dist/assets/CategoryAdminPage-DGK56hoP.js     4.63 kB │ gzip:  1.99 kB
+dist/assets/ProductDetailPage-COgrGpPS.js     5.45 kB │ gzip:  2.41 kB
+dist/assets/ChainPage-BQyUyXoi.js             6.81 kB │ gzip:  2.70 kB
+dist/assets/ProductEditorPage-6LbkFS1y.js    10.00 kB │ gzip:  3.70 kB
+dist/assets/CatalogBrowsePage-BshGqVJf.js    10.43 kB │ gzip:  4.18 kB
+dist/assets/OverviewPage-ja759733.js         10.84 kB │ gzip:  3.82 kB
+dist/assets/index-DbZDF9G3.js               108.70 kB │ gzip: 42.71 kB
+✓ built in 1.15s

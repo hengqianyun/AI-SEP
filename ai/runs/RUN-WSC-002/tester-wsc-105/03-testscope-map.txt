@@ -1,0 +1,21 @@
+﻿# testScope map TASK-WSC-105 (tester-wsc-105)
+
+1. code conflict / format
+   - ProductEditorIntegrationTest#update_incrementsVersion_oldReadable_conflictAndFormat
+   - ERR_PRODUCT_CODE_FORMAT, ERR_PRODUCT_CODE_CONFLICT (HTTP 409)
+2. version increment + old snapshot readable
+   - create_other_version1_fourFields_andRejectExtraTypeSpecific (v1)
+   - update_incrementsVersion_oldReadable_conflictAndFormat (v1->v2, old v1 snapshot OK)
+3. attestation failure no half product
+   - attestationFailure_noHalfProduct_noOrphanChain (ERR_ATTESTATION)
+4. snapshot by versionId + L3 path
+   - ChainApiIntegrationTest#getSnapshot_byVersionId (categoryPath + categoryPathParts)
+   - editor create/update snapshot assertions
+5. section4 product write matrix (ordinary user no write)
+   - ordinaryUser_productWriteForbidden (403 ERR_FORBIDDEN)
+6. L3 leaf required
+   - create_rejectsNonL3_andL2Only (ERR_CATEGORY_LEAF_REQUIRED)
+7. FE
+   - useProductEditor: L3 block, OTHER, cascade
+   - useProductDetail: three-level path
+   - useChainPage: formatCategoryPath

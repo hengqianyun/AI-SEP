@@ -1,0 +1,16 @@
+local_yml_exists=True
+username_found=True
+password_found=True
+url_found=True
+url_redacted=jdbc:mysql://localhost:3306/wsc?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+parsed_host=localhost port=3306 db=wsc
+using_username=root
+=== ping ===
+cmd_redacted=C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe --host=localhost --port=3306 --user=root --password=*** --execute=SELECT 1 AS ping;
+exit=1
+stdout:
+
+stderr:
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+

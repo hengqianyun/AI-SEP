@@ -1,0 +1,3 @@
+mysql 127.0.0.1:3306 ok=True
+redis 58.33.102.13:16379 ok=True
+application-local.yml exists=True

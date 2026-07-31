@@ -1,0 +1,10 @@
+﻿FOUND: C:\WorkSpace\AI-SEP\backend\app\data-chain-service\src\test\java\com\shdata\datachain\catalog\maintenance\CatalogMaintenanceIntegrationTest.java
+class CatalogMaintenanceIntegrationTest {
+@Test
+void pending_to_maintained_singleAssociate() throws Exception {
+@Test
+void batchAssociate_and_leafRequired() throws Exception {
+@Test
+void pagination_pagePageSizeTotal() throws Exception {
+@Test
+void nonAdmin_forbidden() throws Exception {

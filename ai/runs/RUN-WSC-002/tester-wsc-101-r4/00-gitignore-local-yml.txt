@@ -1,0 +1,1 @@
+﻿.gitignore:14:**/application-local.yml	backend/app/wsc-service/src/main/resources/application-local.yml

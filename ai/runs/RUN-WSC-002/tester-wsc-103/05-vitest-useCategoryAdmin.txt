@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 C:/WorkSpace/AI-SEP/frontend
+
+ ✓ src/features/catalog/admin/composables/useCategoryAdmin.spec.ts (4 tests) 20ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  16:35:41
+   Duration  1.50s (transform 162ms, setup 0ms, collect 463ms, tests 20ms, environment 0ms, prepare 422ms)
+

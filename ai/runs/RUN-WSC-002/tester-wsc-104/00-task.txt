@@ -1,0 +1,63 @@
+﻿# 浠诲姟鍖?TASK-WSC-104
+
+```yaml
+taskId: TASK-WSC-104
+planId: PLAN-WSC-2.2
+snapshotId: SNAP-WSC-002
+runId: RUN-WSC-002
+status: DISPATCHED
+wave: W3
+parallelWith:
+  - TASK-WSC-103
+goal: |
+  椤堕儴绌洪棿/琛屼笟鏍囩锛涘瓙绫诲垎缁勫垪琛紱棰勮涓庝笁绾ц矾寰勶紱绛涢€夊榻愪笁绾э紱
+  婊氬姩鍔犺浇鏇村锛坧age/pageSize/total锛夈€?reqs:
+  - REQ-CAT-001
+  - REQ-CAT-002
+  - REQ-CAT-003
+dependsOn:
+  - TASK-WSC-102
+denyModify:
+  - contracts/**
+  - frontend/src/api/**
+  - "**/sql/**"
+  - frontend/src/features/catalog/admin/**
+  - frontend/src/features/catalog/detail/**
+  - frontend/src/features/catalog/editor/**
+  - frontend/src/features/catalog/maintenance/**
+  - frontend/src/features/catalog/import/**
+  - backend/app/*/src/main/java/**/catalog/admin/**
+  - backend/app/*/src/main/java/**/catalog/detail/**
+  - backend/app/*/src/main/java/**/catalog/editor/**
+  - backend/app/*/src/main/java/**/catalog/maintenance/**
+  - backend/app/*/src/main/java/**/catalog/import/**
+  - ai/rules/**
+  - product/**
+  - planning/**
+readSet:
+  - contracts/**锛堝彧璇伙級
+  - frontend/src/api/**锛堝彧璇伙級
+  - product/requirements/SNAP-WSC-002.md
+  - planning/approved/PLAN-WSC-2.2.md
+writeSet:
+  - frontend/src/features/catalog/browse/**
+  - backend/app/*/src/main/java/**/catalog/browse/**
+  - 瀵瑰簲娴嬭瘯
+riskTags: []
+actorInstance: developer-wsc-104
+codeReviewerMustDiffer: true
+mergeConstraint: 绂佹涓?TASK-WSC-103 娣峰啓鍚屼竴 PR
+```
+
+## 楠屾敹瑕佺偣
+
+瑙?`planning/approved/PLAN-WSC-2.2.md` 搂 TASK-WSC-104銆?
+- 鏍囩鍒囨崲鏇存柊浜у搧闆嗭紱鍒嗚妭瀛楁绗﹀悎 SNAP
+- 婊氬姩鍔犺浇鏈?loading 涓斾繚鐣欐粴鍔ㄤ綅缃笌绛涢€夛紱鍒嗛〉瀛楁 `page`/`pageSize`/`total`
+- testScope锛氭爣绛惧垏鎹紱绛涢€夌┖鎬侊紱婊氬姩鍔犺浇锛涢瑙堟潈闄愬叆鍙ｏ紱绛涢€?鈫?load-more 浠嶆弧瓒崇瓫閫?
+## 娲惧彂璁板綍
+
+- runId: RUN-WSC-002
+- dispatchedAt: 2026-07-31T16:04:00+08:00
+- wave: W3 骞惰锛堚垾 TASK-WSC-103锛?- dependsOnVerified: TASK-WSC-102
+

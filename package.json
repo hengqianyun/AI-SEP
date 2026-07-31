@@ -1,12 +1,14 @@
 {
-  "name": "wsc-monorepo",
+  "name": "ai-sep-control-plane",
   "private": true,
+  "description": "AI-SEP 控制面本地仓；前后端实现已拆至 data-chain-static / data-chain-backend",
   "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "dev:frontend": "pnpm --filter frontend dev",
-    "build:frontend": "pnpm --filter frontend build",
-    "typecheck:frontend": "pnpm --filter frontend typecheck",
-    "lint:frontend": "pnpm --filter frontend lint",
+    "dev:frontend": "pnpm --filter data-chain-static dev",
+    "build:frontend": "pnpm --filter data-chain-static build",
+    "typecheck:frontend": "pnpm --filter data-chain-static typecheck",
+    "lint:frontend": "pnpm --filter data-chain-static lint",
+    "test:frontend": "pnpm --filter data-chain-static test",
     "test:e2e": "pnpm --filter @wsc/e2e test"
   },
   "engines": {

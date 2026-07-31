@@ -1,0 +1,14 @@
+line 7 indent=4 url: jdbc:mysql://localhost:3306/wsc?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+line 8 indent=4 username: root
+line 9 indent=4 key=password
+line 10 indent=4 driver-class-name: com.mysql.cj.jdbc.Driver
+line 12 indent=4 host: 58.33.102.13
+line 13 indent=4 port: 16379
+line 14 indent=4 key=password
+line 15 indent=4 database: 0
+line 16 indent=4 timeout: 5000
+line 19 indent=6 ddl-auto: validate
+line 21 indent=4 enabled: true
+line 22 indent=4 locations: classpath:sql/migration
+line 23 indent=4 baseline-on-migrate: true
+line 24 indent=4 baseline-version: 0

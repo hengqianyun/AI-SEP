@@ -1,0 +1,2 @@
+mysql_auth: PASSED via root (pw len=6; not logged)
+host=127.0.0.1 protocol=TCP SELECT 1 ok

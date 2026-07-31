@@ -1,0 +1,14 @@
+{
+  "evidenceId": "EVID-TASK-WSC-102-1",
+  "taskId": "TASK-WSC-102",
+  "actorInstance": "tester-wsc-102",
+  "status": "PASSED",
+  "reviewDecision": "APPROVE",
+  "contracts": "wsc-contracts@2.0.0",
+  "backendTests": "12/12 PASSED",
+  "frontendVitest": "3/3 PASSED",
+  "sessionDenial": "SessionAuthIntegrationTest logout+roleSwitch PASSED",
+  "shellE2E": "SKIPPED",
+  "executedAt": "2026-07-31T16:02:10+08:00",
+  "testrunPath": "planning/tasks/TESTRUN-TASK-WSC-102.md"
+}

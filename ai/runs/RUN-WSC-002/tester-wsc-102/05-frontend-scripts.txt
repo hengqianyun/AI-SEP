@@ -1,0 +1,4 @@
+    "build": "vue-tsc --noEmit -p tsconfig.json && vite build",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json --pretty false",
+    "lint": "echo \"lint placeholder: no eslint config yet\" && exit 0",
+    "test": "vitest run",

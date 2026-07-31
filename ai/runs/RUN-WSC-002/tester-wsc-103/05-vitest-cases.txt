@@ -1,0 +1,7 @@
+﻿pnpm exec vitest run src/features/catalog/admin/composables/useCategoryAdmin.spec.ts
+cases:
+- loads three levels and cascades L2/L3 selection
+- surfaces delete rejection reason (mounted / last-l3)
+- marks dirty pending-save hint on rename input
+- adds L3 under selected L2 then reloads
+result: 4 passed / EXIT=0

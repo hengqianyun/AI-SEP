@@ -1,0 +1,30 @@
+# wsc-contracts@2.0.0 �?RBAC 可测矩阵
+# 对齐 PLAN-WSC-2.2 §4 / REQ-RBAC-001 / REQ-SHELL-001
+
+version: "2.0.0"
+package: wsc-contracts
+
+roles:
+  - ADMIN      # 管理�?  - PROVIDER   # 提供�?  - USER       # 普通用�?
+matrix:
+  - role: ADMIN
+    categoryMaintainUI: visible
+    categoryWriteApi: { expect: 200, on: valid }
+    catalogMaintenanceUI: visible
+    catalogMaintenanceApi: { expect: 200, on: valid }
+    productWriteUI: visible
+    productWriteApi: { expect: 200, on: valid }
+    productImportUI: visible
+    productImportApi: { expect: 200, on: valid }
+    importReportGet: { expect: 200, on: ownOrAdmin }
+
+  - role: PROVIDER
+    categoryMaintainUI: hidden
+    categoryWriteApi: { expect: 403, code: ERR_FORBIDDEN }
+    catalogMaintenanceUI: hidden
+    catalogMaintenanceApi: { expect: 403, code: ERR_MAINTENANCE_FORBIDDEN }
+    productWriteUI: visible
+    productWriteApi: { expect: 200, on: valid }
+    productImportUI: visible
+    productImportApi: { expect: 200, on: valid }
+    importReportGet: { expect: 200, on: importer }

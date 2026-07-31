@@ -1,7 +1,8 @@
-# wsc-contracts@1.1.0 — 错误码目录（最小集）
+# wsc-contracts@2.0.0 — 错误码目录
 # 与 contracts/openapi/openapi.yaml 示例及统一响应包装一致
+# 继承 V1.0 最小集；V1.1 新增导入/分类叶节点/维护/报告码
 
-version: "1.1.0"
+version: "2.0.0"
 package: wsc-contracts
 
 codes:
@@ -9,21 +10,59 @@ codes:
     httpStatus: 400
     code: ERR_PRODUCT_CODE_FORMAT
     message: "产品编码格式非法，须符合 {DOMAIN}-{FEATURE}-{NNNN}"
-    refs: [DEC-WSC-001, REQ-CAT-004, REQ-CAT-005]
+    refs: [DEC-WSC-001, REQ-CAT-004, REQ-CAT-005, REQ-CAT-008]
 
   ERR_PRODUCT_CODE_CONFLICT:
     httpStatus: 409
     code: ERR_PRODUCT_CODE_CONFLICT
     message: "产品编码已存在"
-    refs: [DEC-WSC-001, REQ-CAT-005]
+    refs: [DEC-WSC-001, REQ-CAT-005, REQ-CAT-008]
 
   ERR_CATEGORY_HAS_PRODUCTS:
     httpStatus: 409
     code: ERR_CATEGORY_HAS_PRODUCTS
     message: "分类下仍有挂载产品，禁止删除"
-    # data 须含 reason 与 productCount（挂载数量）
     dataFields: [reason, productCount]
     refs: [DEC-WSC-003, REQ-CAT-006]
+
+  ERR_CATEGORY_LEAF_REQUIRED:
+    httpStatus: 400
+    code: ERR_CATEGORY_LEAF_REQUIRED
+    message: "产品须挂载三级分类节点"
+    refs: [REQ-CAT-005, REQ-CAT-007, REQ-CAT-008]
+
+  ERR_MAINTENANCE_FORBIDDEN:
+    httpStatus: 403
+    code: ERR_MAINTENANCE_FORBIDDEN
+    message: "当前角色无权执行目录维护"
+    refs: [REQ-RBAC-001, REQ-CAT-007]
+
+  ERR_IMPORT_FILE_TOO_LARGE:
+    httpStatus: 400
+    code: ERR_IMPORT_FILE_TOO_LARGE
+    message: "导入文件超过 10MB"
+    scope: request
+    refs: [REQ-CAT-008, PLAN-WSC-2.2 §3.1]
+
+  ERR_IMPORT_FORMAT_INVALID:
+    httpStatus: 400
+    code: ERR_IMPORT_FORMAT_INVALID
+    message: "无法解析文件或非 xlsx/csv"
+    scope: request
+    refs: [REQ-CAT-008, PLAN-WSC-2.2 §3.1]
+
+  ERR_IMPORT_ROW_INVALID:
+    httpStatus: null
+    code: ERR_IMPORT_ROW_INVALID
+    message: "行级校验失败（仅出现在错误报告内，不作整单 HTTP envelope code）"
+    scope: report-row
+    refs: [REQ-CAT-008, PLAN-WSC-2.2 §3.1 ISSUE-API-R1-004]
+
+  ERR_IMPORT_REPORT_NOT_FOUND:
+    httpStatus: 404
+    code: ERR_IMPORT_REPORT_NOT_FOUND
+    message: "错误报告不存在或已过期"
+    refs: [REQ-CAT-008, PLAN-WSC-2.2 §3.5]
 
   ERR_FORBIDDEN:
     httpStatus: 403
@@ -34,3 +73,9 @@ codes:
 envelope:
   fields: [code, message, data, correlationId]
   successCode: "0"
+
+importSemantics:
+  requestLevel: [ERR_IMPORT_FILE_TOO_LARGE, ERR_IMPORT_FORMAT_INVALID]
+  rowLevelInReportOnly: [ERR_IMPORT_ROW_INVALID]
+  reportTtlHours: 24
+  reportFieldsWhitelist: [rowNumber, productCode, reasonCode, reasonMessage]

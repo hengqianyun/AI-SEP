@@ -1,0 +1,28 @@
+# repos.yaml — 实现仓与控制面分离（WSC / data-chain）
+# AI-SEP 控制面保留本地；前后端推送至独立 Codeup 仓库。
+projectId: WSC
+controlPlane: .
+mode: multi-repo
+repositories:
+  data-chain-static:
+    role: frontend
+    url: https://codeup.aliyun.com/5f4356276207a1a8b17f985c/SH-BIGDATA/data-chain/data-chain-static.git
+    localPath: frontend
+    packageName: data-chain-static
+    layoutAlias: frontend/**
+    notes: "Vue 静态站；pnpm build → dist/；VITE_API_BASE_URL 指向后端"
+  data-chain-backend:
+    role: backend
+    url: https://codeup.aliyun.com/5f4356276207a1a8b17f985c/SH-BIGDATA/data-chain/data-chain-backend.git
+    localPath: backend
+    artifact: app/data-chain-service
+    layoutAlias: backend/**
+    notes: "唯一服务模块 app/data-chain-service；业务包统一 com.shdata.datachain.*；CORS 见 WSC_CORS_ALLOWED_ORIGINS"
+contracts:
+  source: controlPlane
+  path: contracts/
+  versionFile: contracts/VERSION
+isolation:
+  # 任务派发时按仓写集隔离；state.yaml 仍只在本控制面 Run 下单写
+  stateOwner: controlPlane
+  workerWrites: [data-chain-static, data-chain-backend]

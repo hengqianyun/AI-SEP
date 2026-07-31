@@ -1,0 +1,3 @@
+﻿# Overview smoke — SKIPPED
+reason: spring-boot profile=local failed to start (MySQL Access denied 1045)
+/health and /doc.html not probed — app not listening

@@ -1,0 +1,50 @@
+| ISSUE-SA-R1-001 | P1 | §5 全文内联 TASK-WSC-102..106 的 dependsOn/writeSet/denyModify/acceptance/testScope |
+| ISSUE-PE-R1-002 | P1 | 同 SA-001；另内联 §1.3、§2、§4、§7、§8（禁止「同 2.0」） |
+| ISSUE-QA-R1-006 | P2 | 101 testScope：overview 只读 smoke（metrics + 最新流） |
+| ISSUE-PA-R1-004 | P1 | §3.1 模板列最小集 + 三级分类列语义；107 testScope |
+| ISSUE-QA-R1-003 | P1 | 107 testScope：partial-success fixture + required-field-missing；§6.1 E2E 引用 |
+| ISSUE-QA-R1-005 | P2 | 107 testScope：报告字段白名单负例；临时文件清理可测手段 |
+| ISSUE-SEC-R1-002 | P1 | §3.5/107：报告下载鉴权+授权；testScope 负例 |
+| ISSUE-SEC-R1-001 | P1 | §3.3 会话模型继承 PLAN-WSC-1.1 §3.2；102 acceptance/testScope 负例 |
+- OQ-V11-003：**目录维护条目 ≡ 数据产品**（同一可关联实体）；拆分须新 DEC。
+- 会话/鉴权：**V1.1 沿用 PLAN-WSC-1.1 §3.2**（见本计划 §3.3）。
+| 资源模型 | **目录维护条目 ≡ 数据产品**（同一资源 id/编码）；OpenAPI 不得拆两套冲突实体 |
+| OpenAPI | 三级分类 CRUD；目录维护关联（单条/批量）；产品/上链/总览适配三级路径；批量导入（见下） |
+| RBAC | 见 §4 |
+| 前端写入口 | 角色变更后立即按 §4 更新可见性；**不得**作为唯一防护 |
+| 目录维护列表 | 列表 loading | 无条目/筛选空态 | 加载失败 | 单条/批量保存成功反馈 |
+| 角色 | 三级分类维护 | 目录维护 | 新增/编辑 | 批量导入 | 对应写 API |
+TASK-WSC-102 侧重壳层+会话过滤器；103/106/107 侧重各写路径落地后回归。
+- `acceptance`:
+- `testScope`:
+### TASK-WSC-102 — 壳层与 RBAC 增量
+- `objective`: 实现/保持 §3.3 会话鉴权；管理员侧栏「目录维护」；占位菜单未开放；三角色写入口含批量导入可见性；写 API 403 对齐 §4；角色变更后目录维护与导入入口立即更新且旧会话写 API 拒绝
+- `readSet`: `contracts/**`；`frontend/src/api/**`（只读）；根路由清单；SNAP-WSC-002；本计划 §3.3/§4
+- `acceptance`:
+  - §4 矩阵壳层侧通过
+  - 角色切换后目录维护与导入入口立即更新
+  - **沿用 §3.3**：登出或角色/权限变更后，分类维护/目录维护/导入等写 API **拒绝**（ISSUE-SEC-R1-001）
+- `testScope`:
+  - §4 矩阵（壳层+过滤器）；非管理员不可见目录维护
+  - 至少一条「登出或角色变更后写 API 拒绝」可测用例（覆盖分类维护或目录维护或导入之一即可，建议覆盖导入写路径）
+- `dependsOn`: `[TASK-WSC-102]`
+- `acceptance`: 三级分栏增改；级联刷新；非管理员不可达；删挂载分类返回明确错误码；至少保留一个三级
+- `testScope`: CRUD；禁止删除负例；非管理员 403；至少保留一个三级
+- `dependsOn`: `[TASK-WSC-102]`
+- `acceptance`: 标签切换更新产品集；分节字段符合 SNAP；滚动加载有 loading 且保留滚动位置与筛选；分页契约字段为 `page`/`pageSize`/`total`
+- `testScope`:
+- `acceptance`: 三级路径展示/选择；新建 v1 / 编辑递增；CHAIN 快照含三级；普通用户无编辑
+- `testScope`: 编码冲突；版本递增；适配失败无半成品；快照按 versionId；§4 产品写矩阵回归
+### TASK-WSC-106 — 目录维护（关联）
+- `objective`: 目录维护页：全部/已维护/待关联；一二三级筛选；分页（`page`/`pageSize`/`total`）；单条维护；批量关联
+- `acceptance`: 状态页签与筛选；单条保存/取消；批量栏数量与批量保存；提供方/普通用户不可达；分页字段同 Browse 约定
+- `testScope`: 待关联→已维护；批量关联；非管理员 403；分页
+- `acceptance`:
+  - §4 权限；目录页弹窗入口可达；关闭后回到目录浏览
+- `testScope`:
+  T101[TASK-WSC-101] --> T102[TASK-WSC-102]
+| 3 | 目录维护：待关联→已维护 | CAT-007 |
+3. 独立 `tester` 执行该任务 `testScope`；失败不得标通过。
+| 权限变更后旧会话仍可写 | §3.3 吊销；102 负例 | 紧急吊销全部会话 |
+| 102 | SHELL-001、RBAC-001（含 §3.3 会话） |
+- [x] 任务 101..107 全文内联 dependsOn、writeSet、denyModify、acceptance、testScope（无「同 2.0」）

@@ -1,0 +1,18 @@
+﻿{
+  "evidenceId": "EVID-TASK-WSC-106-1",
+  "taskId": "TASK-WSC-106",
+  "actorInstance": "tester-wsc-106",
+  "status": "PASSED",
+  "executedAt": "2026-07-31T17:51:40+08:00",
+  "layers": {
+    "backend-CatalogMaintenanceIntegrationTest": {"result": "PASSED", "tests": 4, "exitCode": 0},
+    "frontend-useCatalogMaintenance": {"result": "PASSED", "tests": 4, "exitCode": 0},
+    "frontend-typecheck": {"result": "PASSED", "exitCode": 0},
+    "ui-e2e-maintenance": {"result": "SKIPPED"}
+  },
+  "exitCodes": {
+    "mvn": 0,
+    "vitest": 0,
+    "typecheck": 0
+  }
+}

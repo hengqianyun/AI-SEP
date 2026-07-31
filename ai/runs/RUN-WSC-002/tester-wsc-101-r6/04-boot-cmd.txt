@@ -1,0 +1,1 @@
+cmd=mvn -f backend/app/data-chain-service/pom.xml spring-boot:run -Dspring-boot.run.profiles=local -Dspring-boot.run.jvmArguments=-Dfile.encoding=UTF-8

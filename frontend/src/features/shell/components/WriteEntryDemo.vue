@@ -7,13 +7,18 @@ import { useCanWrite } from '@/features/auth/composables/useCanWrite'
 const router = useRouter()
 const auth = useAuthStore()
 const { role } = storeToRefs(auth)
-const { categoryMaintainVisible, productWriteVisible } = useCanWrite(role)
+const {
+  categoryMaintainVisible,
+  catalogMaintenanceVisible,
+  productWriteVisible,
+  productImportVisible,
+} = useCanWrite(role)
 </script>
 
 <template>
   <section class="write-demo" aria-label="写入口演示">
     <h2>写入口（按角色）</h2>
-    <p class="muted">壳层入口 · 跳转至目录写路径</p>
+    <p class="muted">壳层入口 · 角色变更后立即更新可见性</p>
     <div class="actions">
       <button
         v-if="categoryMaintainVisible"
@@ -24,6 +29,14 @@ const { categoryMaintainVisible, productWriteVisible } = useCanWrite(role)
         维护行业分类
       </button>
       <button
+        v-if="catalogMaintenanceVisible"
+        type="button"
+        class="primary"
+        @click="router.push('/catalog/maintenance')"
+      >
+        目录维护
+      </button>
+      <button
         v-if="productWriteVisible"
         type="button"
         class="primary"
@@ -31,8 +44,21 @@ const { categoryMaintainVisible, productWriteVisible } = useCanWrite(role)
       >
         新增产品
       </button>
+      <button
+        v-if="productImportVisible"
+        type="button"
+        class="primary"
+        @click="router.push({ path: '/catalog', query: { import: '1' } })"
+      >
+        批量导入
+      </button>
       <p
-        v-if="!categoryMaintainVisible && !productWriteVisible"
+        v-if="
+          !categoryMaintainVisible &&
+          !catalogMaintenanceVisible &&
+          !productWriteVisible &&
+          !productImportVisible
+        "
         class="empty"
       >
         当前角色无目录写入口

@@ -12,6 +12,11 @@
 | 产品说明（模板自身） | [`product/prd/v1.0.md`](./product/prd/v1.0.md)（状态：`DRAFT`） |
 | 实例化勾选 | [`PROJECT-CUSTOMIZATION.md`](./PROJECT-CUSTOMIZATION.md) |
 | 人工分工 | [`PROJECT-CUSTOMIZATION-ASSIGNMENTS.md`](./PROJECT-CUSTOMIZATION-ASSIGNMENTS.md) |
+| 实现仓映射 | [`ai/rules/project/repos.yaml`](./ai/rules/project/repos.yaml)（前端/后端独立 Codeup 仓） |
+
+> **本仓角色**：AI-SEP **控制面**（产品/规划/Run）保留本地。业务实现推送至：  
+> - 前端 [`data-chain-static`](https://codeup.aliyun.com/5f4356276207a1a8b17f985c/SH-BIGDATA/data-chain/data-chain-static.git)（目录 `frontend/`）  
+> - 后端 [`data-chain-backend`](https://codeup.aliyun.com/5f4356276207a1a8b17f985c/SH-BIGDATA/data-chain/data-chain-backend.git)（目录 `backend/`）  
 
 ---
 

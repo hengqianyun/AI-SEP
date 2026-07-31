@@ -1,0 +1,2 @@
+﻿# /health /doc.html — NOT RUN
+blocker: app did not start under profile local (FlywaySqlException / Access denied 1045)

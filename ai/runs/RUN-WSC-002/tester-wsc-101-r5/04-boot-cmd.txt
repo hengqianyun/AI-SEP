@@ -1,0 +1,1 @@
+cmd=java -jar backend\app\wsc-service\target\wsc-service-0.2.0-SNAPSHOT.jar --spring.profiles.active=local --spring.config.additional-location=optional:file:backend/app/wsc-service/src/main/resources/

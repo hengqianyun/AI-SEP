@@ -1,0 +1,3 @@
+module=backend/app/data-chain-service (renamed from wsc-service)
+flyway-mysql_present=True
+flyway-core_present=True

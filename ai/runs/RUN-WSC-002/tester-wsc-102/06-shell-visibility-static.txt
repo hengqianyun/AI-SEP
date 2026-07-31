@@ -1,0 +1,33 @@
+WorkbenchLayout.vue:3:import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+WorkbenchLayout.vue:6:import { canMaintainCatalog } from '@/features/auth/composables/useCanWrite'
+WorkbenchLayout.vue:12:const route = useRoute()
+WorkbenchLayout.vue:13:const router = useRouter()
+WorkbenchLayout.vue:15:const catalogMaintenanceVisible = computed(() => canMaintainCatalog(role.value))
+WorkbenchLayout.vue:63:v-if="catalogMaintenanceVisible"
+WorkbenchLayout.vue:68:目录维护
+WorkbenchLayout.vue:85:<div v-if="session" class="user">{{ session.displayName }}</div>
+WorkbenchLayout.vue:173:.enterprise .user {
+useCanWrite.ts:6:return role === 'ADMIN'
+useCanWrite.ts:9:/** 目录维护（关联）— 仅管理员。 */
+useCanWrite.ts:10:export function canMaintainCatalog(role: Role | null | undefined): boolean {
+useCanWrite.ts:11:return role === 'ADMIN'
+useCanWrite.ts:15:return role === 'ADMIN' || role === 'PROVIDER'
+useCanWrite.ts:20:return role === 'ADMIN' || role === 'PROVIDER'
+useCanWrite.ts:25:const catalogMaintenanceVisible = computed(() => canMaintainCatalog(role.value))
+useCanWrite.ts:30:catalogMaintenanceVisible,
+useCanWrite.spec.ts:4:canMaintainCatalog,
+useCanWrite.spec.ts:10:it('ADMIN sees category, catalog maintenance, product write, import', () => {
+useCanWrite.spec.ts:11:expect(canMaintainCategory('ADMIN')).toBe(true)
+useCanWrite.spec.ts:12:expect(canMaintainCatalog('ADMIN')).toBe(true)
+useCanWrite.spec.ts:13:expect(canWriteProduct('ADMIN')).toBe(true)
+useCanWrite.spec.ts:14:expect(canImportProduct('ADMIN')).toBe(true)
+useCanWrite.spec.ts:17:it('PROVIDER hides category/catalog maintenance, shows product write and import', () => {
+useCanWrite.spec.ts:18:expect(canMaintainCategory('PROVIDER')).toBe(false)
+useCanWrite.spec.ts:19:expect(canMaintainCatalog('PROVIDER')).toBe(false)
+useCanWrite.spec.ts:20:expect(canWriteProduct('PROVIDER')).toBe(true)
+useCanWrite.spec.ts:21:expect(canImportProduct('PROVIDER')).toBe(true)
+useCanWrite.spec.ts:24:it('USER hides all write entries including import and catalog maintenance', () => {
+useCanWrite.spec.ts:25:expect(canMaintainCategory('USER')).toBe(false)
+useCanWrite.spec.ts:26:expect(canMaintainCatalog('USER')).toBe(false)
+useCanWrite.spec.ts:27:expect(canWriteProduct('USER')).toBe(false)
+useCanWrite.spec.ts:28:expect(canImportProduct('USER')).toBe(false)

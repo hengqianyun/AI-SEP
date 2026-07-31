@@ -1,0 +1,93 @@
+﻿ProductEditorIntegrationTest.java:11: import com.shdata.datachain.chain.ChainAttestationPort;
+ProductEditorIntegrationTest.java:44: @MockBean private ChainAttestationPort attestationPort;
+ProductEditorIntegrationTest.java:46: @Test
+ProductEditorIntegrationTest.java:47: void create_other_version1_fourFields_andRejectExtraTypeSpecific() throws Exception {
+ProductEditorIntegrationTest.java:63: "l3CategoryId":"cat-l3-emr-desense",
+ProductEditorIntegrationTest.java:68: .andExpect(jsonPath("$.code").value("ERR_PRODUCT_CODE_FORMAT"));
+ProductEditorIntegrationTest.java:82: "l3CategoryId":"cat-l3-emr-desense",
+ProductEditorIntegrationTest.java:87: .andExpect(jsonPath("$.data.latestVersionNo").value(1))
+ProductEditorIntegrationTest.java:89: .andExpect(jsonPath("$.data.l3CategoryId").value("cat-l3-emr-desense"))
+ProductEditorIntegrationTest.java:90: .andExpect(jsonPath("$.data.categoryPath").value("医疗卫生 / 电子病历 / 脱敏病历"))
+ProductEditorIntegrationTest.java:97: .perform(get("/api/v1/chain/products/" + productId + "/versions").session(session))
+ProductEditorIntegrationTest.java:100: .andExpect(jsonPath("$.data.items[0].versionNo").value(1))
+ProductEditorIntegrationTest.java:106: String v1Id = chainStore.listByProductId(productId).get(0).versionId();
+ProductEditorIntegrationTest.java:108: .perform(get("/api/v1/chain/versions/" + v1Id + "/snapshot").session(session))
+ProductEditorIntegrationTest.java:110: .andExpect(jsonPath("$.data.categoryPath").value("医疗卫生 / 电子病历 / 脱敏病历"))
+ProductEditorIntegrationTest.java:111: .andExpect(jsonPath("$.data.categoryPathParts.l1").value("医疗卫生"))
+ProductEditorIntegrationTest.java:112: .andExpect(jsonPath("$.data.categoryPathParts.l2").value("电子病历"))
+ProductEditorIntegrationTest.java:113: .andExpect(jsonPath("$.data.categoryPathParts.l3").value("脱敏病历"));
+ProductEditorIntegrationTest.java:116: @Test
+ProductEditorIntegrationTest.java:117: void update_incrementsVersion_oldReadable_conflictAndFormat() throws Exception {
+ProductEditorIntegrationTest.java:134: "l3CategoryId":"cat-l3-emr-desense",
+ProductEditorIntegrationTest.java:139: .andExpect(jsonPath("$.data.latestVersionNo").value(1))
+ProductEditorIntegrationTest.java:155: "l3CategoryId":"cat-l3-emr-struct",
+ProductEditorIntegrationTest.java:160: .andExpect(jsonPath("$.data.latestVersionNo").value(2))
+ProductEditorIntegrationTest.java:162: .andExpect(jsonPath("$.data.l3CategoryId").value("cat-l3-emr-struct"))
+ProductEditorIntegrationTest.java:163: .andExpect(jsonPath("$.data.categoryPath").value("医疗卫生 / 电子病历 / 结构化病历"));
+ProductEditorIntegrationTest.java:166: .perform(get("/api/v1/chain/products/" + productId + "/versions").session(session))
+ProductEditorIntegrationTest.java:169: .andExpect(jsonPath("$.data.items[0].versionNo").value(2))
+ProductEditorIntegrationTest.java:170: .andExpect(jsonPath("$.data.items[1].versionNo").value(1));
+ProductEditorIntegrationTest.java:174: .filter(v -> v.versionNo() == 1)
+ProductEditorIntegrationTest.java:177: .versionId();
+ProductEditorIntegrationTest.java:179: .perform(get("/api/v1/chain/versions/" + v1Id + "/snapshot").session(session))
+ProductEditorIntegrationTest.java:182: .andExpect(jsonPath("$.data.categoryPathParts.l3").value("脱敏病历"));
+ProductEditorIntegrationTest.java:195: "l3CategoryId":"cat-l3-emr-desense"
+ProductEditorIntegrationTest.java:199: .andExpect(jsonPath("$.code").value("ERR_PRODUCT_CODE_FORMAT"));
+ProductEditorIntegrationTest.java:212: "l3CategoryId":"cat-l3-emr-desense"
+ProductEditorIntegrationTest.java:215: .andExpect(status().isConflict())
+ProductEditorIntegrationTest.java:216: .andExpect(jsonPath("$.code").value("ERR_PRODUCT_CODE_CONFLICT"));
+ProductEditorIntegrationTest.java:219: @Test
+ProductEditorIntegrationTest.java:220: void attestationFailure_noHalfProduct_noOrphanChain() throws Exception {
+ProductEditorIntegrationTest.java:221: Mockito.when(attestationPort.attest(Mockito.any()))
+ProductEditorIntegrationTest.java:222: .thenThrow(new RuntimeException("simulated attestation failure"));
+ProductEditorIntegrationTest.java:238: "l3CategoryId":"cat-l3-emr-desense"
+ProductEditorIntegrationTest.java:242: .andExpect(jsonPath("$.code").value("ERR_ATTESTATION"));
+ProductEditorIntegrationTest.java:249: @Test
+ProductEditorIntegrationTest.java:250: void create_rejectsNonL3_andL2Only() throws Exception {
+ProductEditorIntegrationTest.java:251: stubAttest("sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "did:wsc:sim:leaf");
+ProductEditorIntegrationTest.java:262: "productCode":"GEN-LEAF-9004",
+ProductEditorIntegrationTest.java:269: .andExpect(jsonPath("$.code").value("ERR_CATEGORY_LEAF_REQUIRED"));
+ProductEditorIntegrationTest.java:279: "productCode":"GEN-LEAF-9005",
+ProductEditorIntegrationTest.java:282: "l3CategoryId":"cat-l2-emr"
+ProductEditorIntegrationTest.java:286: .andExpect(jsonPath("$.code").value("ERR_CATEGORY_LEAF_REQUIRED"));
+ProductEditorIntegrationTest.java:289: @Test
+ProductEditorIntegrationTest.java:290: void ordinaryUser_productWriteForbidden() throws Exception {
+ProductEditorIntegrationTest.java:303: "l3CategoryId":"cat-l3-emr-desense"
+ProductEditorIntegrationTest.java:306: .andExpect(status().isForbidden())
+ProductEditorIntegrationTest.java:307: .andExpect(jsonPath("$.code").value("ERR_FORBIDDEN"));
+ProductEditorIntegrationTest.java:310: private void stubAttest(String hash, String did) {
+ProductEditorIntegrationTest.java:311: Mockito.when(attestationPort.attest(Mockito.any()))
+ProductEditorIntegrationTest.java:314: new ChainAttestationPort.AttestationResult(
+ProductEditorIntegrationTest.java:318: new ChainAttestationPort.AttestationResult.Certificate("模拟权属方-TEST")));
+ChainApiIntegrationTest.java:17: * 上链列表/快照集成：最新优先、按 versionId 读快照、空态、需登录。
+ChainApiIntegrationTest.java:37: @Autowired private ChainAttestationPort chainAttestationPort;
+ChainApiIntegrationTest.java:39: @Test
+ChainApiIntegrationTest.java:40: void portIsExposedAsSpringBean() {
+ChainApiIntegrationTest.java:41: org.junit.jupiter.api.Assertions.assertNotNull(chainAttestationPort);
+ChainApiIntegrationTest.java:43: chainAttestationPort instanceof SimulatedChainAttestationPort);
+ChainApiIntegrationTest.java:46: @Test
+ChainApiIntegrationTest.java:47: void listVersions_requiresLogin() throws Exception {
+ChainApiIntegrationTest.java:49: .perform(get("/api/v1/chain/products/" + InMemoryChainStore.SEED_PRODUCT_ID + "/versions"))
+ChainApiIntegrationTest.java:54: @Test
+ChainApiIntegrationTest.java:55: void listVersions_seedProduct_latestFirst() throws Exception {
+ChainApiIntegrationTest.java:59: get("/api/v1/chain/products/" + InMemoryChainStore.SEED_PRODUCT_ID + "/versions")
+ChainApiIntegrationTest.java:64: .andExpect(jsonPath("$.data.items[0].versionNo").value(3))
+ChainApiIntegrationTest.java:65: .andExpect(jsonPath("$.data.items[1].versionNo").value(2))
+ChainApiIntegrationTest.java:66: .andExpect(jsonPath("$.data.items[2].versionNo").value(1))
+ChainApiIntegrationTest.java:73: @Test
+ChainApiIntegrationTest.java:74: void listVersions_unknownProduct_returnsEmptyList() throws Exception {
+ChainApiIntegrationTest.java:77: .perform(get("/api/v1/chain/products/prod-does-not-exist/versions").session(session))
+ChainApiIntegrationTest.java:83: @Test
+ChainApiIntegrationTest.java:84: void getSnapshot_byVersionId() throws Exception {
+ChainApiIntegrationTest.java:87: .perform(get("/api/v1/chain/versions/cv-seed-001-v2/snapshot").session(session))
+ChainApiIntegrationTest.java:90: .andExpect(jsonPath("$.data.versionId").value("cv-seed-001-v2"))
+ChainApiIntegrationTest.java:94: .andExpect(jsonPath("$.data.categoryPath").value("金融服务 / 征信评估 / 征信评分"))
+ChainApiIntegrationTest.java:95: .andExpect(jsonPath("$.data.categoryPathParts.l1").value("金融服务"))
+ChainApiIntegrationTest.java:96: .andExpect(jsonPath("$.data.categoryPathParts.l2").value("征信评估"))
+ChainApiIntegrationTest.java:97: .andExpect(jsonPath("$.data.categoryPathParts.l3").value("征信评分"))
+ChainApiIntegrationTest.java:99: .andExpect(jsonPath("$.data.attestation.metadataHash").isNotEmpty())
+ChainApiIntegrationTest.java:100: .andExpect(jsonPath("$.data.attestation.ownerDID").isNotEmpty())
+ChainApiIntegrationTest.java:101: .andExpect(jsonPath("$.data.attestation.certificate.owner").isNotEmpty());
+ChainApiIntegrationTest.java:104: @Test
+ChainApiIntegrationTest.java:105: void getSnapshot_unknownVersion_returns404() throws Exception {
+ChainApiIntegrationTest.java:108: .perform(get("/api/v1/chain/versions/cv-missing/snapshot").session(session))

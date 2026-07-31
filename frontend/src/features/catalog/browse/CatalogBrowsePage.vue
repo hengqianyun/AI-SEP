@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
@@ -23,11 +23,14 @@ const { productWriteVisible } = useCanWrite(role)
 const browse = useCatalogBrowse()
 const {
   products,
+  sections,
   selectedProductId,
   preview,
   listState,
   categoriesState,
   previewState,
+  loadingMore,
+  hasMore,
   listError,
   categoriesError,
   previewError,
@@ -35,18 +38,32 @@ const {
   total,
   l1Categories,
   l2Categories,
+  industryFilterOptions,
   selectProduct,
   selectL1,
+  selectL2,
   applyFilters,
   resetFilters,
   loadProducts,
   loadCategories,
+  loadMore,
   init,
 } = browse
+
+const listScrollEl = ref<HTMLElement | null>(null)
 
 onMounted(() => {
   void init()
 })
+
+function onListScroll(e: Event) {
+  const el = e.target as HTMLElement
+  if (!el || loadingMore.value || !hasMore.value || listState.value !== 'ready') return
+  const remain = el.scrollHeight - el.scrollTop - el.clientHeight
+  if (remain < 80) {
+    void loadMore()
+  }
+}
 
 function goDetail() {
   if (!selectedProductId.value) return
@@ -62,19 +79,73 @@ function goEdit() {
   if (!selectedProductId.value || !productWriteVisible.value) return
   void router.push(`/catalog/products/${selectedProductId.value}/edit`)
 }
+
+function rowIndex(sectionOffset: number, idx: number) {
+  return sectionOffset + idx + 1
+}
 </script>
 
 <template>
   <div class="catalog-browse" data-testid="catalog-browse">
     <header class="page-header">
       <h1>数据目录</h1>
-      <p class="subtitle">按行业浏览、筛选并预览数据产品</p>
+      <p class="subtitle">按空间 / 行业浏览、子类分组预览数据产品</p>
     </header>
 
+    <div class="tag-bar" data-testid="catalog-space-tags">
+      <span class="tag-label">空间</span>
+      <button
+        type="button"
+        class="tag"
+        :class="{ active: !filters.l1CategoryId }"
+        data-testid="catalog-space-all"
+        @click="selectL1('')"
+      >
+        全部空间
+      </button>
+      <button
+        v-for="c in l1Categories"
+        :key="c.id"
+        type="button"
+        class="tag"
+        :class="{ active: filters.l1CategoryId === c.id }"
+        data-testid="catalog-space-tag"
+        @click="selectL1(c.id)"
+      >
+        {{ c.name }}
+      </button>
+    </div>
+
+    <div class="tag-bar" data-testid="catalog-industry-tags">
+      <span class="tag-label">行业</span>
+      <button
+        type="button"
+        class="tag"
+        :class="{ active: !filters.l2CategoryId }"
+        data-testid="catalog-industry-all"
+        @click="selectL2('')"
+      >
+        全部行业
+      </button>
+      <button
+        v-for="c in l2Categories"
+        :key="c.id"
+        type="button"
+        class="tag"
+        :class="{ active: filters.l2CategoryId === c.id }"
+        data-testid="catalog-industry-tag"
+        @click="selectL2(c.id)"
+      >
+        {{ c.name }}
+      </button>
+    </div>
+
     <div class="filter-bar" data-testid="catalog-filters">
-      <select v-model="filters.l2CategoryId" aria-label="二级行业">
-        <option value="">全部二级分类</option>
-        <option v-for="c in l2Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+      <select v-model="filters.industryFilterId" aria-label="行业分类（二级或三级）">
+        <option value="">行业分类：全部</option>
+        <option v-for="o in industryFilterOptions" :key="o.id" :value="o.id">
+          {{ o.level === 'L2' ? o.label : o.label }}
+        </option>
       </select>
       <select v-model="filters.dataSource" aria-label="数据来源">
         <option v-for="o in DATA_SOURCE_OPTIONS" :key="o.value" :value="o.value">
@@ -116,37 +187,20 @@ function goEdit() {
       class="banner error"
       data-testid="catalog-categories-error"
     >
-      {{ categoriesError || '加载行业分类失败' }}
+      {{ categoriesError || '加载分类失败' }}
       <button type="button" class="btn" @click="loadCategories">重试</button>
     </div>
 
-    <div class="tri-pane">
-      <aside class="pane l1" data-testid="catalog-l1">
-        <h2>一级行业</h2>
-        <button
-          type="button"
-          class="l1-item"
-          :class="{ active: !filters.l1CategoryId }"
-          @click="selectL1('')"
-        >
-          全部行业
-        </button>
-        <button
-          v-for="c in l1Categories"
-          :key="c.id"
-          type="button"
-          class="l1-item"
-          :class="{ active: filters.l1CategoryId === c.id }"
-          @click="selectL1(c.id)"
-        >
-          {{ c.name }}
-        </button>
-      </aside>
-
-      <section class="pane list" data-testid="catalog-list">
+    <div class="bi-pane">
+      <section
+        ref="listScrollEl"
+        class="pane list"
+        data-testid="catalog-list"
+        @scroll="onListScroll"
+      >
         <div class="list-head">
           <h2>产品列表</h2>
-          <span class="muted">共 {{ total }} 条</span>
+          <span class="muted">已加载 {{ products.length }} / 共 {{ total }} 条</span>
         </div>
 
         <div v-if="listState === 'loading'" class="state" data-testid="catalog-loading">
@@ -158,7 +212,7 @@ function goEdit() {
           data-testid="catalog-error"
         >
           <p>{{ listError || '筛选失败，请重试' }}</p>
-          <button type="button" class="btn" @click="loadProducts">重试</button>
+          <button type="button" class="btn" @click="loadProducts()">重试</button>
         </div>
         <div
           v-else-if="listState === 'empty'"
@@ -167,34 +221,62 @@ function goEdit() {
         >
           {{ CATALOG_EMPTY_MESSAGE }}
         </div>
-        <table v-else-if="listState === 'ready'" class="product-table">
-          <thead>
-            <tr>
-              <th>序号</th>
-              <th>产品编码</th>
-              <th>产品名称</th>
-              <th>上链次数</th>
-              <th>产品类型</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(p, idx) in products"
-              :key="p.id"
-              :class="{ selected: selectedProductId === p.id }"
-              data-testid="catalog-row"
-              @click="selectProduct(p.id)"
-            >
-              <td>{{ idx + 1 }}</td>
-              <td class="mono">{{ p.productCode }}</td>
-              <td>{{ p.productName }}</td>
-              <td>{{ p.chainCount }}</td>
-              <td>
-                <span class="tag">{{ productTypeLabel(p.productType) }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <template v-else-if="listState === 'ready'">
+          <div
+            v-for="(sec, sIdx) in sections"
+            :key="sec.l3CategoryId"
+            class="section"
+            data-testid="catalog-l3-section"
+          >
+            <div class="section-head">
+              <h3>{{ sec.title }}</h3>
+              <span class="muted">{{ sec.count }} 条</span>
+            </div>
+            <table class="product-table">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>产品编码</th>
+                  <th>产品名称</th>
+                  <th>上链次数</th>
+                  <th>产品类型</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(p, idx) in sec.products"
+                  :key="p.id"
+                  :class="{ selected: selectedProductId === p.id }"
+                  data-testid="catalog-row"
+                  @click="selectProduct(p.id)"
+                >
+                  <td>
+                    {{
+                      rowIndex(
+                        sections.slice(0, sIdx).reduce((n, s) => n + s.products.length, 0),
+                        idx,
+                      )
+                    }}
+                  </td>
+                  <td class="mono">{{ p.productCode }}</td>
+                  <td>{{ p.productName }}</td>
+                  <td>{{ p.chainCount }}</td>
+                  <td>
+                    <span class="type-tag">{{ productTypeLabel(p.productType) }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div
+            v-if="loadingMore"
+            class="state load-more"
+            data-testid="catalog-load-more"
+          >
+            正在加载更多…
+          </div>
+          <div v-else-if="!hasMore" class="state muted end">已加载全部</div>
+        </template>
       </section>
 
       <aside class="pane preview" data-testid="catalog-preview">
@@ -215,8 +297,8 @@ function goEdit() {
               <dd class="mono">{{ preview.productCode }}</dd>
             </div>
             <div>
-              <dt>分类路径</dt>
-              <dd>{{ preview.categoryPath || '—' }}</dd>
+              <dt>三级分类路径</dt>
+              <dd data-testid="catalog-preview-path">{{ preview.categoryPath || '—' }}</dd>
             </div>
             <div>
               <dt>上链次数</dt>
@@ -277,7 +359,7 @@ function goEdit() {
 .catalog-browse {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   min-height: calc(100vh - 48px);
   padding: 4px 4px 16px;
   color: #1b2430;
@@ -291,6 +373,37 @@ function goEdit() {
   margin: 4px 0 0;
   color: #667085;
   font-size: 13px;
+}
+.tag-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.tag-label {
+  font-size: 12px;
+  color: #667085;
+  min-width: 2.5em;
+}
+.tag {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid #cfd6df;
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  color: inherit;
+}
+.tag:hover {
+  background: #f2f4f7;
+}
+.tag.active {
+  border-color: #1f4b7a;
+  background: #e8eef5;
+  color: #1f4b7a;
+  font-weight: 600;
 }
 .filter-bar {
   display: flex;
@@ -344,9 +457,9 @@ function goEdit() {
   color: #b42318;
   background: #fef3f2;
 }
-.tri-pane {
+.bi-pane {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 10px;
   flex: 1;
   min-height: 420px;
@@ -362,31 +475,32 @@ function goEdit() {
   margin: 0 0 10px;
   font-size: 14px;
 }
-.l1-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 8px 10px;
-  margin-bottom: 4px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-  color: inherit;
-}
-.l1-item:hover {
-  background: #f2f4f7;
-}
-.l1-item.active {
-  background: #e8eef5;
-  color: #1f4b7a;
-  font-weight: 600;
-}
 .list-head {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+  padding-bottom: 6px;
+}
+.section {
+  margin-bottom: 16px;
+}
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 8px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #eef0f3;
+}
+.section-head h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #344054;
 }
 .muted {
   color: #667085;
@@ -400,6 +514,12 @@ function goEdit() {
 }
 .state.empty {
   color: #475467;
+}
+.state.load-more {
+  padding: 12px;
+}
+.state.end {
+  padding: 8px;
 }
 .product-table {
   width: 100%;
@@ -430,7 +550,7 @@ function goEdit() {
   font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
   font-size: 12px;
 }
-.tag {
+.type-tag {
   display: inline-block;
   padding: 1px 8px;
   border-radius: 4px;
@@ -457,8 +577,8 @@ function goEdit() {
   gap: 8px;
   margin-top: 16px;
 }
-@media (max-width: 1100px) {
-  .tri-pane {
+@media (max-width: 900px) {
+  .bi-pane {
     grid-template-columns: 1fr;
   }
 }

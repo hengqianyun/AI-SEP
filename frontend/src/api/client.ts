@@ -1,11 +1,11 @@
 /**
- * HTTP client 基座 — 对齐 wsc-contracts@1.1.0
- * 由契约 OpenAPI 对齐/生成；后续任务只读消费，禁止手改生成语义。
+ * HTTP client 基座 — 对齐 wsc-contracts@2.0.0
+ * 由契约 OpenAPI 对齐/生成；TASK-WSC-101 唯一写；后续任务只读消费。
  */
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1'
 
-export const CONTRACT_VERSION = '1.1.0' as const
+export const CONTRACT_VERSION = '2.0.0' as const
 
 export type ApiEnvelope<T> = {
   code: string
@@ -34,7 +34,7 @@ export async function apiRequest<T>(
   if (!headers.has('Accept')) {
     headers.set('Accept', 'application/json')
   }
-  if (init.body && !headers.has('Content-Type')) {
+  if (init.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
 

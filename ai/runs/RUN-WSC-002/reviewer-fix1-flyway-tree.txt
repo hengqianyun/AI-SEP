@@ -1,0 +1,18 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.wsc:wsc-service >-------------------------
+[INFO] Building wsc-service 0.2.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] The artifact mysql:mysql-connector-java:jar:8.0.33 has been relocated to com.mysql:mysql-connector-j:jar:8.0.33
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.3.0:tree (default-cli) @ wsc-service ---
+[WARNING] The artifact mysql:mysql-connector-java:jar:8.0.33 has been relocated to com.mysql:mysql-connector-j:jar:8.0.33
+[INFO] com.wsc:wsc-service:jar:0.2.0-SNAPSHOT
+[INFO] +- org.flywaydb:flyway-core:jar:8.5.13:compile
+[INFO] \- org.flywaydb:flyway-mysql:jar:8.5.13:compile
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.446 s
+[INFO] Finished at: 2026-07-31T13:57:43+08:00
+[INFO] ------------------------------------------------------------------------

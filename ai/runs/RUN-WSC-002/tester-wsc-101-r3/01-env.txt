@@ -1,0 +1,23 @@
+java version "17.0.11" 2024-04-16 LTS
+Java(TM) SE Runtime Environment (build 17.0.11+7-LTS-207)
+Java HotSpot(TM) 64-Bit Server VM (build 17.0.11+7-LTS-207, mixed mode, sharing)
+--- 
+Apache Maven 3.6.3 (cecedd343002696d0abb50b32b541b8a6ba2883f)
+Maven home: C:\Path\apache-maven\apache-maven-3.6.3\bin\..
+Java version: 17.0.11, vendor: Oracle Corporation, runtime: C:\Program Files\Java\jdk-17
+Default locale: zh_CN, platform encoding: GBK
+OS name: "windows 11", version: "10.0", arch: "amd64", family: "windows"
+--- 
+v22.22.0
+--- 
+9.15.0
+--- 
+C:\Program Files\Common Files\Oracle\Java\javapath\java.exe
+C:\Program Files\Java\jdk-17\bin\java.exe
+C:\Path\apache-maven\apache-maven-3.6.3\bin\mvn
+C:\Path\apache-maven\apache-maven-3.6.3\bin\mvn.cmd
+c:\Users\water\AppData\Local\Programs\cursor\resources\app\resources\helpers\node.exe
+C:\nvm4w\nodejs\node.exe
+C:\nvm4w\nodejs\pnpm
+C:\nvm4w\nodejs\pnpm.CMD
+EXIT:0 

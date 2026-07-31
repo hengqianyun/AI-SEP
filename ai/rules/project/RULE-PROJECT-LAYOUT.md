@@ -20,8 +20,8 @@ pilot: WSC
 | `design/` | 设计决策、UI、原型 | uxUiPlanner, solutionArchitect |
 | `design/prototypes/` | 可交互 HTML 等原型参考 | productOwner, uxUiPlanner |
 | `planning/` | 计划、任务、评审 | 规划委员会 |
-| `frontend/` | 前端实现 | developer（任务 allowModify 内） |
-| `backend/` | 后端实现（Maven 多模块根，对齐 data-chain） | developer（任务 allowModify 内） |
+| `frontend/` | 前端实现（亦可推送独立仓 `data-chain-static`，见 `repos.yaml`） | developer（任务 allowModify 内） |
+| `backend/` | 后端实现（Maven 多模块；亦可推送独立仓 `data-chain-backend`） | developer（任务 allowModify 内） |
 | `contracts/` | OpenAPI 等共享契约 | apiDataDesigner, developer（契约任务） |
 | `tests/` / `e2e/` | 测试与证据 | developer, tester |
 | `ai/` | Agent 契约与控制面 | orchestrator；规则变更须人类审批 |

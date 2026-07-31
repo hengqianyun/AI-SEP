@@ -1,0 +1,6 @@
+exit=0 sql=DROP DATABASE IF EXISTS data_chain;\nexit=0 file=backend/app/data-chain-service/src/main/resources/sql/init/00_create_database.sql\nexit=0 file=backend/app/data-chain-service/src/main/resources/sql/init/01_flyway_baseline.sql\nexit=0 sql=USE data_chain; SHOW TABLES; SELECT installed_rank, version, description, type, \nTables_in_data_chain
+flyway_schema_history
+installed_rank	version	description	type	success
+-1	NULL	<< Flyway Schema History table created >>	TABLE	1
+1	0	<< Flyway Baseline >>	BASELINE	1
+\noverall_rc=0\n

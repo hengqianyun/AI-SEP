@@ -1,0 +1,5 @@
+﻿E2E probe for TASK-WSC-105 (tester-wsc-105)
+writeSet: catalog/detail, catalog/editor, chain — no dedicated Playwright/Cypress suite in scope
+e2e/ directory: MISSING or empty of product-editor UI paths
+matching e2e specs: NONE
+decision: SKIPPED (not in executable E2E scope; not faked PASS)

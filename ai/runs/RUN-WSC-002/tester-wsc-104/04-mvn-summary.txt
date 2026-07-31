@@ -1,0 +1,4 @@
+﻿[WARNING] Error creating missing package info classes
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.669 s - in com.shdata.datachain.catalog.browse.CatalogBrowseIntegrationTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

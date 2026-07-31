@@ -1,0 +1,5 @@
+﻿# Ports (tester-wsc-101-r5)
+mysql 127.0.0.1:3306 OPEN
+redis 127.0.0.1:16379 FAIL (expected — option B is remote)
+redis 127.0.0.1:6379 FAIL
+redis remote 58.33.102.13:16379 OPEN

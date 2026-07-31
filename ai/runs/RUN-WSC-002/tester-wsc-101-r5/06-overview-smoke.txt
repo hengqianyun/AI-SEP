@@ -1,0 +1,2 @@
+﻿# overview smoke (tester-wsc-101-r5)
+SKIPPED — spring-boot local did not reach Started

@@ -2,8 +2,8 @@ import type { RouteRecordRaw } from 'vue-router'
 import PlaceholderView from '@/views/PlaceholderView.vue'
 
 /**
- * 根路由清单（TASK-WSC-001 唯一写；后续任务只读）。
- * 对齐 PLAN §3.1 路由清单与 §3.5 UI 状态矩阵引用。
+ * 根路由清单（TASK-WSC-101 增量：契约 2.0.0 / overview 可编译启动）。
+ * 目录维护业务页路由由后续任务追加；本任务不实现 catalog/shell/auth/chain 业务页。
  */
 export const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/overview' },
@@ -42,6 +42,12 @@ export const routes: RouteRecordRaw[] = [
     name: 'catalog-admin-categories',
     component: () => import('@/features/catalog/admin/CategoryAdminPage.vue'),
     meta: { title: '维护行业分类' },
+  },
+  {
+    path: '/catalog/maintenance',
+    name: 'catalog-maintenance',
+    component: () => import('@/features/catalog/maintenance/CatalogMaintenancePage.vue'),
+    meta: { title: '目录维护' },
   },
   {
     path: '/chain/products/:productId',

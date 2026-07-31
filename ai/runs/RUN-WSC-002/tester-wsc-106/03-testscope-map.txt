@@ -1,0 +1,15 @@
+﻿testScope map TASK-WSC-106 / REQ-CAT-007
+1. 待关联→已维护
+   BE: pending_to_maintained_singleAssociate
+   FE: single save associates l3 then reloads
+2. 批量关联
+   BE: batchAssociate_and_leafRequired
+   FE: batch save uses selected ids and batch l3
+3. 非管理员 403
+   BE: nonAdmin_forbidden (PROVIDER GET / USER batch → ERR_MAINTENANCE_FORBIDDEN)
+4. 分页 page/pageSize/total
+   BE: pagination_pagePageSizeTotal
+   FE: loads list with page/pageSize/total and status tabs
+Notes:
+- L1/L2/L3 filter query assertion not in integration tests (REV FIND-002 P2); FE filter UI exists per REV; not treated as FAIL for listed testScope
+- parallel TASK-WSC-105 detail/editor/chain excluded from failure surface

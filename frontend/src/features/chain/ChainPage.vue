@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import SensitiveId from './components/SensitiveId.vue'
-import { chainEmptyMessage, useChainPage } from './composables/useChainPage'
+import { chainEmptyMessage, formatCategoryPath, useChainPage } from './composables/useChainPage'
 
 const route = useRoute()
 const productId = computed(() => String(route.params.productId ?? ''))
@@ -31,6 +31,10 @@ const attestation = computed(() => {
     certOwner: fromSnap?.certificate?.owner ?? selected?.certificate?.owner ?? '',
   }
 })
+
+const categoryPathDisplay = computed(() =>
+  formatCategoryPath(snapshot.value?.categoryPath, snapshot.value?.categoryPathParts),
+)
 </script>
 
 <template>
@@ -120,9 +124,17 @@ const attestation = computed(() => {
               <dt>productType</dt>
               <dd>{{ snapshot.productType }}</dd>
             </div>
-            <div v-if="snapshot.categoryPath">
+            <div v-if="categoryPathDisplay" data-testid="snapshot-category-path">
               <dt>categoryPath</dt>
-              <dd>{{ snapshot.categoryPath }}</dd>
+              <dd>{{ categoryPathDisplay }}</dd>
+            </div>
+            <div v-if="snapshot.categoryPathParts" data-testid="snapshot-category-parts">
+              <dt>categoryPathParts</dt>
+              <dd>
+                L1={{ snapshot.categoryPathParts.l1 || '—' }} /
+                L2={{ snapshot.categoryPathParts.l2 || '—' }} /
+                L3={{ snapshot.categoryPathParts.l3 || '—' }}
+              </dd>
             </div>
             <div v-if="snapshot.summary">
               <dt>summary</dt>

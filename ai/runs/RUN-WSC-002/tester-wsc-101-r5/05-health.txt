@@ -1,0 +1,4 @@
+﻿# health/doc probes (tester-wsc-101-r5)
+SKIPPED — app failed to start (Flyway Unsupported Database: MySQL 8.0 after MySQL auth OK)
+/health not reached
+/doc.html not reached

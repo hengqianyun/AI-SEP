@@ -11,6 +11,8 @@ vi.mock('@/api/catalog', () => ({
         productName: '其他',
         productType: 'OTHER',
         l2CategoryId: 'cat-l2-emr',
+        l3CategoryId: 'cat-l3-emr-desense',
+        categoryPath: '医疗卫生 / 电子病历 / 脱敏病历',
         chainCount: 0,
       },
     }
@@ -18,11 +20,13 @@ vi.mock('@/api/catalog', () => ({
 }))
 
 describe('useProductDetail', () => {
-  it('loads product into ready state', async () => {
+  it('loads product into ready state with three-level path', async () => {
     const d = useProductDetail()
     await d.load('prod-1')
     expect(d.state.value).toBe('ready')
     expect(d.product.value?.productType).toBe('OTHER')
+    expect(d.product.value?.l3CategoryId).toBe('cat-l3-emr-desense')
+    expect(d.product.value?.categoryPath).toContain('脱敏病历')
   })
 
   it('surfaces error feedback', async () => {

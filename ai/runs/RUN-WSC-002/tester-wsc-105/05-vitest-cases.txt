@@ -1,0 +1,19 @@
+﻿useProductEditor.spec.ts:22: describe('useProductEditor', () => {
+useProductEditor.spec.ts:23: it('blocks submit without name/code and shows error feedback', async () => {
+useProductEditor.spec.ts:25: await ed.init()
+useProductEditor.spec.ts:26: const id = await ed.submit()
+useProductEditor.spec.ts:32: it('blocks submit without L3 category', async () => {
+useProductEditor.spec.ts:34: await ed.init()
+useProductEditor.spec.ts:40: const id = await ed.submit()
+useProductEditor.spec.ts:45: it('OTHER type does not require typeSpecific; cascades L3 and success feedback', async () => {
+useProductEditor.spec.ts:47: await ed.init()
+useProductEditor.spec.ts:59: const id = await ed.submit()
+useProductEditor.spec.ts:65: it('changing L1 clears L2/L3', async () => {
+useProductEditor.spec.ts:67: await ed.init()
+useProductDetail.spec.ts:22: describe('useProductDetail', () => {
+useProductDetail.spec.ts:23: it('loads product into ready state with three-level path', async () => {
+useProductDetail.spec.ts:32: it('surfaces error feedback', async () => {
+useChainPage.spec.ts:8: describe('CHAIN page empty / error helpers', () => {
+useChainPage.spec.ts:9: it('empty message is explicit (§3.5)', () => {
+useChainPage.spec.ts:13: it('error state is retryable', () => {
+useChainPage.spec.ts:20: it('formatCategoryPath prefers full path then parts', () => {

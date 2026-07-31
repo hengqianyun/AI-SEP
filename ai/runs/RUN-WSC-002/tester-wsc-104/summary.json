@@ -1,0 +1,38 @@
+{
+  "evidenceId": "EVID-TASK-WSC-104-1",
+  "taskId": "TASK-WSC-104",
+  "actorInstance": "tester-wsc-104",
+  "reviewDecision": "APPROVE",
+  "status": "PASSED",
+  "layers": {
+    "backend-browse-integration": {
+      "exitCode": "0",
+      "tests": 11,
+      "result": "PASSED"
+    },
+    "frontend-browse-vitest": {
+      "exitCode": "0",
+      "tests": 8,
+      "result": "PASSED"
+    },
+    "frontend-typecheck": {
+      "exitCode": "0",
+      "result": "PASSED"
+    },
+    "frontend-build": {
+      "exitCode": "0",
+      "result": "PASSED"
+    },
+    "ui-playwright-e2e": "SKIPPED",
+    "env-probe": "NOT_SCORED"
+  },
+  "be_log_hits": [
+    "Tests run: 11, Failures: 0, Errors: 0, Skipped: 0",
+    "BUILD SUCCESS"
+  ],
+  "fe_log_hits": [
+    "Test Files  1 passed (1)",
+    "Tests  8 passed (8)"
+  ],
+  "out": "C:\\WorkSpace\\AI-SEP\\planning\\tasks\\TESTRUN-TASK-WSC-104.md"
+}

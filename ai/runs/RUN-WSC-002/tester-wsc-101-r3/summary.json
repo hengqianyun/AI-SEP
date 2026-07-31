@@ -1,0 +1,21 @@
+﻿{
+  "evidenceId": "EVID-TASK-WSC-101-1",
+  "taskId": "TASK-WSC-101",
+  "planId": "PLAN-WSC-2.2",
+  "actorInstance": "tester-wsc-101-r3",
+  "contracts": "wsc-contracts@2.0.0",
+  "reviewDecision": "APPROVE",
+  "status": "BLOCKED",
+  "executedAt": "2026-07-31T09:50:00+08:00",
+  "layers": {
+    "env": "PASSED",
+    "mysql_redis": "BLOCKED",
+    "contract_check": "FAILED",
+    "static_contract_notes": "PASSED",
+    "backend_package": "PASSED",
+    "frontend_build": "PASSED",
+    "overview_smoke_h2": "PASSED",
+    "mysql_empty_db": "BLOCKED"
+  },
+  "evidenceDir": "ai/runs/RUN-WSC-002/tester-wsc-101-r3/"
+}

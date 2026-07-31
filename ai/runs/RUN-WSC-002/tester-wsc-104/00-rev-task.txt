@@ -1,0 +1,89 @@
+﻿# 浠ｇ爜瀹℃煡
+
+```yaml
+reviewId: REV-CODE-TASK-WSC-104-R1
+taskId: TASK-WSC-104
+round: 1
+decision: APPROVE
+actorInstance: code-reviewer-wsc-104
+planId: PLAN-WSC-2.2
+contracts: wsc-contracts@2.0.0
+reviewedAt: 2026-07-31T16:30:00+08:00
+basedOn:
+  - planning/tasks/TASK-WSC-104.md
+  - planning/tasks/DEV-TASK-WSC-104.md
+  - planning/approved/PLAN-WSC-2.2.md
+  - product/requirements/SNAP-WSC-002.md
+```
+
+## 缁撹
+
+**APPROVE** 鈥?鏈疆 **P0=0锛孭1=0**銆傚彉鏇磋惤鍦?`writeSet`锛氬墠绔?`frontend/src/features/catalog/browse/**` 涓庡悗绔?`com.shdata.datachain.catalog.browse/**`锛堝惈瀵圭О闆嗘垚娴嬶級锛涙湭鏀规湰浠诲姟 `denyModify` 闈紙`contracts/**`銆乣frontend/src/api/**`銆乣**/sql/**`銆乣catalog/admin/**` 鍙?detail/editor/maintenance/import锛夈€備笁绾ф爣绛?L3 鍒嗚妭/棰勮璺緞銆佽涓氱瓫 L2|L3銆佹粴鍔?load-more 涓庡垎椤靛瓧娈?`page`/`pageSize`/`total` 瀵归綈 SNAP REQ-CAT-001/002/003 涓?PLAN 楠屾敹銆傚鏌ュ璺戝悗绔?11 娴嬩笌鍓嶇 browse composable 8 娴嬪潎 **PASSED**銆傛寮?VERIFIED 浠嶉』鐙珛 tester 鎵ц `testScope`銆?
+## Findings
+
+| id | severity | evidence | closeWhen | relatedReqs |
+|---|---|---|---|---|
+| FIND-WSC-104-R1-001 | P2 | 椤舵爮 `l2CategoryId` 涓庣瓫閫夐」 `industryFilterId`锛圠2锛夊悓鏃跺瓨鍦ㄦ椂锛宍buildQuery` 鐢ㄨ涓氱瓫瑕嗙洊椤舵爮 L2锛孶I 浠嶉珮浜師琛屼笟鏍囩锛屽彲鑳介€犳垚銆屾爣绛锯墵缁撴灉銆嶈鎰熴€俙selectL2` 浼氭竻鍐茬獊绛涳紝鍙嶅悜锛堟敼绛涳級鏈绉版竻鐞?| 鏀圭瓫鏃跺悓姝ラ《鏍?L2锛屾垨 AND 鍙屾潯浠跺苟渚濊禆绌烘€佹彁绀?| REQ-CAT-001, REQ-CAT-002 |
+| FIND-WSC-104-R1-002 | P2 | `CatalogProduct` 澧?`l3CategoryId` 鍚庯紝`ProductEditorService.withChainMeta` / `toProduct` 浠嶈蛋鏃?l3 鍏煎鏋勯€狅紝缂栬緫/涓婇摼鍐欏洖浼氭妸宸叉湁 L3 缃?null锛圖EV 宸插０鏄庝氦 105锛夈€俠rowse 绉嶅瓙璺緞涓嶅彈褰卞搷 | TASK-WSC-105 鍐欒矾寰勫啓鍏ュ苟淇濈暀 `l3CategoryId` | REQ-CAT-001, REQ-CAT-005 |
+| FIND-WSC-104-R1-003 | P2 | 鍓嶇鍗曟祴瑕嗙洊鍒嗚妭/琛屼笟瑙ｆ瀽/绌烘€佹枃妗堬紱`loadMore` append 涓庣瓫閫変繚鐣欎緷璧栧悗绔泦鎴愭祴 + 椤甸潰鐘舵€佹満锛屾棤 composable 绾?mock 缈婚〉娴?| 鍙€夛細mock `listProducts` 鏂█ append 鍚?`page`/`filters` 涓嶅彉 | REQ-CAT-001, REQ-CAT-002 |
+| FIND-WSC-104-R1-004 | P3 | 鍒嗚妭 `count` 涓恒€屽綋鍓嶅凡鍔犺浇鍒楄〃銆嶅唴璁℃暟锛屾粴鍔ㄥ垎椤典笅闈炶 L3 鍏ㄥ簱鎬绘暟锛涗笌銆屽凡鍔犺浇 n / 鍏?total銆嶅苟瀛樺彲鎺ュ彈 | 鑻ヤ骇鍝佽銆屽垎鑺傚叏閲忋€嶅啀鏀瑰悗绔仛鍚堟垨鏂囨鏍囨槑銆屽凡鍔犺浇銆?| REQ-CAT-001 |
+| FIND-WSC-104-R1-005 | P3 | `listScrollEl` 浠呯粦 ref锛屾粴鍔ㄤ繚鐣欎緷璧?DOM 杩藉姞涓嶉噸缃?`scrollTop`锛堟弧瓒抽獙鏀讹級锛涘彉閲忔湰韬棤棰濆鐢ㄩ€?| 鍘绘帀鏈 ref 鎴栨樉寮忔敞閲娿€屼綅缃敱娴忚鍣ㄤ繚鐣欍€?| REQ-CAT-001 |
+
+P0/P1 鏈竻闆朵笉寰?`APPROVE`銆傛湰杞?**P0=0锛孭1=0**銆?
+## 妫€鏌ユ竻鍗曪紙瀵圭収閲嶇偣锛?
+### 1. 鑼冨洿 / writeSet
+
+| 椤?| 缁撴灉 |
+|---|---|
+| 鏈换鍔′氦浠?鈯?`writeSet` | PASS锛坄catalog/browse/**` 鍓嶇 + `data-chain-service` `com.shdata.datachain.catalog.browse/**` + 娴嬭瘯锛?|
+| 鏈敼 `contracts/**`銆乣frontend/src/api/**`銆乣**/sql/**` | PASS锛堢浉瀵?DEV 鍙樻洿娓呭崟锛涘伐浣滃尯鍙︽湁 101/103 濂戠害/api/admin/sql 鏀瑰姩涓嶅綊鏈疆锛?|
+| 鏈敼 `catalog/admin/**` 鍙?detail/editor/maintenance/import | PASS锛堟湰浠诲姟鏈Е纰帮紱鈭?03 admin 鍙﹁建锛?|
+| 鏈笌 TASK-WSC-103 娣峰啓鍚屼竴 browse/admin 浜や粯闈?| PASS |
+
+### 2. REQ-CAT-001锛堜笁绾ф祻瑙堬級
+
+| 椤?| 璇佹嵁 | 缁撴灉 |
+|---|---|---|
+| 椤堕儴绌洪棿(L1)/琛屼笟(L2)鏍囩鍒囨崲浜у搧闆?| `CatalogBrowsePage` tag-bar + `selectL1`/`selectL2` 鈫?`loadProducts` | PASS |
+| 瀛愮被(L3)鍒嗚妭锛堟爣棰?鏁伴噺锛?| `groupProductsByL3` + section UI锛涘崟娴嬭鐩?| PASS |
+| 鍒楄〃瀛楁锛氬簭鍙?缂栫爜/鍚嶇О/涓婇摼娆℃暟/绫诲瀷 | 琛ㄥご涓庤娓叉煋 | PASS |
+| 棰勮鍚笁绾?`categoryPath` | 棰勮鍖?`catalog-preview-path`锛涢泦鎴愭祴 `閲戣瀺鏈嶅姟 / 寰佷俊璇勪及 / 寰佷俊璇勫垎` | PASS锛堝璺戯級 |
+| 婊氬姩鍔犺浇 loading锛屼繚鐣欏凡鍔犺浇鍒楄〃涓庣瓫閫?| `loadingMore` + append锛沗buildQuery` 澶嶇敤 filters锛泂croll 瀹瑰櫒杩藉姞涓嶉噸缃?| PASS锛堝疄鐜帮級 |
+
+### 3. REQ-CAT-002锛堢瓫閫夊榻愪笁绾э級
+
+| 椤?| 璇佹嵁 | 缁撴灉 |
+|---|---|---|
+| 鏉ユ簮/绫诲瀷/鍏叡鏁版嵁/浜や粯/鍏抽敭璇?| filter-bar + `buildQuery` | PASS |
+| 琛屼笟绛涘彲閫?L2 鎴?L3 | `industryFilterOptions` + `resolveIndustryQuery`锛涘悗绔?`l3CategoryId` / L2 鍚瓙 L3 | PASS |
+| 鏃犵粨鏋滅┖鎬?| `listState==='empty'` + 绋冲畾鏂囨锛涢泦鎴愭祴 empty | PASS |
+| 鍒嗛〉瀛楁 `page`/`pageSize`/`total` | Service/Controller + OpenAPI ProductPage锛涘墠绔鍙?| PASS |
+| 绛涢€?鈫?page2 浠嶆弧瓒崇瓫閫?| `listProducts_pagination_pagePageSizeTotal_andFilterPreservedOnPage2` | PASS锛堝璺戯級 |
+
+### 4. REQ-CAT-003锛堥瑙堜笁鍒嗗叆鍙ｏ級
+
+| 椤?| 璇佹嵁 | 缁撴灉 |
+|---|---|---|
+| 璇︽儏 / 涓婇摼 / 缂栬緫 | `goDetail` / `goChain` / `goEdit` | PASS |
+| 鏅€氱敤鎴锋棤缂栬緫 | `v-if="productWriteVisible"`锛坄useCanWrite`锛?| PASS |
+
+### 5. 娴嬭瘯瑕嗙洊锛堟敮鎾戦獙鏀讹紝涓嶄唬鏇?tester锛?
+| 椤?| 缁撴灉 |
+|---|---|
+| 鍚庣涓夌骇/绛涢€?鍒嗛〉 | PASS 鈥?`CatalogBrowseIntegrationTest` 11 tests |
+| 鍓嶇鍒嗚妭涓庤涓氳В鏋?| PASS 鈥?`useCatalogBrowse.spec.ts` 8 tests |
+| 瀹℃煡澶嶈窇 | 鍚庣 11 PASSED / BUILD SUCCESS锛泇itest 8 PASSED |
+
+## 娈嬩綑椋庨櫓锛堜氦 tester锛?
+- E2E 鎶芥牱锛氶《鏍忔爣绛惧垏鎹?鈫?鍒嗚妭鍙樺寲锛涚瓫閫夌┖鎬侊紱婊氳嚦搴曢儴 load-more 涓旂瓫閫変粛鎴愮珛锛沀SER 瑙掕壊棰勮鏃犮€岀紪杈戙€嶃€?- 宸ヤ綔鍖哄苟瀛?TASK-WSC-101/103 鏀瑰姩锛泃ester 鍩虹嚎妯″潡涓?`data-chain-service`锛坄repos.yaml`锛夛紝鍕挎妸 admin/sql 鍙樻洿绠楄繘 104銆?- 105 钀藉湴鍓嶅嬁瀵广€岀紪杈戝悗浜у搧浠嶅甫 L3銆嶅仛纭獙鏀讹紙瑙?FIND-002锛夈€?
+## 鍐崇瓥鏉冨０鏄?
+- 瀹℃煡鑰呮湭淇敼琚涓氬姟浠ｇ爜銆?- 鏈吋浠?developer锛涙湭浠ｆ浛 tester 瀹ｇО娴嬭瘯閫氳繃 / VERIFIED銆?- **decision: APPROVE**锛堣繘鍏ョ嫭绔?tester 闂ㄧ锛夈€?
+## 璁℃暟
+
+| 绾у埆 | 鏁伴噺 |
+|---|---|
+| P0 | 0 |
+| P1 | 0 |
+| P2 | 3 |
+| P3 | 2 |
+

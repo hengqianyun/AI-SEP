@@ -1,0 +1,145 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] data-chain                                                         [pom]
+[INFO] data-chain-service                                                 [jar]
+[INFO] 
+[INFO] -----------------------< com.shdata:data-chain >------------------------
+[INFO] Building data-chain 0.0.1-SNAPSHOT                                 [1/2]
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------------< com.shdata:data-chain-service >--------------------
+[INFO] Building data-chain-service 0.0.1-SNAPSHOT                         [2/2]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:3.2.0:resources (default-resources) @ data-chain-service ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] Copying 3 resources
+[INFO] Copying 6 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.10.1:compile (default-compile) @ data-chain-service ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 58 source files to C:\WorkSpace\AI-SEP\backend\app\data-chain-service\target\classes
+[WARNING] Error creating missing package info classes
+java.nio.file.NoSuchFileException: C:\WorkSpace\AI-SEP\backend\app\data-chain-service\target\classes\com\shdata\datachain\catalog\detail\package-info.class
+    at sun.nio.fs.WindowsException.translateToIOException (WindowsException.java:85)
+    at sun.nio.fs.WindowsException.rethrowAsIOException (WindowsException.java:103)
+    at sun.nio.fs.WindowsException.rethrowAsIOException (WindowsException.java:108)
+    at sun.nio.fs.WindowsFileSystemProvider.newByteChannel (WindowsFileSystemProvider.java:236)
+    at java.nio.file.spi.FileSystemProvider.newOutputStream (FileSystemProvider.java:484)
+    at java.nio.file.Files.newOutputStream (Files.java:228)
+    at java.nio.file.Files.write (Files.java:3512)
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.createMissingPackageInfoClasses (AbstractCompilerMojo.java:1364)
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.execute (AbstractCompilerMojo.java:1229)
+    at org.apache.maven.plugin.compiler.CompilerMojo.execute (CompilerMojo.java:198)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:137)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:210)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:156)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:148)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:117)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:81)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:56)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:128)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:305)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:192)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:105)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:957)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:289)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:193)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)
+    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:568)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:282)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:225)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:406)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:347)
+[INFO] 
+[INFO] --- maven-resources-plugin:3.2.0:testResources (default-testResources) @ data-chain-service ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] skip non existing resourceDirectory C:\WorkSpace\AI-SEP\backend\app\data-chain-service\src\test\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.10.1:testCompile (default-testCompile) @ data-chain-service ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 12 source files to C:\WorkSpace\AI-SEP\backend\app\data-chain-service\target\test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.22.2:test (default-test) @ data-chain-service ---
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest
+16:36:05.188 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating CacheAwareContextLoaderDelegate from class [org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate]
+16:36:05.221 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating BootstrapContext using constructor [public org.springframework.test.context.support.DefaultBootstrapContext(java.lang.Class,org.springframework.test.context.CacheAwareContextLoaderDelegate)]
+16:36:05.306 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating TestContextBootstrapper for test class [com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest] from class [org.springframework.boot.test.context.SpringBootTestContextBootstrapper]
+16:36:05.334 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Neither @ContextConfiguration nor @ContextHierarchy found for test class [com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest], using SpringBootContextLoader
+16:36:05.340 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader - Did not detect default resource location for test class [com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest]: class path resource [com/shdata/datachain/catalog/admin/CategoryAdminIntegrationTest-context.xml] does not exist
+16:36:05.341 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader - Did not detect default resource location for test class [com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest]: class path resource [com/shdata/datachain/catalog/admin/CategoryAdminIntegrationTestContext.groovy] does not exist
+16:36:05.341 [main] INFO org.springframework.test.context.support.AbstractContextLoader - Could not detect default resource locations for test class [com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest]: no resource found for suffixes {-context.xml, Context.groovy}.
+16:36:05.343 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest]: CategoryAdminIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+16:36:05.467 [main] DEBUG org.springframework.test.context.support.ActiveProfilesUtils - Could not find an 'annotation declaring class' for annotation type [org.springframework.test.context.ActiveProfiles] and class [com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest]
+16:36:05.658 [main] DEBUG org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider - Identified candidate component class: file [C:\WorkSpace\AI-SEP\backend\app\data-chain-service\target\classes\com\shdata\datachain\DataChainApplication.class]
+16:36:05.660 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.shdata.datachain.DataChainApplication for test class com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest
+16:36:05.907 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - @TestExecutionListeners is not present for class [com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest]: using defaults.
+16:36:05.907 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.event.ApplicationEventsTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener, org.springframework.test.context.event.EventPublishingTestExecutionListener]
+16:36:05.948 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@294a6b8e, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@4b1d6571, org.springframework.test.context.event.ApplicationEventsTestExecutionListener@1b835480, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@3549bca9, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@4f25b795, org.springframework.test.context.support.DirtiesContextTestExecutionListener@6fb365ed, org.springframework.test.context.transaction.TransactionalTestExecutionListener@6e950bcf, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener@16414e40, org.springframework.test.context.event.EventPublishingTestExecutionListener@74bada02, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@525575, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@46dffdc3, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@5a709816, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@78383390, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@6ad3381f, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener@53dbe163]
+16:36:05.958 [main] DEBUG org.springframework.test.context.support.AbstractDirtiesContextTestExecutionListener - Before test class: context [DefaultTestContext@38831718 testClass = CategoryAdminIntegrationTest, testInstance = [null], testMethod = [null], testException = [null], mergedContextConfiguration = [WebMergedContextConfiguration@2c1156a7 testClass = CategoryAdminIntegrationTest, locations = '{}', classes = '{class com.shdata.datachain.DataChainApplication}', contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations = '{}', propertySourceProperties = '{spring.datasource.url=jdbc:h2:mem:wsc_cat_admin_103;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE, spring.datasource.username=sa, spring.datasource.password=, spring.datasource.driver-class-name=org.h2.Driver, spring.jpa.hibernate.ddl-auto=create-drop, spring.jpa.database-platform=org.hibernate.dialect.H2Dialect, spring.flyway.enabled=false, spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration, org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true}', contextCustomizers = set[[ImportsContextCustomizer@33fe57a9 key = [org.springframework.boot.test.autoconfigure.web.servlet.MockMvcWebDriverAutoConfiguration, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcAutoConfiguration, org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration, org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcSecurityConfiguration, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcWebClientAutoConfiguration, org.springframework.boot.test.autoconfigure.web.reactive.WebTestClientAutoConfiguration]], org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@19e4653c, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@3a7442c7, org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@0, org.springframework.boot.test.web.client.TestRestTemplateContextCustomizer@5f049ea1, org.springframework.boot.test.autoconfigure.actuate.metrics.MetricsExportContextCustomizerFactory$DisableMetricExportContextCustomizer@5e2c3d18, org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@4b3fa0b3, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizerFactory$Customizer@268f106e, org.springframework.boot.test.context.SpringBootTestArgs@1, org.springframework.boot.test.context.SpringBootTestWebEnvironment@2a70a3d8], resourceBasePath = 'src/main/webapp', contextLoader = 'org.springframework.boot.test.context.SpringBootContextLoader', parent = [null]], attributes = map['org.springframework.test.context.web.ServletTestExecutionListener.activateListener' -> true]], class annotated with @DirtiesContext [false] with mode [null].
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::               (v2.7.18)
+
+2026-07-31 16:36:07.097  INFO 15672 --- [           main] c.s.d.c.a.CategoryAdminIntegrationTest   : Starting CategoryAdminIntegrationTest using Java 17.0.11 on admin with PID 15672 (started by water in C:\WorkSpace\AI-SEP\backend\app\data-chain-service)
+2026-07-31 16:36:07.101  INFO 15672 --- [           main] c.s.d.c.a.CategoryAdminIntegrationTest   : No active profile set, falling back to 1 default profile: "default"
+2026-07-31 16:36:11.009  INFO 15672 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-07-31 16:36:11.015  INFO 15672 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-31 16:36:11.435  INFO 15672 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 396 ms. Found 1 JPA repository interfaces.
+2026-07-31 16:36:13.906  INFO 15672 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-31 16:36:14.134  INFO 15672 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-07-31 16:36:14.701  INFO 15672 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-07-31 16:36:15.508  INFO 15672 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-31 16:36:16.210  INFO 15672 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-31 16:36:16.289  INFO 15672 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.MySQL8Dialect
+2026-07-31 16:36:17.885  INFO 15672 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-07-31 16:36:17.899  INFO 15672 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-31 16:36:23.319  INFO 15672 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-07-31 16:36:23.319  INFO 15672 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-31 16:36:23.341  INFO 15672 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2026-07-31 16:36:23.433  INFO 15672 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 113 ms
+2026-07-31 16:36:23.617  INFO 15672 --- [           main] c.s.d.c.a.CategoryAdminIntegrationTest   : Started CategoryAdminIntegrationTest in 17.547 seconds (JVM running for 20.051)
+2026-07-31 16:36:25.286  WARN 15672 --- [           main] wsc.audit                                : event=CATEGORY_DELETE_REJECTED userId=u-admin categoryId=cat-l3-emr-desense productCount=20 code=ERR_CATEGORY_HAS_PRODUCTS correlationId=corr-7524799536e0
+2026-07-31 16:36:25.295  WARN 15672 --- [           main] wsc.audit                                : event=CATEGORY_DELETE_REJECTED userId=u-admin categoryId=cat-l2-emr productCount=21 code=ERR_CATEGORY_HAS_PRODUCTS correlationId=corr-2fbe40b6598d
+2026-07-31 16:36:25.301  WARN 15672 --- [           main] wsc.audit                                : event=CATEGORY_DELETE_REJECTED userId=u-admin categoryId=cat-l1-health productCount=22 code=ERR_CATEGORY_HAS_PRODUCTS correlationId=corr-44562dd8b311
+2026-07-31 16:36:25.330  WARN 15672 --- [           main] wsc.audit                                : event=AUTH_FORBIDDEN userId=u-provider role=PROVIDER method=POST resource=/api/v1/catalog/categories code=ERR_FORBIDDEN correlationId=corr-ff55faaa16a9
+2026-07-31 16:36:25.339  WARN 15672 --- [           main] wsc.audit                                : event=AUTH_FORBIDDEN userId=u-user role=USER method=DELETE resource=/api/v1/catalog/categories/cat-l3-txn-retail code=ERR_FORBIDDEN correlationId=corr-f930f5120338
+2026-07-31 16:36:25.343  WARN 15672 --- [           main] wsc.audit                                : event=AUTH_FORBIDDEN userId=u-user role=USER method=POST resource=/api/v1/catalog/categories code=ERR_FORBIDDEN correlationId=corr-22ab22f5cc87
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.313 s - in com.shdata.datachain.catalog.admin.CategoryAdminIntegrationTest
+[INFO] Running com.shdata.datachain.catalog.admin.CategoryAdminServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.449 s - in com.shdata.datachain.catalog.admin.CategoryAdminServiceTest
+2026-07-31 16:36:25.936  INFO 15672 --- [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-31 16:36:25.936  INFO 15672 --- [ionShutdownHook] .SchemaDropperImpl$DelayedDropActionImpl : HHH000477: Starting delayed evictData of schema as part of SessionFactory shut-down'
+2026-07-31 16:36:26.131  INFO 15672 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-07-31 16:36:26.133  INFO 15672 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for data-chain 0.0.1-SNAPSHOT:
+[INFO] 
+[INFO] data-chain ......................................... SUCCESS [  0.013 s]
+[INFO] data-chain-service ................................. SUCCESS [ 42.618 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  43.164 s
+[INFO] Finished at: 2026-07-31T16:36:26+08:00
+[INFO] ------------------------------------------------------------------------

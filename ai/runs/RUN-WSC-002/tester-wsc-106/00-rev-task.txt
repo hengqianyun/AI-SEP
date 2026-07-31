@@ -1,0 +1,7 @@
+﻿decision: APPROVE
+  - planning/approved/PLAN-WSC-2.2.md
+**APPROVE** — 本轮 **P0=0，P1=0**。变更落在 `writeSet`：`frontend/src/features/catalog/maintenance/**` 与 `backend/.../catalog/maintenance/**`（含集成测）。未改 `contracts/**`、`frontend/src/api/**`、`**/sql/**`；**未触碰** detail/editor/chain（并行 TASK-WSC-105 工作区改动不归本轮）。REQ-CAT-007：状态页签、一二三级筛选、分页 `page`/`pageSize`/`total`、单条保存/取消、批量关联、非管理员页不可达 + API `ERR_MAINTENANCE_FORBIDDEN` 均有实现与测试支撑。SCOPE_AMEND（`StubWriteController` 去维护占位、`routes.ts` 注册 `/catalog/maintenance`）合理且最小，对齐 REV-102 关闭条件。审查复跑后端 4 测与 vitest 4 测均 **PASSED**。正式 VERIFIED 仍须独立 tester 执行 `testScope`。
+P0/P1 未清零不得 `APPROVE`。本轮 **P0=0，P1=0**。
+- **decision: APPROVE**（进入独立 tester 门禁）。
+| P0 | 0 |
+| P1 | 0 |

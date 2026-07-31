@@ -1,0 +1,9 @@
+﻿# MySQL auth result (secrets redacted)
+port_3306: OPEN
+application-local.yml: present; datasource username=root; password len=4 (value not logged)
+mysql CLI with credentials from application-local.yml: ERROR 1045 Access denied for user root@localhost (using password: YES)
+mysql CLI default root/root: ERROR 1045 Access denied
+mysql CLI no password: ERROR 1045 Access denied (using password: NO)
+docker: no MySQL container on 3306
+empty-db init (00/01 sql): NOT APPLIED — blocked on auth
+action_needed: human must supply working MySQL credentials for 127.0.0.1:3306; do not invent password

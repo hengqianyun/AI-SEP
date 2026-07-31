@@ -1,6 +1,6 @@
 /**
- * API modules aligned to wsc-contracts@1.1.0 OpenAPI.
- * Generated/hand-aligned in TASK-WSC-001; subsequent tasks must treat as read-only.
+ * API modules aligned to wsc-contracts@2.0.0 OpenAPI.
+ * TASK-WSC-101 唯一写；后续任务只读。
  */
 export { CONTRACT_VERSION, apiRequest, getApiBaseUrl, ApiError } from './client'
 export * from './auth'

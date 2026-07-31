@@ -1,0 +1,5 @@
+variant_0 len=14 exit=1 err=ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: Y
+variant_1 len=14 exit=1 err=ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: Y
+variant_2 len=14 exit=1 err=ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: Y
+variant_3 len=4 exit=1 err=ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: Y
+variant_4 len=0 exit=1 err=ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: N

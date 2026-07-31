@@ -1,0 +1,7 @@
+[WARNING] Error creating missing package info classes
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s - in com.shdata.datachain.rbac.RbacMatrixTest
+2026-07-31 15:41:27.116  INFO 36004 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=TST-ADM-0001 result=SUCCESS errorCode=- correlationId=corr-ac03a839c0d3
+2026-07-31 15:41:27.233  INFO 36004 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-provider productCode=TST-PRV-0001 result=SUCCESS errorCode=- correlationId=corr-11ecf0434cc6
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.993 s - in com.shdata.datachain.security.SessionAuthIntegrationTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

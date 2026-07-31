@@ -1,0 +1,6 @@
+﻿E2E probe for TASK-WSC-106 (REQ-CAT-007 maintenance)
+PLAN places Playwright E2E in W5 (tests/e2e); not in TASK-WSC-106 writeSet executable scope
+playwright.config exists=True
+maint-related under tests/: 0
+catalog-ish under tests/e2e: 0
+decision: SKIPPED — no TASK-WSC-106-scoped Playwright suite executable in this wave; not faked PASS

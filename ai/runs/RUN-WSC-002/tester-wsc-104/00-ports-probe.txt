@@ -1,0 +1,4 @@
+﻿port=3306 TcpTestSucceeded=True
+port=6379 TcpTestSucceeded=False
+port=8080 TcpTestSucceeded=False
+NOT_SCORED: env port probe informational only; H2+exclude Redis for browse integration

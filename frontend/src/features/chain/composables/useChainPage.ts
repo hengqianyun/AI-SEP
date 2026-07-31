@@ -9,10 +9,17 @@ import { ApiError } from '@/api/client'
 
 export type LoadState = 'idle' | 'loading' | 'empty' | 'ready' | 'error'
 
+/** 契约 2.0.0 快照三级路径分段（api 类型尚未展开时在 feature 层补充）。 */
+export type CategoryPathParts = { l1?: string; l2?: string; l3?: string }
+
+export type CatalogSnapshotView = CatalogSnapshot & {
+  categoryPathParts?: CategoryPathParts
+}
+
 export function useChainPage(productIdSource: () => string) {
   const versions = ref<ChainVersion[]>([])
   const selectedVersionId = ref<string | null>(null)
-  const snapshot = ref<CatalogSnapshot | null>(null)
+  const snapshot = ref<CatalogSnapshotView | null>(null)
   const listState = ref<LoadState>('idle')
   const snapshotState = ref<LoadState>('idle')
   const listError = ref<string | null>(null)
@@ -59,7 +66,7 @@ export function useChainPage(productIdSource: () => string) {
     snapshot.value = null
     try {
       const res = await getChainSnapshot(versionId)
-      snapshot.value = res.data
+      snapshot.value = res.data as CatalogSnapshotView
       snapshotState.value = 'ready'
     } catch (e) {
       snapshotState.value = 'error'
@@ -74,9 +81,13 @@ export function useChainPage(productIdSource: () => string) {
     void loadSnapshot(versionId)
   }
 
-  watch(productId, () => {
-    void loadVersions()
-  }, { immediate: true })
+  watch(
+    productId,
+    () => {
+      void loadVersions()
+    },
+    { immediate: true },
+  )
 
   return {
     versions,
@@ -99,4 +110,14 @@ export function chainEmptyMessage(): string {
 /** 纯函数：列表错误是否可重试展示。 */
 export function isRetryableListState(state: LoadState): boolean {
   return state === 'error'
+}
+
+/** 三级路径展示文案：优先完整 path，否则由 parts 拼接。 */
+export function formatCategoryPath(
+  path?: string | null,
+  parts?: CategoryPathParts | null,
+): string {
+  if (path && path.trim()) return path.trim()
+  if (!parts) return ''
+  return [parts.l1, parts.l2, parts.l3].filter((x) => Boolean(x && String(x).trim())).join(' / ')
 }

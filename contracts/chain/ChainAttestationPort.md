@@ -1,7 +1,8 @@
-# ChainAttestationPort（wsc-contracts@1.1.0）
+# ChainAttestationPort（wsc-contracts@2.0.0）
 
 > 对齐 DEC-WSC-002 / REQ-CHAIN-001 / REQ-CAT-005。  
-> 业务层仅依赖本接口；禁止直连真实链 SDK。
+> 业务层仅依赖本接口；禁止直连真实链 SDK。  
+> V1.1：`catalogSnapshot` 须含三级分类路径字段（`categoryPath` / `categoryPathParts`）。
 
 ## 职责
 

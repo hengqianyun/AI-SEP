@@ -1,0 +1,25 @@
+﻿FOUND: C:\WorkSpace\AI-SEP\backend\app\data-chain-service\src\test\java\com\shdata\datachain\catalog\maintenance\CatalogMaintenanceIntegrationTest.java
+class CatalogMaintenanceIntegrationTest {
+@Test
+void pending_to_maintained_singleAssociate() throws Exception {
+@Test
+void batchAssociate_and_leafRequired() throws Exception {
+@Test
+void pagination_pagePageSizeTotal() throws Exception {
+@Test
+void nonAdmin_forbidden() throws Exception {
+
+FE: C:\WorkSpace\AI-SEP\frontend\src\features\catalog\maintenance\composables\useCatalogMaintenance.spec.ts
+describe('useCatalogMaintenance', () => {
+it('loads list with page/pageSize/total and status tabs', async () => {
+await m.init()
+it('single save associates l3 then reloads', async () => {
+await m.init()
+m.startEdit(m.entries.value[0])
+await m.saveEdit()
+it('batch save uses selected ids and batch l3', async () => {
+await m.init()
+it('surfaces ApiError on save failure', async () => {
+await m.init()
+m.startEdit(m.entries.value[0])
+await m.saveEdit()

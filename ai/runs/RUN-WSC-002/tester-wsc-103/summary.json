@@ -1,0 +1,26 @@
+{
+  "evidenceId": "EVID-TASK-WSC-103-1",
+  "taskId": "TASK-WSC-103",
+  "actorInstance": "tester-wsc-103",
+  "reviewDecision": "APPROVE",
+  "status": "PASSED",
+  "executedAt": "2026-07-31T17:10:13+08:00",
+  "backend": {
+    "testsRun": 8,
+    "failures": 0,
+    "exitCode": 0
+  },
+  "frontend": {
+    "vitest": {
+      "tests": 4,
+      "passed": 4,
+      "exitCode": 0
+    },
+    "typecheck": {
+      "exitCode": 0
+    }
+  },
+  "uiE2e": "SKIPPED",
+  "testrunPath": "planning/tasks/TESTRUN-TASK-WSC-103.md",
+  "evidenceDir": "ai/runs/RUN-WSC-002/tester-wsc-103/"
+}

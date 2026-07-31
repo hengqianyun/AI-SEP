@@ -1,0 +1,4 @@
+C:\WorkSpace\AI-SEP\backend\app\data-chain-service\src\test\java\com\shdata\datachain\rbac\RbacMatrixTest.java
+C:\WorkSpace\AI-SEP\backend\app\data-chain-service\src\test\java\com\shdata\datachain\security\SessionAuthIntegrationTest.java
+C:\WorkSpace\AI-SEP\frontend\src\features\auth\composables\useCanWrite.spec.ts
+C:\WorkSpace\AI-SEP\frontend\src\features\auth\composables\useCanWrite.ts

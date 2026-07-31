@@ -1,0 +1,6 @@
+﻿actuator/health=200 body={"status":"UP"}
+/health=200 body={"code":200,"message":"success","data":"UP"}
+/doc.html=200 reachable
+Unsupported Database: ABSENT
+Flyway: Successfully applied 3 migrations incl V202607301600 init wsc v11
+Started: DataChainApplication

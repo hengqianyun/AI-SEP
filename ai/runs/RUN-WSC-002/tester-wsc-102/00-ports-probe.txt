@@ -1,0 +1,4 @@
+probeAt=2026-07-31T15:43:53.5853729+08:00
+mysql_3306_TcpTestSucceeded=True
+redis_6379_TcpTestSucceeded=False
+note=Live MySQL/Redis NOT required for this TESTRUN: SessionAuthIntegrationTest uses H2 + Redis excluded (per DEV). Env probe is informational only; not scored as PASSED.

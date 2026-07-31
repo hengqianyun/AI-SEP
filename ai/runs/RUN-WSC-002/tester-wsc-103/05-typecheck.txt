@@ -1,0 +1,4 @@
+
+> data-chain-static@0.1.0 typecheck C:\WorkSpace\AI-SEP\frontend
+> vue-tsc --noEmit -p tsconfig.json --pretty false
+

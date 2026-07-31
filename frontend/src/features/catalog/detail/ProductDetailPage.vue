@@ -66,7 +66,10 @@ function goBack() {
           <div><dt>产品名称</dt><dd>{{ product.productName }}</dd></div>
           <div><dt>产品编码</dt><dd>{{ product.productCode }}</dd></div>
           <div><dt>产品类型</dt><dd>{{ product.productType }}</dd></div>
-          <div><dt>行业分类</dt><dd>{{ product.categoryPath || '—' }}</dd></div>
+          <div data-testid="category-path">
+            <dt>分类路径（三级）</dt>
+            <dd>{{ product.categoryPath || '—' }}</dd>
+          </div>
           <div><dt>业务大类</dt><dd>{{ product.businessCategory || '—' }}</dd></div>
           <div><dt>业务子类</dt><dd>{{ product.businessSubCategory || '—' }}</dd></div>
           <div><dt>数据来源</dt><dd>{{ product.dataSource || '—' }}</dd></div>

@@ -18,8 +18,22 @@ const productId = computed(() =>
 )
 
 const editor = useProductEditor(mode.value === 'create' ? 'create' : 'edit')
-const { state, feedback, form, isOther, l2Categories, init, onTagKeydown, removeTag, submit } =
-  editor
+const {
+  state,
+  feedback,
+  form,
+  isOther,
+  l1Categories,
+  l2Categories,
+  l3Categories,
+  selectedPathLabel,
+  onL1Change,
+  onL2Change,
+  init,
+  onTagKeydown,
+  removeTag,
+  submit,
+} = editor
 
 onMounted(() => {
   if (!productWriteVisible.value) {
@@ -67,13 +81,38 @@ function onCancel() {
             <option value="OTHER">其他数据产品</option>
           </select>
         </label>
-        <label>
-          二级行业分类
-          <select v-model="form.l2CategoryId" required>
-            <option disabled value="">请选择</option>
-            <option v-for="c in l2Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-          </select>
-        </label>
+        <div class="category-cascade" data-testid="category-cascade">
+          <label>
+            空间（一级）*
+            <select v-model="form.l1CategoryId" required data-testid="cat-l1" @change="onL1Change">
+              <option disabled value="">请选择</option>
+              <option v-for="c in l1Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </label>
+          <label>
+            行业（二级）*
+            <select
+              v-model="form.l2CategoryId"
+              required
+              :disabled="!form.l1CategoryId"
+              data-testid="cat-l2"
+              @change="onL2Change"
+            >
+              <option disabled value="">请选择</option>
+              <option v-for="c in l2Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </label>
+          <label>
+            子类（三级）*
+            <select v-model="form.l3CategoryId" required :disabled="!form.l2CategoryId" data-testid="cat-l3">
+              <option disabled value="">请选择</option>
+              <option v-for="c in l3Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </label>
+          <p v-if="selectedPathLabel" class="path-preview" data-testid="category-path-preview">
+            路径预览：{{ selectedPathLabel }}
+          </p>
+        </div>
         <label>业务大类 <input v-model="form.businessCategory" /></label>
         <label>业务子类 <input v-model="form.businessSubCategory" /></label>
         <label>数据来源 <input v-model="form.dataSource" /></label>
@@ -181,6 +220,18 @@ label.check {
   align-items: center;
   gap: 8px;
 }
+.category-cascade {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px 14px;
+}
+.path-preview {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 12px;
+  color: #1f4b7a;
+}
 input,
 select,
 textarea {
@@ -237,5 +288,10 @@ button:disabled {
 }
 .err {
   color: #a33;
+}
+@media (max-width: 720px) {
+  .category-cascade {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

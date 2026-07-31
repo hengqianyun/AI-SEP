@@ -1,19 +1,30 @@
 import { describe, expect, it } from 'vitest'
-import { canMaintainCategory, canWriteProduct } from './useCanWrite'
+import {
+  canImportProduct,
+  canMaintainCatalog,
+  canMaintainCategory,
+  canWriteProduct,
+} from './useCanWrite'
 
-describe('useCanWrite / RBAC UI visibility', () => {
-  it('ADMIN sees category maintain and product write', () => {
+describe('useCanWrite / RBAC UI visibility (§4)', () => {
+  it('ADMIN sees category, catalog maintenance, product write, import', () => {
     expect(canMaintainCategory('ADMIN')).toBe(true)
+    expect(canMaintainCatalog('ADMIN')).toBe(true)
     expect(canWriteProduct('ADMIN')).toBe(true)
+    expect(canImportProduct('ADMIN')).toBe(true)
   })
 
-  it('PROVIDER hides category maintain, shows product write', () => {
+  it('PROVIDER hides category/catalog maintenance, shows product write and import', () => {
     expect(canMaintainCategory('PROVIDER')).toBe(false)
+    expect(canMaintainCatalog('PROVIDER')).toBe(false)
     expect(canWriteProduct('PROVIDER')).toBe(true)
+    expect(canImportProduct('PROVIDER')).toBe(true)
   })
 
-  it('USER hides all write entries', () => {
+  it('USER hides all write entries including import and catalog maintenance', () => {
     expect(canMaintainCategory('USER')).toBe(false)
+    expect(canMaintainCatalog('USER')).toBe(false)
     expect(canWriteProduct('USER')).toBe(false)
+    expect(canImportProduct('USER')).toBe(false)
   })
 })

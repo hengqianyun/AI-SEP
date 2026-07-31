@@ -1,0 +1,87 @@
+﻿# DEV-TASK-WSC-104
+
+```yaml
+taskId: TASK-WSC-104
+actorInstance: developer-wsc-104
+planId: PLAN-WSC-2.2
+snapshotId: SNAP-WSC-002
+contracts: wsc-contracts@2.0.0
+status: READY_FOR_REVIEW
+completedAt: 2026-07-31T16:20:00+08:00
+reqs:
+  - REQ-CAT-001
+  - REQ-CAT-002
+  - REQ-CAT-003
+```
+
+## 鎽樿
+
+鍦?`backend/app/data-chain-service`锛坄com.shdata.datachain.catalog.browse`锛変笌 `frontend/src/features/catalog/browse` 钀藉湴涓夌骇鐩綍娴忚锛氶《閮ㄧ┖闂?琛屼笟鏍囩銆佸瓙绫诲垎鑺傚垪琛ㄣ€侀瑙堜笁绾ц矾寰勩€佽涓氱瓫鍙€?L2/L3銆佹粴鍔ㄥ姞杞芥洿澶氾紙濂戠害瀛楁 `page`/`pageSize`/`total`锛涚瓫閫夋潯浠跺湪 load-more 涓繚鐣欙級銆傛湭鏀?`contracts/**`銆乣frontend/src/api/**`銆乣catalog/admin/**`銆?
+## 鍙樻洿鏂囦欢鍒楄〃
+
+### 鍚庣锛坵riteSet锛?
+| 璺緞 | REQ | 璇存槑 |
+|---|---|---|
+| `.../catalog/browse/CatalogProduct.java` | REQ-CAT-001 | 澧?`l3CategoryId`锛涗繚鐣欐棤 l3 鍏煎鏋勯€犱緵 editor |
+| `.../catalog/browse/CatalogCategory.java` | REQ-CAT-001 | 娉ㄩ噴瀵归綈 L1/L2/L3 |
+| `.../catalog/browse/CatalogBrowseSeedStore.java` | REQ-CAT-001 | L3 绉嶅瓙锛涗骇鍝佹寕涓夌骇锛涜矾寰?鎸傝浇璁℃暟锛涘垎椤垫牱渚嬫暟鎹?|
+| `.../catalog/browse/CatalogBrowseService.java` | REQ-CAT-001/002 | `l3CategoryId` 绛涢€夛紱L2 鍚瓙 L3锛沗pathLabels`锛沗page/pageSize/total` |
+| `.../catalog/browse/CatalogBrowseController.java` | REQ-CAT-001/002 | 鏌ヨ鍙傛暟澧炲姞 `l3CategoryId` |
+| `.../catalog/browse/package-info.java` | 鈥?| 瀵归綈 TASK-WSC-104 |
+| `.../test/.../CatalogBrowseIntegrationTest.java` | REQ-CAT-001/002 | 涓夌骇/绛涢€夌┖鎬?鍒嗛〉涓庣瓫閫変繚鐣欙紙H2锛?|
+
+### 鍓嶇锛坵riteSet锛?
+| 璺緞 | REQ | 璇存槑 |
+|---|---|---|
+| `frontend/src/features/catalog/browse/CatalogBrowsePage.vue` | REQ-CAT-001/002/003 | 椤堕儴绌洪棿/琛屼笟鏍囩锛涘瓙绫诲垎鑺傦紱婊氬姩 load-more锛涢瑙堣矾寰勪笌涓夊垎鍏ュ彛 |
+| `frontend/src/features/catalog/browse/composables/useCatalogBrowse.ts` | REQ-CAT-001/002 | 绛涢€夊榻愪笁绾э紱append 鍒嗛〉锛沗groupProductsByL3` |
+| `frontend/src/features/catalog/browse/composables/useCatalogBrowse.spec.ts` | REQ-CAT-001/002 | 鍒嗚妭/琛屼笟绛涜В鏋?绌烘€佺瓑鍗曟祴 |
+
+> 鏈敼 `SensitiveId.vue` / `labels.ts` / `truncateSensitive.ts`锛堟棦鏈夎兘鍔涘鐢級銆?
+## REQ 鏄犲皠
+
+| REQ | 瀹炵幇瑕佺偣 |
+|---|---|
+| **REQ-CAT-001** | 椤堕儴绌洪棿(L1)/琛屼笟(L2)鏍囩鍒囨崲浜у搧闆嗭紱鍒楄〃鎸?L3 鍒嗚妭锛堟爣棰?鏁伴噺锛夛紱琛屽瓧娈靛惈搴忓彿/缂栫爜/鍚嶇О/涓婇摼娆℃暟/绫诲瀷锛涢瑙堝惈涓夌骇 `categoryPath`锛涙粴鍔ㄥ姞杞芥湁 loading锛岀瓫閫変笌宸插姞杞藉垪琛ㄤ繚鐣?|
+| **REQ-CAT-002** | 鏉ユ簮/绫诲瀷/鍏叡鏁版嵁/浜や粯/鍏抽敭璇嶅悓鍓嶏紱琛屼笟绛涘彲閫?L2 鎴?L3锛涙棤缁撴灉绌烘€?|
+| **REQ-CAT-003** | 棰勮銆岃鎯?/ 涓婇摼 / 缂栬緫銆嶏紱缂栬緫浠?`productWriteVisible`锛堟櫘閫氱敤鎴锋棤缂栬緫锛?|
+
+## 宸茬煡杈圭晫 / 鍚庣画浠诲姟
+
+- `CatalogProduct` 鏃?l3 鍏煎鏋勯€犱緵 TASK-WSC-105 editor 杩囨浮锛沚rowse 绉嶅瓙宸叉寕 L3銆?- 鍒嗙被缁存姢 CRUD锛堝惈 L3锛夊睘 TASK-WSC-103锛涙湰浠诲姟鏈Е纰?`catalog/admin/**`銆?- 璇︽儏/缂栬緫涓夌骇閫夋嫨鍣ㄥ睘 TASK-WSC-105銆?
+## 鑷祴鍛戒护涓庣粨鏋?
+### 鍚庣
+
+```text
+mvn -f backend/pom.xml "-Dtest=com.shdata.datachain.catalog.browse.CatalogBrowseIntegrationTest" test
+```
+
+| 绫?| Tests | 缁撴灉 |
+|---|---|---|
+| `com.shdata.datachain.catalog.browse.CatalogBrowseIntegrationTest` | 11 | **PASSED** / **BUILD SUCCESS** |
+
+瑕嗙洊锛氱櫥褰曢棬绂侊紱L1/L2/L3 鍒嗙被锛汱1/L2/L3 绛涢€夛紱绌烘€侊紱鍏抽敭璇嶏紱涓夌骇璺緞棰勮锛沗page`/`pageSize`/`total`锛沺age2 浠嶆弧瓒?`l3CategoryId` 绛涢€夈€傞泦鎴愭祴璇曚娇鐢?H2 + 鎺掗櫎 Redis銆?
+### 鍓嶇
+
+```text
+cd frontend
+pnpm exec vitest run src/features/catalog/browse/composables/useCatalogBrowse.spec.ts
+pnpm typecheck
+pnpm lint
+pnpm build
+```
+
+| 鍛戒护 | 缁撴灉 |
+|---|---|
+| vitest browse composable | **PASSED**锛? tests锛?|
+| `pnpm typecheck` | **PASSED** |
+| `pnpm lint` | **PASSED**锛坧laceholder exit 0锛?|
+| `pnpm build` | **PASSED** |
+
+## SCOPE / denyModify
+
+- 鏈慨鏀?`contracts/**`銆乣frontend/src/api/**`銆乣**/sql/**`
+- **鏈Е纰?* `frontend/src/features/catalog/admin/**`銆乣backend/.../catalog/admin/**`锛堝強 detail/editor/maintenance/import锛?- 鏈笌 TASK-WSC-103 娣峰啓 admin锛涗粎 browse writeSet
+- 鏈?DEV 鎶ュ憡鎸夋淳鍙戣姹傚啓鍏?`planning/tasks/`
+- 鏈吋浠?codeReviewer锛涙湭鑷鏍囪 VERIFIED
+

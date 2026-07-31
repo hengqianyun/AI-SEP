@@ -1,0 +1,10 @@
+﻿CatalogMaintenanceIntegrationTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.721 s
+Results: Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+EXIT=0
+methods:
+- pending_to_maintained_singleAssociate
+- batchAssociate_and_leafRequired
+- pagination_pagePageSizeTotal
+- nonAdmin_forbidden

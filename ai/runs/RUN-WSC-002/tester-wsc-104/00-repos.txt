@@ -1,0 +1,30 @@
+﻿# repos.yaml 鈥?瀹炵幇浠撲笌鎺у埗闈㈠垎绂伙紙WSC / data-chain锛?# AI-SEP 鎺у埗闈繚鐣欐湰鍦帮紱鍓嶅悗绔帹閫佽嚦鐙珛 Codeup 浠撳簱銆?
+projectId: WSC
+controlPlane: .
+mode: multi-repo
+
+repositories:
+  data-chain-static:
+    role: frontend
+    url: https://codeup.aliyun.com/5f4356276207a1a8b17f985c/SH-BIGDATA/data-chain/data-chain-static.git
+    localPath: frontend
+    packageName: data-chain-static
+    layoutAlias: frontend/**
+    notes: "Vue 闈欐€佺珯锛沺npm build 鈫?dist/锛沄ITE_API_BASE_URL 鎸囧悜鍚庣"
+
+  data-chain-backend:
+    role: backend
+    url: https://codeup.aliyun.com/5f4356276207a1a8b17f985c/SH-BIGDATA/data-chain/data-chain-backend.git
+    localPath: backend
+    artifact: app/data-chain-service
+    layoutAlias: backend/**
+    notes: "鍞竴鏈嶅姟妯″潡 app/data-chain-service锛涗笟鍔″寘缁熶竴 com.shdata.datachain.*锛汣ORS 瑙?WSC_CORS_ALLOWED_ORIGINS"
+
+contracts:
+  source: controlPlane
+  path: contracts/
+  versionFile: contracts/VERSION
+
+isolation:
+  # 浠诲姟娲惧彂鏃舵寜浠撳啓闆嗛殧绂伙紱state.yaml 浠嶅彧鍦ㄦ湰鎺у埗闈?Run 涓嬪崟鍐?  stateOwner: controlPlane
+  workerWrites: [data-chain-static, data-chain-backend]

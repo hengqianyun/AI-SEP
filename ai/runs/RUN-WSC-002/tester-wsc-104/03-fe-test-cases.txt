@@ -1,0 +1,10 @@
+﻿describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
+it('empty message is explicit and stable (testid catalog-empty)', () => {
+it('error state is retryable', () => {
+it('default filters include industryFilterId (L2/L3)', () => {
+it('product type labels cover four types', () => {
+it('resolveIndustryQuery maps L2 and L3 filter ids', () => {
+it('groupProductsByL3 sections by subcategory with counts', () => {
+it('groupProductsByL3 preserves filter semantics for load-more append order', () => {
+describe('§3.6 sensitive id truncate (browse)', () => {
+it('truncates long credit code with ellipsis', () => {

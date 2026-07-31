@@ -1,5 +1,5 @@
 /**
- * Auth API — 对齐 contracts/openapi (wsc-contracts@1.1.0)
+ * Auth API — 对齐 contracts/openapi (wsc-contracts@2.0.0；会话 scheme 继承 V1.0)
  * 由契约生成/手写对齐；禁止在后续业务任务中手改契约语义。
  */
 import { apiRequest } from './client'

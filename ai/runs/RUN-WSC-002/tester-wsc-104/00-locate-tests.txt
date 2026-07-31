@@ -1,0 +1,2 @@
+﻿C:\WorkSpace\AI-SEP\backend\app\data-chain-service\src\test\java\com\shdata\datachain\catalog\browse\CatalogBrowseIntegrationTest.java
+C:\WorkSpace\AI-SEP\frontend\src\features\catalog\browse\composables\useCatalogBrowse.spec.ts

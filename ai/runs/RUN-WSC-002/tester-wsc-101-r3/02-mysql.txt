@@ -1,0 +1,5 @@
+MySQL 3306 TcpTestSucceeded=False
+BLOCKED: MySQL unreachable
+Redis 6379 TcpTestSucceeded=False
+NOTE: Redis unreachable
+EXIT:0

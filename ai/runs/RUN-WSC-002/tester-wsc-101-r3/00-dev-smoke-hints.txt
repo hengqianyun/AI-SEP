@@ -1,0 +1,19 @@
+后端迁至 `backend/app/wsc-service/`（Boot 2.7.18 / MySQL+Redis 配置基线 / Flyway `sql/init`+`sql/migration`）；冻结 `wsc-contracts@2.0.0`（三级分类、目录维护≡产品、同步导入、Browse `page`/`pageSize`/`total`、会话 scheme 继承）；生成/对齐 `frontend/src/api/**`；overview 前后端最小适配可编译启动；文档化 V1.0→V1.1 schema 策略。未实现 catalog/shell/auth/chain **业务页**；未实现导入/维护后端业务逻辑（契约+表结构已冻结）。
+- `backend/app/wsc-service/src/main/java/com/wsc/WscApplication.java`
+- `backend/app/wsc-service/src/main/java/com/wsc/config/{HealthConfig,OpenApiConfig}.java`
+- `backend/app/wsc-service/src/main/java/com/wsc/overview/**`（迁入 + package-info 适配说明）
+- `backend/app/wsc-service/src/main/resources/application.yml`
+- `backend/app/wsc-service/src/main/resources/application-local.example.yml`
+- `contracts/overview/stream-events.yaml`
+- `frontend/src/api/{client,catalog,overview,auth,chain,index}.ts`（2.0.0）
+- `frontend/src/features/overview/composables/useOverviewData.ts`（契约版本注释；无新指标）
+| REQ-OVW-001..005 | OpenAPI overview 端点；后端 overview 可启动；前端 API/composable 对齐；无新指标 |
+- overview 无新业务指标；仍以内存 seed 投影为主（与 V1.0 一致）
+| `mvn -f backend/app/wsc-service/pom.xml "-Dtest=OverviewApiIntegrationTest,WscApplicationTests" test` | **PASSED** | Tests run: 6, Failures: 0 |
+| `mvn -f backend/app/wsc-service/pom.xml spring-boot:run -Dspring-boot.run.profiles=dev` | **PASSED** | H2 + 排除 Redis；`Started WscApplication` |
+| `GET http://localhost:8080/health` | **PASSED** | `{"status":"UP"}` |
+| `GET http://localhost:8080/doc.html` | **PASSED** | HTTP 200 |
+| overview smoke（login admin/demo → metrics + stream） | **PASSED** | 200 + seed 数据 / 流含 items |
+| 空库 MySQL `sql/init`→启动 Flyway | **BLOCKED** | 本机 `localhost:3306` / `6379` 不可达；dev profile 下 H2 已跑通 migration |
+1. 安装/启动本地 MySQL 8 + Redis，按 `sql/init` 建库 baseline 后以默认 profile 启动 `wsc-service`。
+- 默认 profile 依赖 MySQL+Redis；无环境时用 `--spring.profiles.active=dev`。

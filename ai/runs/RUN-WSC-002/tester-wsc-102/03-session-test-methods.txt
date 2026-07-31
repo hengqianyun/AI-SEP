@@ -1,0 +1,37 @@
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+@Test
+void rbacMatrix_admin_canWriteCategoryProductMaintenanceImport() throws Exception {
+.perform(post("/api/v1/catalog/products/import").session(session))
+.perform(get("/api/v1/catalog/products/import/reports/rep-admin").session(session))
+@Test
+void rbacMatrix_provider_maintenanceForbidden_productAndImportOk() throws Exception {
+.perform(post("/api/v1/catalog/products/import").session(session))
+.perform(get("/api/v1/catalog/products/import/reports/rep-prv").session(session))
+@Test
+void rbacMatrix_user_allWritesAndMaintenanceImportForbidden() throws Exception {
+.perform(post("/api/v1/catalog/products/import").session(session))
+.perform(get("/api/v1/catalog/products/import/reports/rep-user").session(session))
+@Test
+void logout_thenImportWriteApiRejected() throws Exception {
+.perform(post("/api/v1/catalog/products/import").session(session))
+.andExpect(jsonPath("$.code").value("401"));
+@Test
+void roleSwitch_oldSessionImportRejected() throws Exception {
+.perform(post("/api/v1/catalog/products/import").session(oldSession))
+.perform(post("/api/v1/catalog/products/import").session(newSession))
+@Test
+void loginFailed_returns401() throws Exception {
+.andExpect(jsonPath("$.code").value("401"));

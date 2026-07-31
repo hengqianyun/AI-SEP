@@ -1,0 +1,7 @@
+﻿actorInstance: tester-wsc-106
+taskId: TASK-WSC-106
+planId: PLAN-WSC-2.2
+strategy: shell-specialist-file-based-evidence
+reviewDecision: APPROVE (REV-TASK-WSC-106)
+startedAt: 2026-07-31T17:48:05+08:00
+testScope: 待关联→已维护；批量关联；非管理员 403；分页

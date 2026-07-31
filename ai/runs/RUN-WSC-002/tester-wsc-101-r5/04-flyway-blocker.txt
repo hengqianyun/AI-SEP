@@ -1,0 +1,11 @@
+﻿# spring-boot local outcome (tester-wsc-101-r5)
+profile: local (confirmed in log)
+MySQL auth: CLEARED (previous 1045 superseded) — used application-local.yml via
+  --spring.config.additional-location=optional:file:backend/app/wsc-service/src/main/resources/
+Note: packaged jar BOOT-INF/classes/application-local.yml was STALE vs gitignored src;
+  bare java -jar without additional-location still 1045; not a live-cred failure.
+Empty DB: DROP + 00_create_database + 01_flyway_baseline applied (02-mysql-init.txt)
+Flyway: FAILED — org.flywaydb.core.api.FlywayException: Unsupported Database: MySQL 8.0
+Root cause: pom has flyway-core only; Flyway 8.5.x requires flyway-mysql for MySQL.
+Migration V202607301600__init_wsc_v11.sql NOT applied by app.
+status: BLOCKED (product dependency), not env/auth

@@ -1,0 +1,5 @@
+﻿Playwright/E2E probe for TASK-WSC-104
+writeSet: frontend/src/features/catalog/browse/** + backend browse
+testScope: tag switch; filter empty; scroll load-more; preview ACL; filter retained after load-more
+No Playwright specs under browse writeSet; UI E2E not executable in this TESTRUN -> SKIPPED
+C:\WorkSpace\AI-SEP\frontend\src\features\catalog\browse\composables\useCatalogBrowse.spec.ts

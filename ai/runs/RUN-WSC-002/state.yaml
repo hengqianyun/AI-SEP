@@ -8,6 +8,11 @@ completedNodes:
   - REQUIREMENT_REVIEW
   - PLAN_DRAFT
   - PLAN_REVIEW
+  - PLAN_APPROVED
+  - TASK_DISPATCH
+  - DEVELOPMENT
+  - CODE_REVIEW
+  - TESTING
 activeWave: null
 activeTaskIds: []
 activeSnapshotId: SNAP-WSC-002
@@ -17,9 +22,78 @@ approvedPlanPath: planning/approved/PLAN-WSC-2.2.md
 priorReviewPath: planning/reviews/wsc-2.1/round-1/
 reviewPath: planning/reviews/wsc-2.2/round-2/
 nextAction: human/CONFIRM_TASK_DISPATCH
+nextWave: W5
+nextTaskIds:
+  - TASK-WSC-107
+dependsOnVerified:
+  - TASK-WSC-105
+taskGate:
+  TASK-WSC-101:
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-101.md
+    evidenceId: EVID-TASK-WSC-101-4
+    codeReview: APPROVE
+    tester: PASSED
+    bugClosed:
+      - BUG-WSC-101-001
+  TASK-WSC-102:
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-102.md
+    evidenceId: EVID-TASK-WSC-102-1
+    codeReview: APPROVE
+    tester: PASSED
+  TASK-WSC-103:
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-103.md
+    evidenceId: EVID-TASK-WSC-103-1
+    codeReview: APPROVE
+    tester: PASSED
+  TASK-WSC-104:
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-104.md
+    evidenceId: EVID-TASK-WSC-104-1
+    codeReview: APPROVE
+    tester: PASSED
+  TASK-WSC-105:
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-105.md
+    evidenceId: EVID-TASK-WSC-105-1
+    codeReview: APPROVE
+    tester: PASSED
+    codeReviewReport: planning/tasks/REV-TASK-WSC-105.md
+    devReport: planning/tasks/DEV-TASK-WSC-105.md
+  TASK-WSC-106:
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-106.md
+    evidenceId: EVID-TASK-WSC-106-1
+    codeReview: APPROVE
+    tester: PASSED
+    codeReviewReport: planning/tasks/REV-TASK-WSC-106.md
+    devReport: planning/tasks/DEV-TASK-WSC-106.md
+lastCompletedWave: W4
+lastCompletedTasks:
+  - TASK-WSC-105
+  - TASK-WSC-106
 dispatch:
-  awaiting: human-confirm-task-dispatch
-  firstWave: W1
-  firstTaskId: TASK-WSC-101
+  wave: W4
+  parallel: true
+  status: VERIFIED
+  mergeConstraint: 禁止单 PR 混写 105 与 106 路径
+  confirmedAt: 2026-07-31T17:11:00+08:00
+  closedAt: 2026-07-31T17:54:00+08:00
+  dependsOnVerified:
+    - TASK-WSC-103
+    - TASK-WSC-104
   approvedPlanPath: planning/approved/PLAN-WSC-2.2.md
-updatedAt: 2026-07-30T16:30:00+08:00
+  tasks:
+    - taskId: TASK-WSC-105
+      status: VERIFIED
+      evidenceId: EVID-TASK-WSC-105-1
+      tester: PASSED
+      codeReviewer: APPROVE
+    - taskId: TASK-WSC-106
+      status: VERIFIED
+      evidenceId: EVID-TASK-WSC-106-1
+      tester: PASSED
+      codeReviewer: APPROVE
+updatedAt: 2026-07-31T17:54:00+08:00

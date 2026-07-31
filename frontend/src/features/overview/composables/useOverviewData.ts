@@ -1,4 +1,7 @@
 import { ref } from 'vue'
+/**
+ * Overview 数据加载 — 对齐 wsc-contracts@2.0.0（无新增指标；空态友好）。
+ */
 import {
   getOverviewDistribution,
   getOverviewMetrics,

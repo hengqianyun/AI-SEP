@@ -1,0 +1,5 @@
+﻿describe('useCatalogMaintenance')
+it('loads list with page/pageSize/total and status tabs')
+it('single save associates l3 then reloads')
+it('batch save uses selected ids and batch l3')
+it('surfaces ApiError on save failure')

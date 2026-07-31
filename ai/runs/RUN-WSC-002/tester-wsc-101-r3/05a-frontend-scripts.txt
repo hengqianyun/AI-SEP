@@ -1,0 +1,16 @@
+== frontend/package.json ==
+  dev: vite
+  build: vue-tsc --noEmit -p tsconfig.json && vite build
+  typecheck: vue-tsc --noEmit -p tsconfig.json --pretty false
+  lint: echo "lint placeholder: no eslint config in scaffold" && exit 0
+  preview: vite preview
+  test: vitest
+name=frontend packageManager=None
+== package.json ==
+  dev:frontend: pnpm --filter frontend dev
+  build:frontend: pnpm --filter frontend build
+  typecheck:frontend: pnpm --filter frontend typecheck
+  lint:frontend: pnpm --filter frontend lint
+  test:e2e: pnpm --filter @wsc/e2e test
+name=wsc-monorepo packageManager=pnpm@9.15.0
+EXIT:0

@@ -1,0 +1,1 @@
+﻿pnpm exec vitest run src/features/catalog/editor/composables/useProductEditor.spec.ts src/features/catalog/detail/composables/useProductDetail.spec.ts src/features/chain/composables/useChainPage.spec.ts

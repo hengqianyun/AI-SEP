@@ -1,0 +1,34 @@
+1: COMMENT_OR_BLANK
+2: COMMENT_OR_BLANK
+3: COMMENT_OR_BLANK
+4: COMMENT_OR_BLANK
+5: spring:
+6:   datasource:
+7:     url: jdbc:mysql://localhost:3306/wsc?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+8:     username: root
+9: password: <redacted len=4 quoted=False empty=False>
+10:     driver-class-name: com.mysql.cj.jdbc.Driver
+11:   redis:
+12:     host: 58.33.102.13
+13:     port: 16379
+14: password: <redacted len=16 quoted=False empty=False>
+15:     database: 0
+16:     timeout: 5000
+17:   jpa:
+18:     hibernate:
+19:       ddl-auto: validate
+20:   flyway:
+21:     enabled: true
+22:     locations: classpath:sql/migration
+23:     baseline-on-migrate: true
+24:     baseline-version: 0
+25: COMMENT_OR_BLANK
+26: logging:
+27:   level:
+28:     com.wsc: INFO
+try_no_pass_flag exit=1 stderr=ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO) | 
+docker_ps:
+compose-umami-1 
+umami-umami-1 0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp
+umami-db-1 5432/tcp
+

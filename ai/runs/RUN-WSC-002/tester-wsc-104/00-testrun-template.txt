@@ -1,0 +1,60 @@
+﻿# 娴嬭瘯璇佹嵁
+
+```yaml
+evidenceId: EVID-TASK-WSC-102-1
+taskId: TASK-WSC-102
+planId: PLAN-WSC-2.2
+actorInstance: tester-wsc-102
+contracts: wsc-contracts@2.0.0
+basedOn:
+  - planning/tasks/TASK-WSC-102.md
+  - planning/tasks/DEV-TASK-WSC-102.md
+  - planning/tasks/REV-TASK-WSC-102.md
+  - planning/approved/PLAN-WSC-2.2.md
+reviewDecision: APPROVE
+executedAt: 2026-07-31T16:02:10+08:00
+status: PASSED
+```
+
+## 缁撹鎽樿
+
+**PASSED** 鈥?鐙珛 tester-wsc-102 鎸?testScope 澶嶈窇锛氬悗绔?RbacMatrixTest + SessionAuthIntegrationTest 鍏?12 娴?BUILD SUCCESS锛涘墠绔?useCanWrite.spec.ts 3 娴?+ typecheck + build 閫€鍑虹爜 0銆傜櫥鍑?瑙掕壊鍙樻洿鍚庡啓 API 鎷掔粷鐢遍泦鎴愭祴 logout_thenImportWriteApiRejected (401) 涓?roleSwitch_oldSessionImportRejected (鏃т細璇濇嫆缁?+ 鏂?USER 403) 瑕嗙洊骞跺璺戦€氳繃銆傚３灞傘€岄潪绠＄悊鍛樹笉鍙鐩綍缁存姢銆嶄互 useCanWrite/canMaintainCatalog 鍗曟祴涓鸿瘉鎹紱WorkbenchLayout UI E2E 涓嶅湪鏈换鍔?writeSet/testScope 鍙墽琛?E2E 鑼冨洿鍐?-> SKIPPED锛堜笉浼€?PASS锛夈€?
+
+- 妯″潡锛歜ackend/app/data-chain-service (com.shdata.datachain)
+- 瀹℃煡锛歊EV-TASK-WSC-102 APPROVE, P0/P1=0
+- 鏈満 3306/6379 绔彛鎺㈤拡浠呬俊鎭褰曪紝涓嶈鍏?PASSED锛涢泦鎴愭祴 H2+鎺掗櫎 Redis锛屾棤闇€ live MySQL/Redis
+- 鏈慨鏀逛笟鍔′唬鐮佹垨瀹℃煡鎶ュ憡锛涙湭鑷瀹ｇО VERIFIED
+
+璇佹嵁鐩綍锛歚ai/runs/RUN-WSC-002/tester-wsc-102/`
+
+## Layers
+
+| name | command | result | notes / evidence |
+| --- | --- | --- | --- |
+| backend-rbac-unit | mvn -f backend/pom.xml -Dtest=RbacMatrixTest,SessionAuthIntegrationTest test | PASSED | Tests run: 6 鈥?04-mvn-rbac-session.txt, 04-mvn-exit.txt (exitCode=0) |
+| backend-session-integration | same run / SessionAuthIntegrationTest | PASSED | Tests run: 6; total 12 / BUILD SUCCESS 鈥?04-mvn-rbac-session.txt, 03-session-test-methods.txt |
+| session-denial-proof | logout_thenImportWriteApiRejected + roleSwitch_oldSessionImportRejected | PASSED | logout->401; roleSwitch old reject / new USER 403 鈥?03-session-test-methods.txt, 03-session-denial-log.txt (MockMvc+H2) |
+| frontend-useCanWrite | pnpm exec vitest run src/features/auth/composables/useCanWrite.spec.ts | PASSED | 3 tests 鈥?05-vitest-useCanWrite.txt, 05-vitest-exit.txt |
+| frontend-typecheck | pnpm typecheck | PASSED | exitCode=0 鈥?05-typecheck.txt |
+| frontend-build | pnpm build | PASSED | exitCode=0 鈥?05-frontend-build.txt |
+| shell-catalog-maintenance-visibility | unit canMaintainCatalog + static WorkbenchLayout v-if | PASSED (unit) | 05-vitest-cases.txt, 06-shell-visibility-static.txt |
+| shell-ui-e2e | (none in scope) | SKIPPED | no UI E2E in writeSet/testScope 鈥?06-e2e-probe.txt; not faked PASS |
+| env-mysql-redis-probe | local port probe (info) | NOT SCORED | 00-ports-probe.txt; not marked PASSED |
+
+## testScope 瀵圭収
+
+| # | 瑕佹眰 | 缁撴灉 |
+|---|---|---|
+| 1 | BE unit/integration 搂4 matrix + session | PASSED (12/12) |
+| 2 | FE useCanWrite vitest + typecheck/build | PASSED |
+| 3 | logout/role-change write API denial | PASSED (integration re-run) |
+| 4 | non-admin hide catalog maintenance | PASSED (unit); UI E2E SKIPPED |
+
+## 璇佹嵁绾㈢嚎
+
+- env/port probe not marked PASSED
+- no self VERIFIED claim (TESTRUN only)
+- no business code or REV edits
+- no passwords / application-local.yml printed
+- actorInstance=tester-wsc-102 (differs from developer-wsc-102 / code-reviewer-wsc-102)
+

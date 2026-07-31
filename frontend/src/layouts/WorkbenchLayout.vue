@@ -3,13 +3,16 @@ import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
+import { canMaintainCatalog } from '@/features/auth/composables/useCanWrite'
 import RoleSwitcher from '@/features/shell/components/RoleSwitcher.vue'
 import WriteEntryDemo from '@/features/shell/components/WriteEntryDemo.vue'
 
 const auth = useAuthStore()
-const { enterpriseName, session } = storeToRefs(auth)
+const { enterpriseName, session, role } = storeToRefs(auth)
 const route = useRoute()
 const router = useRouter()
+
+const catalogMaintenanceVisible = computed(() => canMaintainCatalog(role.value))
 
 const navOpen = [
   { to: '/overview', label: '总览' },
@@ -55,6 +58,14 @@ async function onLogout() {
           :class="{ active: isActive(item.to) }"
         >
           {{ item.label }}
+        </RouterLink>
+        <RouterLink
+          v-if="catalogMaintenanceVisible"
+          to="/catalog/maintenance"
+          class="nav-item"
+          :class="{ active: isActive('/catalog/maintenance') }"
+        >
+          目录维护
         </RouterLink>
         <button
           v-for="item in navClosed"
