@@ -3,8 +3,6 @@
 > 状态：架构规范草案
 >
 > 范围：工具中立，可映射到 Cursor、Claude Code、Codex 或其他支持多 Agent 的运行时
->
-> 原始设想：保留于 [`base_design.md`](./base_design.md)，本文是在其基础上的结构化增强版
 
 ## 1. 目标与原则
 

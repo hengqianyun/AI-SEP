@@ -1,0 +1,9 @@
+.git
+.gitignore
+.idea
+.vscode
+.claude
+**/target
+logs
+*.log
+deploy/.env
