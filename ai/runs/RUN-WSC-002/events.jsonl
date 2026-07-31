@@ -138,3 +138,7 @@
 {"ts": "2026-07-31T17:54:01+08:00", "type": "TASK_VERIFIED", "runId": "RUN-WSC-002", "taskId": "TASK-WSC-105", "wave": "W4", "evidenceId": "EVID-TASK-WSC-105-1"}
 {"ts": "2026-07-31T17:54:01+08:00", "type": "TASK_VERIFIED", "runId": "RUN-WSC-002", "taskId": "TASK-WSC-106", "wave": "W4", "evidenceId": "EVID-TASK-WSC-106-1"}
 {"ts": "2026-07-31T17:54:02+08:00", "type": "WAVE_CLOSED", "runId": "RUN-WSC-002", "wave": "W4", "tasks": ["TASK-WSC-105", "TASK-WSC-106"], "nextAction": "human/CONFIRM_TASK_DISPATCH", "nextWave": "W5", "nextTaskIds": ["TASK-WSC-107"]}
+{"ts": "2026-07-31T17:58:00+08:00", "type": "HUMAN_DECISION", "runId": "RUN-WSC-002", "identity": "productOwner", "action": "CONFIRM_TASK_DISPATCH", "wave": "W5", "taskIds": ["TASK-WSC-107"], "dependsOnVerified": ["TASK-WSC-105"]}
+{"ts": "2026-07-31T17:58:01+08:00", "type": "TASK_PACKET_MATERIALIZED", "runId": "RUN-WSC-002", "taskId": "TASK-WSC-107", "path": "planning/tasks/TASK-WSC-107.md", "wave": "W5"}
+{"ts": "2026-07-31T17:58:02+08:00", "type": "NODE_ADVANCED", "runId": "RUN-WSC-002", "from": "PLAN_APPROVED", "to": "DEVELOPMENT", "wave": "W5"}
+{"ts": "2026-07-31T17:58:03+08:00", "type": "NEXT_ACTION", "runId": "RUN-WSC-002", "nextAction": "developer/implement-TASK-WSC-107", "taskIds": ["TASK-WSC-107"]}

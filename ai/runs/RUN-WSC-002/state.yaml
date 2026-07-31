@@ -1,5 +1,5 @@
 runId: RUN-WSC-002
-currentNode: PLAN_APPROVED
+currentNode: DEVELOPMENT
 round: 2
 status: ACTIVE
 blockedBy: []
@@ -13,20 +13,16 @@ completedNodes:
   - DEVELOPMENT
   - CODE_REVIEW
   - TESTING
-activeWave: null
-activeTaskIds: []
+activeWave: W5
+activeTaskIds:
+  - TASK-WSC-107
 activeSnapshotId: SNAP-WSC-002
 activePlanId: PLAN-WSC-2.2
 candidatePlanPath: planning/proposals/PLAN-WSC-2.2.md
 approvedPlanPath: planning/approved/PLAN-WSC-2.2.md
 priorReviewPath: planning/reviews/wsc-2.1/round-1/
 reviewPath: planning/reviews/wsc-2.2/round-2/
-nextAction: human/CONFIRM_TASK_DISPATCH
-nextWave: W5
-nextTaskIds:
-  - TASK-WSC-107
-dependsOnVerified:
-  - TASK-WSC-105
+nextAction: developer/implement-TASK-WSC-107
 taskGate:
   TASK-WSC-101:
     verified: true
@@ -70,30 +66,28 @@ taskGate:
     tester: PASSED
     codeReviewReport: planning/tasks/REV-TASK-WSC-106.md
     devReport: planning/tasks/DEV-TASK-WSC-106.md
+  TASK-WSC-107:
+    verified: false
+    codeReview: PENDING
+    tester: PENDING
 lastCompletedWave: W4
-lastCompletedTasks:
-  - TASK-WSC-105
-  - TASK-WSC-106
 dispatch:
-  wave: W4
-  parallel: true
-  status: VERIFIED
-  mergeConstraint: 禁止单 PR 混写 105 与 106 路径
-  confirmedAt: 2026-07-31T17:11:00+08:00
-  closedAt: 2026-07-31T17:54:00+08:00
+  wave: W5
+  parallel: false
+  confirmedAt: 2026-07-31T17:58:00+08:00
   dependsOnVerified:
-    - TASK-WSC-103
-    - TASK-WSC-104
+    - TASK-WSC-105
   approvedPlanPath: planning/approved/PLAN-WSC-2.2.md
+  note: |
+    W5 本步仅派发 TASK-WSC-107。波次 E2E（TESTRUN-WSC-E2E-V11）
+    须等 101..107 均 VERIFIED 后再独立派发 tester。
   tasks:
-    - taskId: TASK-WSC-105
-      status: VERIFIED
-      evidenceId: EVID-TASK-WSC-105-1
-      tester: PASSED
-      codeReviewer: APPROVE
-    - taskId: TASK-WSC-106
-      status: VERIFIED
-      evidenceId: EVID-TASK-WSC-106-1
-      tester: PASSED
-      codeReviewer: APPROVE
-updatedAt: 2026-07-31T17:54:00+08:00
+    - taskId: TASK-WSC-107
+      taskPacket: planning/tasks/TASK-WSC-107.md
+      actorInstance: developer-wsc-107
+      output: planning/tasks/DEV-TASK-WSC-107.md
+      writeSetCore: catalog/import/** + tests/fixtures/import/**
+      status: READY_TO_DISPATCH
+      dependsOnVerified:
+        - TASK-WSC-105
+updatedAt: 2026-07-31T17:58:00+08:00
