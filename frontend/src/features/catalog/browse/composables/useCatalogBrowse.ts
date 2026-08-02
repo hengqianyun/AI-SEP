@@ -98,6 +98,82 @@ export function resolveIndustryQuery(industryFilterId: string, categories: Categ
   return { l2CategoryId: undefined, l3CategoryId: undefined }
 }
 
+/** 列表 pane 近底 / 未溢出判定阈值（px）。 */
+export const LIST_SCROLL_THRESHOLD = 80
+
+/** 未溢出自动续载的安全上限（页），防止异常 total 死循环。 */
+export const MAX_AUTO_FILL_PAGES = 20
+
+/** 列表 pane 触底判定（REQ-UX-004）：剩余可滚距离小于 threshold 时触发 loadMore。 */
+export function isNearScrollBottom(
+  el: Pick<HTMLElement, 'scrollHeight' | 'scrollTop' | 'clientHeight'>,
+  threshold = LIST_SCROLL_THRESHOLD,
+): boolean {
+  return el.scrollHeight - el.scrollTop - el.clientHeight < threshold
+}
+
+/** 内容高度不足以产生可用滚动条（含接近阈值内）。 */
+export function needsMoreContentToScroll(
+  el: Pick<HTMLElement, 'scrollHeight' | 'clientHeight'>,
+  threshold = LIST_SCROLL_THRESHOLD,
+): boolean {
+  return el.scrollHeight - el.clientHeight < threshold
+}
+
+/** 首屏/追加后：有更多且列表未撑满 pane 时继续 loadMore（FIND-WSC-305-R1-001）。 */
+export function shouldAutoLoadMore(input: {
+  hasMore: boolean
+  loadingMore: boolean
+  listReady: boolean
+  scrollHeight: number
+  clientHeight: number
+  threshold?: number
+}): boolean {
+  if (!input.hasMore || input.loadingMore || !input.listReady) return false
+  return needsMoreContentToScroll(
+    { scrollHeight: input.scrollHeight, clientHeight: input.clientHeight },
+    input.threshold ?? LIST_SCROLL_THRESHOLD,
+  )
+}
+
+/**
+ * 循环拉取直至可滚、无更多、停滞或达上限。
+ * @returns 实际触发的 loadMore 次数
+ */
+export async function fillUntilScrollable(opts: {
+  getMetrics: () => { scrollHeight: number; clientHeight: number }
+  hasMore: () => boolean
+  loadingMore: () => boolean
+  listReady: () => boolean
+  loadMore: () => Promise<void>
+  getLoadedCount?: () => number
+  maxPages?: number
+  threshold?: number
+}): Promise<number> {
+  const max = opts.maxPages ?? MAX_AUTO_FILL_PAGES
+  let pages = 0
+  while (pages < max) {
+    if (
+      !shouldAutoLoadMore({
+        hasMore: opts.hasMore(),
+        loadingMore: opts.loadingMore(),
+        listReady: opts.listReady(),
+        ...opts.getMetrics(),
+        threshold: opts.threshold,
+      })
+    ) {
+      break
+    }
+    const before = opts.getLoadedCount?.()
+    await opts.loadMore()
+    pages += 1
+    if (before !== undefined && opts.getLoadedCount?.() === before) {
+      break
+    }
+  }
+  return pages
+}
+
 export function useCatalogBrowse() {
   const categories = ref<Category[]>([])
   const products = ref<Product[]>([])

@@ -1,0 +1,15 @@
+﻿evidenceId: TESTRUN-WSC-E2E-V12-UX
+actorInstance: tester-wsc-206
+taskId: TASK-WSC-206
+spec: tests/e2e/specs/p0-wsc-v1.1.spec.ts
+actualCommand: |
+  cd C:\WorkSpace\AI-SEP\tests\e2e
+  $env:E2E_RUN='1'
+  node C:\WorkSpace\AI-SEP\node_modules\.pnpm\@playwright+test@1.62.0\node_modules\@playwright\test\cli.js test specs/p0-wsc-v1.1.spec.ts
+exitCode: 0
+result: 14 passed (18.6s)
+reportHtml: tests/e2e/reports/p0-wsc-v1.2-ux/index.html
+roleMatrix: 6b ADMIN/PROVIDER/USER + 6c PROVIDER/USER PASSED
+fullSpecsNotRun: true (did not run legacy p0-wsc.spec.ts or full specs/)
+frontend: http://127.0.0.1:5173 -> 200
+backendHealth: http://127.0.0.1:8080/actuator/health -> 200 UP

@@ -1,0 +1,6 @@
+﻿CR P2 FIND-WSC-204-R1-001 / visual pixel vs live shell
+result: PARTIAL / SKIPPED
+note: 草稿 05/06/07 为 fixture HTML 视口拍屏（角标「FIXTURE · 脱敏演示数据 - TASK-WSC-204」），非联调 Vue 真壳层会话态。
+本轮未启动 frontend/dev 或浏览器对照 CatalogMaintenancePage / CategoryAdminPage modal 壳 / ImportDialog 实机像素。
+不得因 fixture alone 标「与真壳层像素一致」PASSED；正式像素/视口走查归 TASK-WSC-206。
+actorInstance: tester-wsc-204

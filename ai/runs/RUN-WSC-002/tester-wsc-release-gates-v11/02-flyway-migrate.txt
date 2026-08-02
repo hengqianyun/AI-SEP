@@ -1,0 +1,15 @@
+WARNING: Storing migrations in 'sql' is not recommended and default scanning of this location may be deprecated in a future release
+A more recent version of Flyway is available. Find out more about Flyway 13.1.0 at https://rd.gt/3rXiSlV
+
+Flyway OSS Edition 10.22.0 by Redgate
+
+See release notes here: https://rd.gt/416ObMi
+Database: jdbc:mysql://wsc-mysql-release-v11:3306/data_chain?allowPublicKeyRetrieval=true&useSSL=false (MySQL 8.0)
+Successfully validated 4 migrations (execution time 00:00.063s)
+Current version of schema `data_chain`: 0
+Migrating schema `data_chain` to version "1 - create demo table"
+Migrating schema `data_chain` to version "2 - insert demo data"
+Migrating schema `data_chain` to version "202607301600 - init wsc v11"
+WARNING: DB: Integer display width is deprecated and will be removed in a future release. (SQL State:  - Error Code: 1681)
+WARNING: DB: Integer display width is deprecated and will be removed in a future release. (SQL State:  - Error Code: 1681)
+Successfully applied 3 migrations to schema `data_chain`, now at version v202607301600 (execution time 00:00.698s)

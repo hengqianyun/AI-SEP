@@ -1,0 +1,14 @@
+actorInstance=tester-wsc-e2e-v11-r2
+evidenceId=TESTRUN-WSC-E2E-V11
+round=r2
+result=PASSED
+exitCode=0
+tests=11 passed (16.7s)
+html=tests/e2e/reports/p0-wsc-v1.1/index.html
+bugId=BUG-WSC-E2E-001
+bugStatus=CLOSED
+fixId=FIX1
+scenarios=1-6 all PASSED
+authoritativeRun=02-playwright-v11-r2.txt
+testedAt=2026-07-31T23:30:50+08:00
+specFix=FIXTURE_PARTIAL path ../../../ → ../../ (tests/fixtures/import)

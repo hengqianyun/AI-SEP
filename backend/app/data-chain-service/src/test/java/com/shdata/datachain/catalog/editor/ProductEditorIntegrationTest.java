@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.shdata.datachain.catalog.browse.CatalogBrowseSeedStore;
 import com.shdata.datachain.chain.ChainAttestationPort;
 import com.shdata.datachain.chain.InMemoryChainStore;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,28 +45,10 @@ class ProductEditorIntegrationTest {
   @MockBean private ChainAttestationPort attestationPort;
 
   @Test
-  void create_other_version1_fourFields_andRejectExtraTypeSpecific() throws Exception {
+  void create_other_withContentDescription_version1() throws Exception {
     stubAttest("sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "did:wsc:sim:test");
 
     MockHttpSession session = login("admin", "demo");
-
-    mockMvc
-        .perform(
-            post("/api/v1/catalog/products")
-                .session(session)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                    {
-                      "productCode":"GEN-OTH-9001",
-                      "productName":"其他类型产品",
-                      "productType":"OTHER",
-                      "l3CategoryId":"cat-l3-emr-desense",
-                      "typeSpecific":{"dataset":{"recordCount":1}}
-                    }
-                    """))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.code").value("ERR_PRODUCT_CODE_FORMAT"));
 
     MvcResult created =
         mockMvc
@@ -80,7 +63,15 @@ class ProductEditorIntegrationTest {
                           "productName":"其他类型产品",
                           "productType":"OTHER",
                           "l3CategoryId":"cat-l3-emr-desense",
-                          "summary":"OQ-004"
+                          "summary":"OQ-004-revised",
+                          "updateFrequency":"NO_UPDATE",
+                          "typeSpecific":{
+                            "other":{
+                              "contentDescription":"其他产品内容",
+                              "timeRange":"2026/01/01 -",
+                              "regionScope":"全国"
+                            }
+                          }
                         }
                         """))
             .andExpect(status().isOk())
@@ -88,6 +79,8 @@ class ProductEditorIntegrationTest {
             .andExpect(jsonPath("$.data.chainCount").value(1))
             .andExpect(jsonPath("$.data.l3CategoryId").value("cat-l3-emr-desense"))
             .andExpect(jsonPath("$.data.categoryPath").value("医疗卫生 / 电子病历 / 脱敏病历"))
+            .andExpect(jsonPath("$.data.updateFrequency").value("NO_UPDATE"))
+            .andExpect(jsonPath("$.data.typeSpecific.other.contentDescription").value("其他产品内容"))
             .andReturn();
 
     String productId =
@@ -110,7 +103,143 @@ class ProductEditorIntegrationTest {
         .andExpect(jsonPath("$.data.categoryPath").value("医疗卫生 / 电子病历 / 脱敏病历"))
         .andExpect(jsonPath("$.data.categoryPathParts.l1").value("医疗卫生"))
         .andExpect(jsonPath("$.data.categoryPathParts.l2").value("电子病历"))
-        .andExpect(jsonPath("$.data.categoryPathParts.l3").value("脱敏病历"));
+        .andExpect(jsonPath("$.data.categoryPathParts.l3").value("脱敏病历"))
+        .andExpect(jsonPath("$.data.typeSpecific.other.contentDescription").value("其他产品内容"));
+  }
+
+  @Test
+  void create_api_endpointsConflict_keepsClientEndpoints() throws Exception {
+    stubAttest("sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "did:wsc:sim:api");
+    MockHttpSession session = login("admin", "demo");
+
+    MvcResult created =
+        mockMvc
+            .perform(
+                post("/api/v1/catalog/products")
+                    .session(session)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                          "productCode":"GEN-API-9001",
+                          "productName":"接口冲突产品",
+                          "productType":"API",
+                          "l3CategoryId":"cat-l3-emr-desense",
+                          "typeSpecific":{
+                            "api":{
+                              "swaggerFileContent":"{\\"openapi\\":\\"3.0.3\\",\\"info\\":{\\"title\\":\\"t\\",\\"version\\":\\"1\\"},\\"paths\\":{\\"/from-swagger\\":{\\"get\\":{\\"summary\\":\\"FromSwagger\\",\\"responses\\":{\\"200\\":{\\"description\\":\\"ok\\"}}}}}}",
+                              "endpoints":[
+                                {
+                                  "id":"client-ep",
+                                  "method":"POST",
+                                  "path":"/client-path",
+                                  "summary":"ClientWins"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                        """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.typeSpecific.api.endpoints[0].method").value("POST"))
+            .andExpect(jsonPath("$.data.typeSpecific.api.endpoints[0].path").value("/client-path"))
+            .andExpect(jsonPath("$.data.typeSpecific.api.endpoints[0].summary").value("ClientWins"))
+            .andExpect(jsonPath("$.data.typeSpecific.api.swaggerFileContent").exists())
+            .andReturn();
+
+    String productId =
+        com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.data.id");
+    // 回读：endpoints ≡ 客户端提交，≠ 对原文重解析的 /from-swagger
+    assertThat(catalog.findProduct(productId).orElseThrow().typeSpecific()).isNotNull();
+    @SuppressWarnings("unchecked")
+    Map<String, Object> api =
+        (Map<String, Object>) catalog.findProduct(productId).orElseThrow().typeSpecific().get("api");
+    @SuppressWarnings("unchecked")
+    java.util.List<Map<String, Object>> endpoints =
+        (java.util.List<Map<String, Object>>) api.get("endpoints");
+    assertThat(endpoints.get(0).get("path")).isEqualTo("/client-path");
+    assertThat(endpoints.get(0).get("summary")).isEqualTo("ClientWins");
+    assertThat(String.valueOf(api.get("swaggerFileContent"))).contains("/from-swagger");
+  }
+
+  @Test
+  void create_dataset_report_roundTrip_andLegacyEndpointRead() throws Exception {
+    stubAttest("sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "did:wsc:sim:ts");
+    MockHttpSession session = login("admin", "demo");
+
+    mockMvc
+        .perform(
+            post("/api/v1/catalog/products")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "productCode":"GEN-DS-9001",
+                      "productName":"数据集扩展",
+                      "productType":"DATASET",
+                      "l3CategoryId":"cat-l3-emr-struct",
+                      "typeSpecific":{
+                        "dataset":{
+                          "timeRange":"2025/01/01 - 2026/01/01",
+                          "regionScope":"省级",
+                          "dataScale":"1GB",
+                          "dataForm":"表格",
+                          "fieldDescription":"a\\tb\\tc",
+                          "dataSample":"{}"
+                        }
+                      }
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.typeSpecific.dataset.dataScale").value("1GB"))
+        .andExpect(jsonPath("$.data.typeSpecific.dataset.dataForm").value("表格"));
+
+    mockMvc
+        .perform(
+            post("/api/v1/catalog/products")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "productCode":"GEN-RP-9001",
+                      "productName":"报告扩展",
+                      "productType":"REPORT",
+                      "l3CategoryId":"cat-l3-credit-score",
+                      "typeSpecific":{
+                        "report":{
+                          "contentDescription":"报告正文",
+                          "timeRange":"2026/08/01 -",
+                          "regionScope":"市级"
+                        }
+                      }
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.typeSpecific.report.contentDescription").value("报告正文"));
+
+    mockMvc
+        .perform(
+            post("/api/v1/catalog/products")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "productCode":"GEN-API-9002",
+                      "productName":"旧endpoint可读",
+                      "productType":"API",
+                      "l3CategoryId":"cat-l3-emr-desense",
+                      "typeSpecific":{
+                        "api":{
+                          "endpoint":"GET /legacy"
+                        }
+                      }
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.typeSpecific.api.endpoint").value("GET /legacy"));
   }
 
   @Test

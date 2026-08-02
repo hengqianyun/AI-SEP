@@ -1,5 +1,5 @@
 /**
- * Overview API — 对齐 contracts/openapi + overview/stream-events.yaml (2.0.0)
+ * Overview API — 对齐 contracts/openapi + overview/stream-events.yaml (2.1.0)
  * V1.1：无新增业务指标；DTO 与端点沿用 V1.0（TASK-WSC-101 最小适配）。
  */
 import { apiRequest } from './client'

@@ -1,0 +1,17 @@
+﻿{
+  "evidenceId": "TESTRUN-WSC-RELEASE-GATES-V11",
+  "actorInstance": "tester-wsc-release-gates-v11",
+  "result": "PASSED",
+  "rollbackDrill": "PASSED",
+  "flywayEmptyDbApply": "PASSED",
+  "flywayEmptyDbApplyRef": "EVID-TASK-WSC-101-4 / planning/tasks/TESTRUN-TASK-WSC-101.md (cited) + drill-time replay on MySQL 8",
+  "probeGone": true,
+  "backupId": "mysqldump-pre-20260802T125222+0800",
+  "gitSha": "472494d87c43bb92d8e51fc166ac62aaef68c3c3",
+  "contracts": "wsc-contracts@2.0.0",
+  "closesGaps": ["MYSQL_ROLLBACK_DRILL_EVIDENCE"],
+  "doesNotApprove": ["MAINTAINER"],
+  "blocked": false,
+  "reportPath": "planning/tasks/TESTRUN-WSC-RELEASE-GATES-V11.md",
+  "evidenceDir": "ops/evidence/release-v11/"
+}

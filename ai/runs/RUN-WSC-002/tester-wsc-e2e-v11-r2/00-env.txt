@@ -1,0 +1,10 @@
+﻿actorInstance=tester-wsc-e2e-v11-r2
+bugId=BUG-WSC-E2E-001
+fixId=FIX1
+evidenceId=TESTRUN-WSC-E2E-V11
+round=r2
+backend=http://127.0.0.1:8080 (200; restarted before final run for PENDING seed)
+frontend=http://127.0.0.1:5173 (200)
+result=PASSED
+exitCode=0
+testedAt=2026-07-31T23:30:50+08:00

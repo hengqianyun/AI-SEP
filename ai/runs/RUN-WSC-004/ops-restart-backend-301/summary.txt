@@ -1,0 +1,10 @@
+old_pid=44796
+new_java_pid=5440
+cmd=mvn -f backend/app/data-chain-service/pom.xml spring-boot:run -Dspring-boot.run.profiles=local
+health=UP
+csv_http=200
+xlsx_http=200
+csv_has_legacy_product_code=False
+xlsx_has_legacy_product_code=False
+csv_has_product_name=True
+switched_to_301=True

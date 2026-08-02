@@ -1,0 +1,8 @@
+TABLE_NAME
+chain_catalog_snapshot
+chain_version
+data_product
+flyway_schema_history
+import_error_report
+industry_category
+mysql: [Warning] Using a password on the command line interface can be insecure.

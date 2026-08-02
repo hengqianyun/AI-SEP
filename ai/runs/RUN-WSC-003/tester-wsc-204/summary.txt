@@ -1,0 +1,19 @@
+TESTRUN-TASK-WSC-204 / EVID-TASK-WSC-204-1
+actorInstance=tester-wsc-204
+status=PASSED
+executedAt=2026-08-02T15:17:23+08:00
+
+typecheck: PASSED exit=0
+vitest maintenance+admin+import: PASSED 3 files / 17 tests exit=0
+  - useCatalogMaintenance 4
+  - useCategoryAdmin 4
+  - useProductImport 9 (incl. §3.4 four states + §3.5 forbidden-field negative)
+draft 05-catalog-maintenance.png: PASSED EXISTS|45846
+draft 06-category-admin-modal.png: PASSED EXISTS|41797
+draft 07-import-modal.png: PASSED EXISTS|41591
+gap-draft schema §3.1 + #05/#06/#07: PASSED (GAP-UX-005-01, GAP-UX-006-01, GAP-UX-006-02)
+visual pixel vs live shell: PARTIAL/SKIPPED (fixture; CR FIND-WSC-204-R1-001)
+e2e: SKIPPED (out of scope)
+
+No business source / REV / state / events modified.
+Not claiming VERIFIED.

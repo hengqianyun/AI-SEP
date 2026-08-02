@@ -1,0 +1,179 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.shdata:data-chain-service >--------------------
+[INFO] Building data-chain-service 0.0.1-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:3.2.0:resources (default-resources) @ data-chain-service ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] Copying 3 resources
+[INFO] Copying 7 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.10.1:compile (default-compile) @ data-chain-service ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 69 source files to C:\WorkSpace\AI-SEP\backend\app\data-chain-service\target\classes
+[WARNING] Error creating missing package info classes
+java.nio.file.NoSuchFileException: C:\WorkSpace\AI-SEP\backend\app\data-chain-service\target\classes\com\shdata\datachain\catalog\detail\package-info.class
+    at sun.nio.fs.WindowsException.translateToIOException (WindowsException.java:85)
+    at sun.nio.fs.WindowsException.rethrowAsIOException (WindowsException.java:103)
+    at sun.nio.fs.WindowsException.rethrowAsIOException (WindowsException.java:108)
+    at sun.nio.fs.WindowsFileSystemProvider.newByteChannel (WindowsFileSystemProvider.java:236)
+    at java.nio.file.spi.FileSystemProvider.newOutputStream (FileSystemProvider.java:484)
+    at java.nio.file.Files.newOutputStream (Files.java:228)
+    at java.nio.file.Files.write (Files.java:3512)
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.createMissingPackageInfoClasses (AbstractCompilerMojo.java:1364)
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.execute (AbstractCompilerMojo.java:1229)
+    at org.apache.maven.plugin.compiler.CompilerMojo.execute (CompilerMojo.java:198)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:137)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:210)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:156)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:148)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:117)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:81)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:56)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:128)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:305)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:192)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:105)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:957)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:289)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:193)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)
+    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:568)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:282)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:225)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:406)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:347)
+[INFO] 
+[INFO] --- maven-resources-plugin:3.2.0:testResources (default-testResources) @ data-chain-service ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] skip non existing resourceDirectory C:\WorkSpace\AI-SEP\backend\app\data-chain-service\src\test\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.10.1:testCompile (default-testCompile) @ data-chain-service ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 14 source files to C:\WorkSpace\AI-SEP\backend\app\data-chain-service\target\test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.22.2:test (default-test) @ data-chain-service ---
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest
+17:49:58.206 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating CacheAwareContextLoaderDelegate from class [org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate]
+17:49:58.224 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating BootstrapContext using constructor [public org.springframework.test.context.support.DefaultBootstrapContext(java.lang.Class,org.springframework.test.context.CacheAwareContextLoaderDelegate)]
+17:49:58.292 [main] DEBUG org.springframework.test.context.BootstrapUtils - Instantiating TestContextBootstrapper for test class [com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest] from class [org.springframework.boot.test.context.SpringBootTestContextBootstrapper]
+17:49:58.309 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Neither @ContextConfiguration nor @ContextHierarchy found for test class [com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest], using SpringBootContextLoader
+17:49:58.316 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader - Did not detect default resource location for test class [com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest]: class path resource [com/shdata/datachain/catalog/editor/ProductEditorIntegrationTest-context.xml] does not exist
+17:49:58.318 [main] DEBUG org.springframework.test.context.support.AbstractContextLoader - Did not detect default resource location for test class [com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest]: class path resource [com/shdata/datachain/catalog/editor/ProductEditorIntegrationTestContext.groovy] does not exist
+17:49:58.318 [main] INFO org.springframework.test.context.support.AbstractContextLoader - Could not detect default resource locations for test class [com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest]: no resource found for suffixes {-context.xml, Context.groovy}.
+17:49:58.319 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest]: ProductEditorIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+17:49:58.449 [main] DEBUG org.springframework.test.context.support.ActiveProfilesUtils - Could not find an 'annotation declaring class' for annotation type [org.springframework.test.context.ActiveProfiles] and class [com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest]
+17:49:58.625 [main] DEBUG org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider - Identified candidate component class: file [C:\WorkSpace\AI-SEP\backend\app\data-chain-service\target\classes\com\shdata\datachain\DataChainApplication.class]
+17:49:58.628 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.shdata.datachain.DataChainApplication for test class com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest
+17:49:58.807 [main] DEBUG org.springframework.boot.test.context.SpringBootTestContextBootstrapper - @TestExecutionListeners is not present for class [com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest]: using defaults.
+17:49:58.808 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.event.ApplicationEventsTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener, org.springframework.test.context.event.EventPublishingTestExecutionListener]
+17:49:58.857 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@e54303, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@e8df99a, org.springframework.test.context.event.ApplicationEventsTestExecutionListener@2dc995f4, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@2f40e5db, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@517566b, org.springframework.test.context.support.DirtiesContextTestExecutionListener@64b73e7a, org.springframework.test.context.transaction.TransactionalTestExecutionListener@530712d, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener@2df6226d, org.springframework.test.context.event.EventPublishingTestExecutionListener@12ed9db6, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@4ff4357f, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@49cb9cb5, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@55322aab, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@2b4c1d96, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@45fd9a4d, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener@50468873]
+17:49:58.866 [main] DEBUG org.springframework.test.context.support.AbstractDirtiesContextTestExecutionListener - Before test class: context [DefaultTestContext@737a135b testClass = ProductEditorIntegrationTest, testInstance = [null], testMethod = [null], testException = [null], mergedContextConfiguration = [WebMergedContextConfiguration@687ef2e0 testClass = ProductEditorIntegrationTest, locations = '{}', classes = '{class com.shdata.datachain.DataChainApplication}', contextInitializerClasses = '[]', activeProfiles = '{}', propertySourceLocations = '{}', propertySourceProperties = '{spring.datasource.url=jdbc:h2:mem:wsc_cat_editor_105;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE, spring.datasource.username=sa, spring.datasource.password=, spring.datasource.driver-class-name=org.h2.Driver, spring.jpa.hibernate.ddl-auto=create-drop, spring.jpa.database-platform=org.hibernate.dialect.H2Dialect, spring.flyway.enabled=false, spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration, org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true}', contextCustomizers = set[[ImportsContextCustomizer@15dcfae7 key = [org.springframework.boot.test.autoconfigure.web.servlet.MockMvcWebDriverAutoConfiguration, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcAutoConfiguration, org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration, org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcSecurityConfiguration, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcWebClientAutoConfiguration, org.springframework.boot.test.autoconfigure.web.reactive.WebTestClientAutoConfiguration]], org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@3e08ff24, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@70ed52de, org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@cb40942f, org.springframework.boot.test.web.client.TestRestTemplateContextCustomizer@71075444, org.springframework.boot.test.autoconfigure.actuate.metrics.MetricsExportContextCustomizerFactory$DisableMetricExportContextCustomizer@5965d37, org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@4b3fa0b3, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizerFactory$Customizer@1807e3f6, org.springframework.boot.test.context.SpringBootTestArgs@1, org.springframework.boot.test.context.SpringBootTestWebEnvironment@3891771e], resourceBasePath = 'src/main/webapp', contextLoader = 'org.springframework.boot.test.context.SpringBootContextLoader', parent = [null]], attributes = map['org.springframework.test.context.web.ServletTestExecutionListener.activateListener' -> true]], class annotated with @DirtiesContext [false] with mode [null].
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::               (v2.7.18)
+
+2026-08-02 17:49:59.802  INFO 4556 --- [           main] c.s.d.c.e.ProductEditorIntegrationTest   : Starting ProductEditorIntegrationTest using Java 17.0.11 on admin with PID 4556 (started by water in C:\WorkSpace\AI-SEP\backend\app\data-chain-service)
+2026-08-02 17:49:59.804  INFO 4556 --- [           main] c.s.d.c.e.ProductEditorIntegrationTest   : No active profile set, falling back to 1 default profile: "default"
+2026-08-02 17:50:02.589  INFO 4556 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-02 17:50:02.594  INFO 4556 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-02 17:50:02.984  INFO 4556 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 374 ms. Found 1 JPA repository interfaces.
+2026-08-02 17:50:05.466  INFO 4556 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-02 17:50:05.661  INFO 4556 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 5.6.15.Final
+2026-08-02 17:50:05.818  INFO 4556 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2026-08-02 17:50:06.144  INFO 4556 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-02 17:50:06.473  INFO 4556 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-02 17:50:06.507  INFO 4556 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.MySQL8Dialect
+2026-08-02 17:50:07.154  INFO 4556 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-08-02 17:50:07.174  INFO 4556 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-02 17:50:13.400  INFO 4556 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-08-02 17:50:13.401  INFO 4556 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-08-02 17:50:13.422  INFO 4556 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2026-08-02 17:50:13.516  INFO 4556 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 115 ms
+2026-08-02 17:50:13.607  INFO 4556 --- [           main] c.s.d.c.e.ProductEditorIntegrationTest   : Started ProductEditorIntegrationTest in 14.649 seconds (JVM running for 16.76)
+2026-08-02 17:50:14.326  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=GEN-FAIL-9003 result=FAILURE errorCode=ERR_ATTESTATION correlationId=corr-f3d6079159df
+2026-08-02 17:50:14.678  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=GEN-LEAF-9004 result=FAILURE errorCode=ERR_CATEGORY_LEAF_REQUIRED correlationId=corr-510af033382f
+2026-08-02 17:50:14.688  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=GEN-LEAF-9005 result=FAILURE errorCode=ERR_CATEGORY_LEAF_REQUIRED correlationId=corr-5776bd0e5363
+2026-08-02 17:50:14.719  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=GEN-OTH-9001 result=SUCCESS errorCode=- correlationId=corr-4700975915db
+2026-08-02 17:50:14.829  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=GEN-DS-9001 result=SUCCESS errorCode=- correlationId=corr-b22ebbda1d74
+2026-08-02 17:50:14.839  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=GEN-RP-9001 result=SUCCESS errorCode=- correlationId=corr-4146edd239ea
+2026-08-02 17:50:14.847  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=GEN-API-9002 result=SUCCESS errorCode=- correlationId=corr-a36dc380c13e
+2026-08-02 17:50:14.869  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=GEN-API-9001 result=SUCCESS errorCode=- correlationId=corr-7ce3dbe43e2e
+2026-08-02 17:50:14.936  WARN 4556 --- [           main] wsc.audit                                : event=AUTH_FORBIDDEN userId=u-user role=USER method=POST resource=/api/v1/catalog/products code=ERR_FORBIDDEN correlationId=corr-61be2a0dd840
+2026-08-02 17:50:14.963  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-provider productCode=MED-EDT-9002 result=SUCCESS errorCode=- correlationId=corr-00a84b1810a6
+2026-08-02 17:50:14.979  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-provider productCode=MED-EDT-9002 result=SUCCESS errorCode=- correlationId=corr-d5e889926ca0
+2026-08-02 17:50:14.997  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-provider productCode=bad-code result=FAILURE errorCode=ERR_PRODUCT_CODE_FORMAT correlationId=corr-547cfb958bc2
+2026-08-02 17:50:15.006  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-provider productCode=MED-EDT-9002 result=FAILURE errorCode=ERR_PRODUCT_CODE_CONFLICT correlationId=corr-8b31e6db09d3
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 16.941 s - in com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest
+[INFO] Running com.shdata.datachain.catalog.productimport.ProductImportIntegrationTest
+2026-08-02 17:50:15.026  INFO 4556 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Neither @ContextConfiguration nor @ContextHierarchy found for test class [com.shdata.datachain.catalog.productimport.ProductImportIntegrationTest], using SpringBootContextLoader
+2026-08-02 17:50:15.028  INFO 4556 --- [           main] o.s.t.c.support.AbstractContextLoader    : Could not detect default resource locations for test class [com.shdata.datachain.catalog.productimport.ProductImportIntegrationTest]: no resource found for suffixes {-context.xml, Context.groovy}.
+2026-08-02 17:50:15.028  INFO 4556 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.shdata.datachain.catalog.productimport.ProductImportIntegrationTest]: ProductImportIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-02 17:50:15.088  INFO 4556 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.shdata.datachain.DataChainApplication for test class com.shdata.datachain.catalog.productimport.ProductImportIntegrationTest
+2026-08-02 17:50:15.094  INFO 4556 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Loaded default TestExecutionListener class names from location [META-INF/spring.factories]: [org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener, org.springframework.test.context.web.ServletTestExecutionListener, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener, org.springframework.test.context.event.ApplicationEventsTestExecutionListener, org.springframework.test.context.support.DependencyInjectionTestExecutionListener, org.springframework.test.context.support.DirtiesContextTestExecutionListener, org.springframework.test.context.transaction.TransactionalTestExecutionListener, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener, org.springframework.test.context.event.EventPublishingTestExecutionListener]
+2026-08-02 17:50:15.095  INFO 4556 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Using TestExecutionListeners: [org.springframework.test.context.web.ServletTestExecutionListener@51617b93, org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener@23471f48, org.springframework.test.context.event.ApplicationEventsTestExecutionListener@2898cd46, org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener@7ebf5bf, org.springframework.boot.test.autoconfigure.SpringBootDependencyInjectionTestExecutionListener@5d8cbb32, org.springframework.test.context.support.DirtiesContextTestExecutionListener@46aa5294, org.springframework.test.context.transaction.TransactionalTestExecutionListener@283645fa, org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener@70a81b4e, org.springframework.test.context.event.EventPublishingTestExecutionListener@48c56b42, org.springframework.boot.test.mock.mockito.ResetMocksTestExecutionListener@5c6fae3c, org.springframework.boot.test.autoconfigure.restdocs.RestDocsTestExecutionListener@466c39de, org.springframework.boot.test.autoconfigure.web.client.MockRestServiceServerResetTestExecutionListener@762e3836, org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrintOnlyOnFailureTestExecutionListener@15d2c2ca, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverTestExecutionListener@346d8002, org.springframework.boot.test.autoconfigure.webservices.client.MockWebServiceServerTestExecutionListener@1368ed98]
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::               (v2.7.18)
+
+2026-08-02 17:50:15.226  INFO 4556 --- [           main] c.s.d.c.p.ProductImportIntegrationTest   : Starting ProductImportIntegrationTest using Java 17.0.11 on admin with PID 4556 (started by water in C:\WorkSpace\AI-SEP\backend\app\data-chain-service)
+2026-08-02 17:50:15.228  INFO 4556 --- [           main] c.s.d.c.p.ProductImportIntegrationTest   : No active profile set, falling back to 1 default profile: "default"
+2026-08-02 17:50:16.183  INFO 4556 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-08-02 17:50:16.183  INFO 4556 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-02 17:50:16.296  INFO 4556 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 111 ms. Found 1 JPA repository interfaces.
+2026-08-02 17:50:16.747  INFO 4556 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-02 17:50:16.773  INFO 4556 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-08-02 17:50:16.777  INFO 4556 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-08-02 17:50:16.777  INFO 4556 --- [           main] org.hibernate.dialect.Dialect            : HHH000400: Using dialect: org.hibernate.dialect.MySQL8Dialect
+2026-08-02 17:50:16.833  INFO 4556 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2026-08-02 17:50:16.834  INFO 4556 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-02 17:50:18.901  INFO 4556 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-08-02 17:50:18.902  INFO 4556 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-08-02 17:50:18.928  INFO 4556 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2026-08-02 17:50:18.995  INFO 4556 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 93 ms
+2026-08-02 17:50:19.026  INFO 4556 --- [           main] c.s.d.c.p.ProductImportIntegrationTest   : Started ProductImportIntegrationTest in 3.923 seconds (JVM running for 22.178)
+2026-08-02 17:50:19.135  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-provider productCode=WSC-IMP-0001 result=SUCCESS errorCode=- correlationId=corr-4a1b2e74e935
+2026-08-02 17:50:19.202  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=WSC-IMP-0002 result=SUCCESS errorCode=- correlationId=corr-543aad719a3b
+2026-08-02 17:50:19.227  WARN 4556 --- [           main] wsc.audit                                : event=AUTH_FORBIDDEN userId=u-user role=USER method=GET resource=/api/v1/catalog/products/import/reports/rep-eacda18dfb45 code=ERR_FORBIDDEN correlationId=corr-9d67befebcbe
+2026-08-02 17:50:19.244  WARN 4556 --- [           main] wsc.audit                                : event=AUTH_FORBIDDEN userId=u-user role=USER method=POST resource=/api/v1/catalog/products/import code=ERR_FORBIDDEN correlationId=corr-01e290fd5e91
+2026-08-02 17:50:19.282  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=WSC-IMP-0003 result=SUCCESS errorCode=- correlationId=corr-b6f1b297bc27
+2026-08-02 17:50:19.285  INFO 4556 --- [           main] wsc.audit                                : event=PRODUCT_SUBMIT userId=u-admin productCode=WSC-IMP-0004 result=SUCCESS errorCode=- correlationId=corr-b6f1b297bc27
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.329 s - in com.shdata.datachain.catalog.productimport.ProductImportIntegrationTest
+2026-08-02 17:50:19.430  INFO 4556 --- [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-02 17:50:19.431  INFO 4556 --- [ionShutdownHook] .SchemaDropperImpl$DelayedDropActionImpl : HHH000477: Starting delayed evictData of schema as part of SessionFactory shut-down'
+2026-08-02 17:50:19.440  INFO 4556 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-08-02 17:50:19.442  INFO 4556 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-08-02 17:50:19.451  INFO 4556 --- [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-02 17:50:19.451  INFO 4556 --- [ionShutdownHook] .SchemaDropperImpl$DelayedDropActionImpl : HHH000477: Starting delayed evictData of schema as part of SessionFactory shut-down'
+2026-08-02 17:50:19.640  INFO 4556 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown initiated...
+2026-08-02 17:50:19.641  INFO 4556 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Shutdown completed.
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  43.715 s
+[INFO] Finished at: 2026-08-02T17:50:20+08:00
+[INFO] ------------------------------------------------------------------------

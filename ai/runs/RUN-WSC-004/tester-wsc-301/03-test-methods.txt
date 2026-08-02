@@ -1,0 +1,23 @@
+﻿ProductImportIntegrationTest (10):
+- template_matchesV0729Columns_andAuthoritativeXlsx
+- fullSuccess_autoCode_searchableAndChained
+- partialSuccess_andAllFail_rowLevel
+- legacyTemplate_requestLevelReject_zeroWrites
+- formatInvalid_notMappedToTemplateUnsupported
+- oversize_requestLevelReject
+- openapiCell_badText_rowFail_sharedFixture_endpoints
+- categoryMismatch_andRequiredMissing_rowLevel
+- reportGet_forbiddenForUserAndUnauthenticated
+- ordinaryUser_importForbidden
+
+ProductEditorIntegrationTest (7):
+- create_other_withContentDescription_version1
+- create_api_endpointsConflict_keepsClientEndpoints
+- create_dataset_report_roundTrip_andLegacyEndpointRead
+- update_incrementsVersion_oldReadable_conflictAndFormat
+- attestationFailure_noHalfProduct_noOrphanChain
+- create_rejectsNonL3_andL2Only
+- ordinaryUser_productWriteForbidden
+
+Maven: Tests run: 17, Failures: 0, Errors: 0, Skipped: 0; BUILD SUCCESS; EXIT=0
+Finished: 2026-08-02T17:50:20+08:00

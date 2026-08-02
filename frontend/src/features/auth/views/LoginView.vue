@@ -29,12 +29,30 @@ async function onSubmit() {
 
 <template>
   <div class="login-page">
-    <form class="login-card" @submit.prevent="onSubmit">
-      <h1>接入端工作台</h1>
+    <form class="login-card" data-testid="login-form" @submit.prevent="onSubmit">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <div>
+          <p class="brand-eyebrow">可信数据空间</p>
+          <h1>接入端工作台</h1>
+        </div>
+      </div>
       <p class="hint">演示账号：admin / provider / user，密码均为 demo</p>
       <label>
         用户名
-        <input v-model="username" name="username" autocomplete="username" required />
+        <input
+          v-model="username"
+          name="username"
+          autocomplete="username"
+          data-testid="login-username"
+          required
+        />
       </label>
       <label>
         密码
@@ -43,11 +61,12 @@ async function onSubmit() {
           type="password"
           name="password"
           autocomplete="current-password"
+          data-testid="login-password"
           required
         />
       </label>
-      <p v-if="localError" class="error" role="alert">{{ localError }}</p>
-      <button type="submit" :disabled="submitting">
+      <p v-if="localError" class="error" role="alert" data-testid="login-error">{{ localError }}</p>
+      <button type="submit" class="submit" data-testid="login-submit" :disabled="submitting">
         {{ submitting ? '登录中…' : '登录' }}
       </button>
     </form>
@@ -59,56 +78,122 @@ async function onSubmit() {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: linear-gradient(160deg, #f0f4f8 0%, #e8eef5 50%, #f7f7f5 100%);
+  padding: 24px;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(56, 189, 248, 0.12), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 100%, rgba(59, 130, 246, 0.1), transparent 50%),
+    var(--main-bg);
 }
+
 .login-card {
-  width: min(360px, 92vw);
+  width: min(380px, 92vw);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 28px 24px;
-  background: #fff;
-  border: 1px solid #e2e6ec;
-  border-radius: 8px;
+  gap: 14px;
+  padding: 28px 26px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg);
 }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-accent);
+  flex-shrink: 0;
+}
+
+.brand-logo svg {
+  width: 22px;
+  height: 22px;
+}
+
+.brand-eyebrow {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+}
+
 h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
+
 .hint {
   margin: 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 13px;
+  line-height: 1.5;
 }
+
 label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
+
 input {
-  padding: 8px 10px;
-  border: 1px solid #cfd6df;
-  border-radius: 4px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-button {
+
+input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-light);
+}
+
+.submit {
   margin-top: 4px;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: 4px;
-  background: #1f4b7a;
+  padding: 10px 14px;
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-menu);
+  background: var(--blue);
   color: #fff;
   font: inherit;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
 }
-button:disabled {
+
+.submit:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.submit:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
+
 .error {
   margin: 0;
-  color: #b42318;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--red-light);
+  color: var(--red);
   font-size: 13px;
 }
 </style>

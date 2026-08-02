@@ -1,13 +1,21 @@
 /**
- * Catalog API — 对齐 contracts/openapi (wsc-contracts@2.0.0)
- * 三级分类；目录维护条目≡产品；Browse 分页 page/pageSize/total；同步导入。
- * OQ-004: productType=OTHER 时无 typeSpecific 专属字段。
+ * Catalog API — 对齐 contracts/openapi (wsc-contracts@2.1.0)
+ * 三级分类；目录维护条目≡产品；Browse 分页 page/pageSize/total；v0729 同步导入。
+ * typeSpecific：api/dataset/report/other；OTHER 允许 contentDescription。
  */
 import { apiRequest, getApiBaseUrl } from './client'
 
 export type ProductType = 'DATASET' | 'REPORT' | 'API' | 'OTHER'
 export type CategoryLevel = 'L1' | 'L2' | 'L3'
 export type MaintenanceStatus = 'PENDING' | 'MAINTAINED'
+export type UpdateFrequency =
+  | 'REALTIME'
+  | 'DAILY'
+  | 'WEEKLY'
+  | 'MONTHLY'
+  | 'YEARLY'
+  | 'ON_DEMAND'
+  | 'NO_UPDATE'
 
 export type Category = {
   id: string
@@ -17,21 +25,78 @@ export type Category = {
   pathLabels?: string[]
 }
 
+export type ApiEndpointParameter = {
+  name?: string
+  type?: string
+  required?: boolean
+  description?: string
+}
+
+export type ApiEndpointResponse = {
+  code?: string
+  description?: string
+}
+
+export type ApiEndpoint = {
+  id?: string
+  method?: string
+  path?: string
+  summary?: string
+  description?: string
+  parameters?: ApiEndpointParameter[]
+  responses?: ApiEndpointResponse[]
+  responseBodySchema?: string
+  requestBodySchema?: string
+}
+
+export type TypeSpecificApi = {
+  swaggerFileContent?: string
+  endpoints?: ApiEndpoint[]
+  fieldDescription?: string
+  dataSample?: string
+  timeRange?: string
+  regionScope?: string
+  /** 兼容旧字段；非唯一真源 */
+  endpoint?: string
+}
+
+export type TypeSpecificDataset = {
+  timeRange?: string
+  regionScope?: string
+  dataScale?: string
+  dataForm?: string
+  fieldDescription?: string
+  dataSample?: string
+}
+
+export type TypeSpecificReportOrOther = {
+  timeRange?: string
+  regionScope?: string
+  contentDescription?: string
+}
+
+export type TypeSpecificFields = {
+  dataset?: TypeSpecificDataset
+  report?: TypeSpecificReportOrOther
+  api?: TypeSpecificApi
+  other?: TypeSpecificReportOrOther
+}
+
 export type ProductWrite = {
   productCode: string
   productName: string
   productType: ProductType
-  /** V1.1 契约权威：挂三级（后续编辑任务切换写入） */
+  /** V1.1+ 契约权威：挂三级 */
   l3CategoryId?: string
   /**
    * V1.0 兼容：既有 catalog 编辑页仍必填写入。
-   * OpenAPI 2.0.0 产品挂载字段为 `l3CategoryId`。
+   * OpenAPI 产品挂载字段为 `l3CategoryId`。
    */
   l2CategoryId: string
   businessCategory?: string
   businessSubCategory?: string
   dataSource?: string
-  updateFrequency?: string
+  updateFrequency?: UpdateFrequency | string
   deliveryMethod?: string
   involvesPersonalInfo?: boolean
   involvesPublicData?: boolean
@@ -43,11 +108,7 @@ export type ProductWrite = {
   tags?: string[]
   summary?: string
   scenario?: string
-  typeSpecific?: {
-    dataset?: Record<string, unknown>
-    report?: Record<string, unknown>
-    api?: Record<string, unknown>
-  }
+  typeSpecific?: TypeSpecificFields
 }
 
 export type Product = ProductWrite & {
@@ -99,19 +160,22 @@ export type ImportErrorReport = {
   rows: ImportErrorRow[]
 }
 
-/** 导入模板列最小集（PLAN-WSC-2.2 §3.1） */
+/** v0729 权威列名行（废止 V1.1 最小列；无产品编码列） */
 export const IMPORT_TEMPLATE_COLUMNS = [
-  '产品名称',
-  '产品编码',
-  '产品类型',
-  '行业分类',
-  '数据来源',
-  '更新频率',
-  '涉及个人信息',
-  '涉及公共数据',
+  '产品名称（必填）',
+  '产品类型（必填）',
+  '行业分类（必填）',
+  '产品简介（必填）',
   '交付方式',
-  '计费方式',
-  '价格',
+  '时间范围',
+  '地域范围',
+  '更新频率',
+  '接口定义',
+  '字段描述',
+  '数据样例',
+  '数据规模',
+  '数据形态',
+  '数据内容描述',
 ] as const
 
 export function listCategories() {

@@ -18,9 +18,10 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 
 /**
- * 产品新增/编辑 + 同事务模拟存证（DEC-WSC-001/002，OQ-004；TASK-WSC-105 三级挂载）。
+ * 产品新增/编辑 + 同事务模拟存证（DEC-WSC-001/002；TASK-WSC-301 typeSpecific 2.1.0）。
  *
  * <p>适配失败时不落产品半成品、不写孤儿上链行。须挂载 L3（{@code ERR_CATEGORY_LEAF_REQUIRED}）。
+ * OTHER 允许 {@code typeSpecific.other.contentDescription}；API 写冲突以客户端 endpoints 为准。
  */
 @Service
 public class ProductEditorService {
@@ -164,10 +165,10 @@ public class ProductEditorService {
             "supplierCreditCode", nullToEmpty(product.supplierCreditCode())));
     snap.put(
         "propertyRights", Map.of("propertyRightsType", nullToEmpty(product.propertyRightsType())));
-    if ("OTHER".equals(product.productType())) {
-      snap.put("typeSpecific", Map.of());
-    } else if (product.typeSpecific() != null) {
+    if (product.typeSpecific() != null) {
       snap.put("typeSpecific", new LinkedHashMap<>(product.typeSpecific()));
+    } else {
+      snap.put("typeSpecific", Map.of());
     }
     snap.put("tags", product.tags() == null ? List.of() : new ArrayList<>(product.tags()));
     snap.put("summary", product.summary());
@@ -232,15 +233,7 @@ public class ProductEditorService {
             ? new LinkedHashMap<>((Map<String, Object>) raw)
             : new LinkedHashMap<>();
 
-    if ("OTHER".equals(productType)) {
-      if (hasTypeSpecificPayload(typeSpecific)) {
-        throw new BusinessException(
-            400, "ERR_PRODUCT_CODE_FORMAT", "其他数据产品不得携带类型专属字段", null);
-      }
-      typeSpecific = new LinkedHashMap<>();
-    } else {
-      typeSpecific = normalizeTypeSpecific(productType, typeSpecific);
-    }
+    typeSpecific = normalizeTypeSpecific(productType, typeSpecific);
 
     @SuppressWarnings("unchecked")
     List<String> tags =
@@ -273,19 +266,6 @@ public class ProductEditorService {
         typeSpecific);
   }
 
-  private static boolean hasTypeSpecificPayload(Map<String, Object> typeSpecific) {
-    for (String key : List.of("dataset", "report", "api")) {
-      Object v = typeSpecific.get(key);
-      if (v instanceof Map<?, ?> m && !m.isEmpty()) {
-        return true;
-      }
-      if (v != null && !(v instanceof Map<?, ?>)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private static Map<String, Object> normalizeTypeSpecific(
       String productType, Map<String, Object> raw) {
     Map<String, Object> out = new LinkedHashMap<>();
@@ -294,18 +274,85 @@ public class ProductEditorService {
           case "DATASET" -> "dataset";
           case "REPORT" -> "report";
           case "API" -> "api";
+          case "OTHER" -> "other";
           default -> null;
         };
     if (key == null) {
       return out;
     }
     Object section = raw.get(key);
+    Map<String, Object> typed = new LinkedHashMap<>();
     if (section instanceof Map<?, ?> m) {
       @SuppressWarnings("unchecked")
-      Map<String, Object> typed = (Map<String, Object>) m;
-      out.put(key, new LinkedHashMap<>(typed));
+      Map<String, Object> cast = (Map<String, Object>) m;
+      typed.putAll(cast);
+    }
+    if ("api".equals(key)) {
+      typed = normalizeApiSection(typed);
+    } else if ("dataset".equals(key)) {
+      typed = keepKeys(
+          typed,
+          List.of(
+              "timeRange",
+              "regionScope",
+              "dataScale",
+              "dataForm",
+              "fieldDescription",
+              "dataSample"));
     } else {
-      out.put(key, new LinkedHashMap<>());
+      // report / other
+      typed = keepKeys(typed, List.of("timeRange", "regionScope", "contentDescription"));
+    }
+    out.put(key, typed);
+    return out;
+  }
+
+  /**
+   * API：保留客户端 swaggerFileContent + endpoints；对齐 §3.3.3 — 二者均非空且不一致时
+   * <b>不以</b>原文重算覆盖 endpoints。
+   */
+  private static Map<String, Object> normalizeApiSection(Map<String, Object> typed) {
+    Map<String, Object> api = new LinkedHashMap<>();
+    Object swagger = typed.get("swaggerFileContent");
+    if (swagger != null) {
+      api.put("swaggerFileContent", String.valueOf(swagger));
+    }
+    List<Map<String, Object>> endpoints = new ArrayList<>();
+    Object epRaw = typed.get("endpoints");
+    if (epRaw instanceof List<?> list) {
+      for (Object item : list) {
+        if (item instanceof Map<?, ?> m) {
+          @SuppressWarnings("unchecked")
+          Map<String, Object> ep = new LinkedHashMap<>((Map<String, Object>) m);
+          endpoints.add(ep);
+        }
+      }
+    }
+    api.put("endpoints", endpoints);
+    for (String k :
+        List.of("fieldDescription", "dataSample", "timeRange", "regionScope", "endpoint")) {
+      if (typed.get(k) != null) {
+        api.put(k, typed.get(k));
+      }
+    }
+    // 兼容字段：若未提供 endpoint 且有 endpoints，派生首端点 method path
+    if (!api.containsKey("endpoint") && !endpoints.isEmpty()) {
+      Map<String, Object> first = endpoints.get(0);
+      api.put(
+          "endpoint",
+          String.valueOf(first.getOrDefault("method", ""))
+              + " "
+              + String.valueOf(first.getOrDefault("path", "")));
+    }
+    return api;
+  }
+
+  private static Map<String, Object> keepKeys(Map<String, Object> src, List<String> keys) {
+    Map<String, Object> out = new LinkedHashMap<>();
+    for (String k : keys) {
+      if (src.get(k) != null) {
+        out.put(k, src.get(k));
+      }
     }
     return out;
   }

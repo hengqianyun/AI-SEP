@@ -1,4 +1,24 @@
 # RUN-WSC-002 批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
 
-# 人类确认与发布批准追加于此；勿回写 RUN-WSC-001。
-approvals: []
+approvals:
+  - id: APPR-WSC-RELEASE-002
+    runId: RUN-WSC-002
+    planId: PLAN-WSC-2.2
+    snapshotId: SNAP-WSC-002
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-08-02T13:03:30+08:00
+    source: chat
+    utterance: 批准发布
+    scope: release-package
+    basedOn:
+      - planning/approved/PLAN-WSC-2.2.md
+      - planning/reviews/integration/REV-WSC-INTEGRATION-002.md
+      - planning/tasks/TESTRUN-WSC-E2E-V11.md
+      - planning/tasks/TESTRUN-WSC-RELEASE-GATES-V11.md
+    notes: |
+      policies.release.requireHumanApproval=true；approverIdentity=maintainer。
+      技术门禁（101..107 VERIFIED、集成审查、E2E V11 r2、Flyway 空库、MySQL 回滚演练）已齐后的发布包人类批准。
+      contracts: wsc-contracts@2.0.0。

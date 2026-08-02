@@ -1,0 +1,12 @@
+﻿file=C:\WorkSpace\AI-SEP\ai\runs\RUN-WSC-003\ux-gap-drafts\TASK-WSC-202.md
+header=| id | screenshot / pathKey | dimension | severity | status | evidence |
+covers_screenshot_01=True
+covers_screenshot_03=True
+gap_rows=GAP-UX-001-01,GAP-UX-003-01
+col_id=True
+col_screenshot=True
+col_dimension=True
+col_severity=True
+col_status=True
+col_evidence=True
+schema_check=PASS

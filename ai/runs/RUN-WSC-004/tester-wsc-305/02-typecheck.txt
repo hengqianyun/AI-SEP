@@ -1,0 +1,2 @@
+﻿(no diagnostics; vue-tsc succeeded with empty stdout)
+exitCode=0

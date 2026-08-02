@@ -1,0 +1,11 @@
+﻿finding=FIND-WSC-202-R1-001 (P2)
+screenshot_nature=fixture HTML viewport capture
+badges_observed=
+  01-login.png: FIXTURE · 前端展示数据 · TASK-WSC-202
+  03-overview.png: FIXTURE · 脱敏演示数据 · TASK-WSC-202
+dev_declaration=DEV-TASK-WSC-202: 草稿截图为与实现令牌一致的 fixture HTML 视口拍屏，非联调后端会话态
+live_shell_pixel_compare=NOT_RUN
+  - 本轮未启动 frontend/dev 或浏览器联调会话态对照 LoginView / OverviewPage 真壳层像素
+  - 按指令：文件存在 + §3.1 schema 可检 → PASS；「与真壳层像素一致」未对照 → PARTIAL/SKIPPED
+  - 不得因 fixture alone 伪造视觉像素 PASSED
+formal_walkthrough=TASK-WSC-206

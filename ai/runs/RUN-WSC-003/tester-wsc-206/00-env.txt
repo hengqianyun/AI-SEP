@@ -1,0 +1,8 @@
+﻿E2E_RUN=1
+baseURL=http://127.0.0.1:5173
+frontend=5173 OK
+backend_health=8080 UP
+playwright_cli=C:\WorkSpace\AI-SEP\node_modules\.pnpm\@playwright+test@1.62.0\node_modules\@playwright\test\cli.js
+spec=specs/p0-wsc-v1.1.spec.ts
+evidenceId=TESTRUN-WSC-E2E-V12-UX
+startedAt=2026-08-02T16:44:07+08:00

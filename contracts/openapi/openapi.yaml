@@ -1,12 +1,14 @@
 openapi: 3.0.3
 info:
   title: WSC Access Workbench API
-  version: 2.0.0
+  version: 2.1.0
   description: |
-    wsc-contracts@2.0.0 — 接入端工作台 V1.1 冻结契约（三级分类/目录维护/批量导入）。
+    wsc-contracts@2.1.0 — 接入端工作台 V1.3（OpenAPI 结构 + v0729 导入）。
     统一响应包装：{ code, message, data, correlationId }；成功时 code="0"。
     产品编码格式（DEC-WSC-001）：`{DOMAIN}-{FEATURE}-{NNNN}`，DOMAIN/FEATURE 为大写字母与数字，NNNN 至少 4 位数字。
-    OQ-004：产品类型为 OTHER（其他数据产品）时无类型专属字段；服务端忽略或拒绝（400）多余专属字段载荷。
+    typeSpecific：按 productType 填充 api/dataset/report/other；OTHER 允许 contentDescription 及共用时间/地域（修订 OQ-004）。
+    typeSpecific.api：swaggerFileContent（原文归档）+ endpoints[]（派生存贮）；兼容旧 endpoint。
+    导入模板：v0729 列名行（无产品编码列；编码由服务端生成）。旧模板 → ERR_IMPORT_TEMPLATE_UNSUPPORTED。
     认证：V1 采用服务端会话（Cookie）为主；亦声明 Bearer 以便网关/文档等价说明——Bearer 须对应可吊销的服务端会话，写 API 以服务端会话角色为准。
 
 servers:
@@ -319,12 +321,32 @@ paths:
                     dataset:
                       recordCount: 1000
               other:
-                summary: 其他数据产品（无专属字段）
+                summary: 其他数据产品（允许 contentDescription）
                 value:
                   productCode: GEN-MISC-0001
                   productName: 其他产品示例
                   productType: OTHER
                   l3CategoryId: "cat-l3-1"
+                  typeSpecific:
+                    other:
+                      contentDescription: 其他数据产品内容说明
+                      timeRange: "2026/01/01 -"
+                      regionScope: 全国
+              api:
+                summary: 数据接口（OpenAPI 形状）
+                value:
+                  productCode: MED-API-0002
+                  productName: 核验接口
+                  productType: API
+                  l3CategoryId: "cat-l3-1"
+                  typeSpecific:
+                    api:
+                      swaggerFileContent: "openapi: 3.0.3\ninfo:\n  title: demo\n  version: 1.0.0\npaths: {}\n"
+                      endpoints:
+                        - id: ep-1
+                          method: POST
+                          path: /enterprise/security/verify
+                          summary: 企业安全信息核验
       responses:
         "200":
           description: 已创建并产生第 1 版上链
@@ -333,7 +355,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseProduct"
         "400":
-          description: 格式非法或 OQ-004 拒绝多余专属字段
+          description: 格式非法或校验失败
           content:
             application/json:
               schema:
@@ -345,13 +367,6 @@ paths:
                     message: 产品编码格式非法，须符合 {DOMAIN}-{FEATURE}-{NNNN}
                     data: null
                     correlationId: "corr-prod-fmt-1"
-                otherExtraFields:
-                  summary: OTHER 类型携带专属字段被拒绝（可选策略；亦可忽略）
-                  value:
-                    code: ERR_PRODUCT_CODE_FORMAT
-                    message: 其他数据产品不得携带类型专属字段
-                    data: null
-                    correlationId: "corr-oq004-1"
         "403":
           $ref: "#/components/responses/Forbidden"
         "409":
@@ -592,11 +607,13 @@ paths:
       summary: 同步批量导入产品（REQ-CAT-008；V1.1 无异步 job）
       description: |
         请求级失败（整单拒绝）：文件 >10MB → ERR_IMPORT_FILE_TOO_LARGE；
-        无法解析/非 xlsx|csv → ERR_IMPORT_FORMAT_INVALID。HTTP 为错误响应，无部分写入。
+        无法解析/非 xlsx|csv → ERR_IMPORT_FORMAT_INVALID；
+        可解析但列名行集合 ≠ v0729 权威 ImportTemplateColumns → ERR_IMPORT_TEMPLATE_UNSUPPORTED。
+        HTTP 为错误响应，无部分写入；不得伪装为行级结果态。
         行级失败：文件已接受并处理完后返回成功 envelope + successCount/failureCount/reportId；
         failureCount>0 时 reportId 必填。ERR_IMPORT_ROW_INVALID 仅作报告内原因码。
-        行业分类列语义：须解析到可挂载三级（三级 id 或「空间/行业/子类」完整路径）；
-        仅二级标签而无三级 → 行级失败。
+        行业分类列语义：须解析到可挂载三级（三级 id、名称或「空间/行业/子类」完整路径）；
+        无法解析到 L3 → 行级失败。模板无产品编码列时服务端按 DEC-WSC-001 自动生成。
       operationId: importProducts
       requestBody:
         required: true
@@ -669,6 +686,13 @@ paths:
                     message: 无法解析文件或非 xlsx/csv
                     data: null
                     correlationId: "corr-imp-fmt"
+                templateUnsupported:
+                  summary: 旧模板/非 v0729 列名行（文件级拒绝）
+                  value:
+                    code: ERR_IMPORT_TEMPLATE_UNSUPPORTED
+                    message: 导入模板不受支持：表头须为 v0729 权威列名行
+                    data: null
+                    correlationId: "corr-imp-tpl"
         "403":
           $ref: "#/components/responses/Forbidden"
 
@@ -826,6 +850,7 @@ components:
                 - ERR_MAINTENANCE_FORBIDDEN
                 - ERR_IMPORT_FILE_TOO_LARGE
                 - ERR_IMPORT_FORMAT_INVALID
+                - ERR_IMPORT_TEMPLATE_UNSUPPORTED
                 - ERR_IMPORT_REPORT_NOT_FOUND
                 - ERR_FORBIDDEN
                 - "401"
@@ -843,8 +868,8 @@ components:
       enum: [DATASET, REPORT, API, OTHER]
       description: |
         DATASET=数据集, REPORT=数据报告, API=数据接口, OTHER=其他数据产品。
-        OTHER（OQ-004）：无类型专属字段；typeSpecific 应省略或为空对象；
-        服务端可忽略多余专属字段，或返回 400 拒绝。
+        OTHER：允许 typeSpecific.other（含 contentDescription 及共用时间/地域）；
+        不得再要求 OTHER 必须为空对象。
 
     DataSource:
       type: string
@@ -856,7 +881,10 @@ components:
 
     UpdateFrequency:
       type: string
-      enum: [REALTIME, DAILY, WEEKLY, MONTHLY, YEARLY, ON_DEMAND]
+      enum: [REALTIME, DAILY, WEEKLY, MONTHLY, YEARLY, ON_DEMAND, NO_UPDATE]
+      description: |
+        REALTIME=实时, DAILY=每日, WEEKLY=每周, MONTHLY=每月, YEARLY=每年,
+        ON_DEMAND=按需, NO_UPDATE=不更新（V1.3 / OQ-V13-008）。
 
     LoginRequest:
       type: object
@@ -1069,24 +1097,87 @@ components:
       description: DEC-WSC-001 `{DOMAIN}-{FEATURE}-{NNNN}`
       example: MED-EMR-0002
 
+    ApiEndpointParameter:
+      type: object
+      properties:
+        name: { type: string }
+        type: { type: string }
+        required: { type: boolean }
+        description: { type: string }
+
+    ApiEndpointResponse:
+      type: object
+      properties:
+        code: { type: string }
+        description: { type: string }
+
+    ApiEndpoint:
+      type: object
+      properties:
+        id: { type: string }
+        method: { type: string, description: "GET|POST|PUT|DELETE|PATCH 等" }
+        path: { type: string }
+        summary: { type: string }
+        description: { type: string }
+        parameters:
+          type: array
+          items: { $ref: "#/components/schemas/ApiEndpointParameter" }
+        responses:
+          type: array
+          items: { $ref: "#/components/schemas/ApiEndpointResponse" }
+        responseBodySchema: { type: string }
+        requestBodySchema: { type: string }
+
+    TypeSpecificApi:
+      type: object
+      description: |
+        数据接口专属。归档真源 swaggerFileContent；派生存贮 endpoints[]。
+        写冲突（二者均非空且不一致）时以客户端 endpoints 为准，禁止服务端静默重算覆盖。
+        兼容旧字段 endpoint（非唯一真源）。
+      properties:
+        swaggerFileContent: { type: string, description: 原始 OpenAPI/Swagger 文本；可空 }
+        endpoints:
+          type: array
+          items: { $ref: "#/components/schemas/ApiEndpoint" }
+        fieldDescription: { type: string }
+        dataSample: { type: string }
+        timeRange: { type: string }
+        regionScope: { type: string }
+        endpoint: { type: string, description: 兼容旧字段；可读；写非唯一真源 }
+
+    TypeSpecificDataset:
+      type: object
+      properties:
+        timeRange: { type: string }
+        regionScope: { type: string }
+        dataScale: { type: string }
+        dataForm: { type: string, description: 图片/文本/视频/音频/表格/其他 }
+        fieldDescription: { type: string }
+        dataSample: { type: string }
+
+    TypeSpecificReportOrOther:
+      type: object
+      description: report 与 other 均允许 contentDescription + 共用时间/地域
+      properties:
+        timeRange: { type: string }
+        regionScope: { type: string }
+        contentDescription: { type: string }
+
     TypeSpecificFields:
       type: object
       description: |
-        按 productType 择一填充。OTHER 时必须省略或为空对象（OQ-004）。
-        若 OTHER 仍携带 dataset/report/api 专属字段，服务端可忽略或 400 拒绝。
+        按 productType 择一填充 api / dataset / report / other。
+        OTHER 允许 other.contentDescription 及共用时间/地域（修订 OQ-004）；
+        不再要求 OTHER 必须为空对象。
       properties:
         dataset:
-          type: object
-          additionalProperties: true
-          description: 数据集专属字段（可空列落地）
+          $ref: "#/components/schemas/TypeSpecificDataset"
         report:
-          type: object
-          additionalProperties: true
-          description: 数据报告专属字段
+          $ref: "#/components/schemas/TypeSpecificReportOrOther"
         api:
-          type: object
-          additionalProperties: true
-          description: 数据接口专属字段
+          $ref: "#/components/schemas/TypeSpecificApi"
+        other:
+          $ref: "#/components/schemas/TypeSpecificReportOrOther"
 
     ProductWrite:
       type: object
@@ -1198,7 +1289,7 @@ components:
       type: object
       description: |
         版本化不可变目录快照。字段覆盖 REQ-CAT-004 分组或文档化子集：
-        基础信息、供应商、数据产权、类型专属（OTHER 无专属）、标签、简介、场景。
+        基础信息、供应商、数据产权、类型专属（含 OTHER.contentDescription）、标签、简介、场景。
       required: [versionId, productCode, productName, productType, capturedAt]
       properties:
         versionId: { type: string }
@@ -1351,26 +1442,29 @@ components:
     ImportTemplateColumns:
       type: object
       description: |
-        导入模板列最小集（ISSUE-PA-R1-004）：
-        产品名称、产品编码、产品类型、行业分类、数据来源、更新频率、
-        涉及个人信息、涉及公共数据、交付方式、计费方式、价格。
-        行业分类列：三级 id 或「空间/行业/子类」完整路径。
+        v0729 权威列名行（xlsx 第 2 行；分组行不参与等值判定）。
+        V1.1 最小列 example（含产品编码、数据来源/个信等）已废止。
+        模板无产品编码列；编码由服务端按 DEC-WSC-001 自动生成。
+        行业分类列：三级 id、名称或「空间/行业/子类」完整路径。
       properties:
         columns:
           type: array
           items: { type: string }
           example:
-            - 产品名称
-            - 产品编码
-            - 产品类型
-            - 行业分类
-            - 数据来源
-            - 更新频率
-            - 涉及个人信息
-            - 涉及公共数据
+            - 产品名称（必填）
+            - 产品类型（必填）
+            - 行业分类（必填）
+            - 产品简介（必填）
             - 交付方式
-            - 计费方式
-            - 价格
+            - 时间范围
+            - 地域范围
+            - 更新频率
+            - 接口定义
+            - 字段描述
+            - 数据样例
+            - 数据规模
+            - 数据形态
+            - 数据内容描述
 
     ImportErrorRow:
       type: object

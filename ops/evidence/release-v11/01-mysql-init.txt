@@ -1,0 +1,6 @@
+00_create exit=0
+01_baseline exit=0
+mysql: [Warning] Using a password on the command line interface can be insecure.
+
+mysql: [Warning] Using a password on the command line interface can be insecure.
+

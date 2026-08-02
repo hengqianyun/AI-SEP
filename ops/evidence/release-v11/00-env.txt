@@ -1,0 +1,8 @@
+docker=29.0.1
+mysql_image=sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b [mysql@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b]
+container=wsc-mysql-release-v11
+network=wsc-release-v11-net
+db=data_chain
+gitSha=472494d87c43bb92d8e51fc166ac62aaef68c3c3
+contracts=wsc-contracts@2.0.0
+backupId=mysqldump-pre-20260802T125222+0800

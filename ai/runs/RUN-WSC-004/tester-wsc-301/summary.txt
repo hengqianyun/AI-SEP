@@ -1,0 +1,7 @@
+﻿TESTRUN-TASK-WSC-301 / EVID-TASK-WSC-301-1
+actorInstance: tester-wsc-301
+result: PASSED
+mvn: ProductImportIntegrationTest(10)+ProductEditorIntegrationTest(7)=17/0/0/0 BUILD SUCCESS EXIT=0
+fixtures: full-success/partial-success/all-fail/legacy-template/format-invalid/openapi-shared* present
+contracts: VERSION=2.1.0; TEMPLATE_UNSUPPORTED hard-sync x4 content-check PASS
+openapi CLI lint toolchain: not wired in repo; content verification used

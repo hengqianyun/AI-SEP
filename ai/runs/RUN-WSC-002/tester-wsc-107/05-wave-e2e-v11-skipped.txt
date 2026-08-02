@@ -1,0 +1,3 @@
+SKIPPED: TESTRUN-WSC-E2E-V11 wave E2E is OUT OF SCOPE for TASK-WSC-107.
+Plan: execute only after TASK-WSC-101..107 all VERIFIED by independent tester.
+This TESTRUN does not claim wave E2E PASS.

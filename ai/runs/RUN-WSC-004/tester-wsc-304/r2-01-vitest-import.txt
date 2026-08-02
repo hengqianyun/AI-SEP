@@ -1,0 +1,8 @@
+RUN  v2.1.9 C:/WorkSpace/AI-SEP/frontend
+
+ ✓ src/features/catalog/import/composables/useProductImport.spec.ts (16 tests) 31ms
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  18:45:20
+   Duration  1.12s

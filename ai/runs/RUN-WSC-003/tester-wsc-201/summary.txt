@@ -1,0 +1,12 @@
+tester-wsc-201 / TASK-WSC-201 / PLAN-WSC-3.1
+executedAt: 2026-08-02T14:03:49+08:00
+status: PASSED
+evidence: planning/tasks/TESTRUN-TASK-WSC-201.md
+
+typecheck: exit 0
+build: exit 0
+vitest: exit 0 (4/4)
+draft 02-shell-sidebar.png: EXISTS 35770 bytes (FIXTURE)
+gap-draft schema: PASS (GAP-UX-002-01 covers #02)
+pixel-vs-live-shell: PARTIAL/SKIPPED (CR P2 fixture; no live app contrast)
+e2e: SKIPPED (out of scope)

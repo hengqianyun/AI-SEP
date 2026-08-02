@@ -1,0 +1,14 @@
+TESTRUN-TASK-WSC-203 / EVID-TASK-WSC-203-1
+actorInstance=tester-wsc-203
+status=PASSED
+executedAt=2026-08-02T14:19:05+08:00
+
+typecheck: PASSED exit=0
+vitest browse: PASSED 2 files / 12 tests exit=0
+draft 04-catalog-browse.png: PASSED EXISTS|84127
+gap-draft schema §3.1 + #04: PASSED (GAP-UX-004-01)
+visual pixel vs live shell: PARTIAL/SKIPPED (fixture; CR FIND-WSC-203-R1-001)
+e2e: SKIPPED (out of scope)
+
+No business source / REV / state / events modified.
+Not claiming VERIFIED.

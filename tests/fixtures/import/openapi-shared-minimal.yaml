@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: Shared Minimal API
+  description: Shared fixture for TASK-WSC-301 import + TASK-WSC-302 editor
+  version: 1.0.0
+paths:
+  /enterprise/security/verify:
+    post:
+      summary: 企业安全信息核验
+      description: 根据统一社会信用代码核验企业安全风险相关信息
+      parameters:
+        - name: X-Request-Id
+          in: header
+          required: false
+          schema:
+            type: string
+          description: 请求追踪 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uscc:
+                  type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: 请求参数错误

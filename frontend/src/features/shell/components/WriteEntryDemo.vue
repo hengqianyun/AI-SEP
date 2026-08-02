@@ -16,7 +16,7 @@ const {
 </script>
 
 <template>
-  <section class="write-demo" aria-label="写入口演示">
+  <section class="write-demo wsc-card" aria-label="写入口演示">
     <h2>写入口（按角色）</h2>
     <p class="muted">壳层入口 · 角色变更后立即更新可见性</p>
     <div class="actions">
@@ -70,41 +70,54 @@ const {
 <style scoped>
 .write-demo {
   margin-top: 16px;
-  padding: 12px 14px;
-  border: 1px dashed #cfd6df;
-  border-radius: 6px;
-  background: #fafbfc;
+  padding: 16px 18px;
 }
+
 h2 {
   margin: 0 0 4px;
-  font-size: 14px;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-weight: 600;
 }
+
 .muted {
-  margin: 0 0 10px;
-  color: #777;
+  margin: 0 0 12px;
+  color: var(--text-secondary);
   font-size: 12px;
 }
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
 }
+
 button {
-  padding: 6px 10px;
-  border: 1px solid #cfd6df;
-  border-radius: 4px;
-  background: #fff;
+  padding: 7px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text-primary);
   font: inherit;
   cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
+
 button.primary {
-  border-color: #1f4b7a;
-  color: #1f4b7a;
+  border-color: #bfdbfe;
+  background: var(--blue-light);
+  color: var(--blue);
+  font-weight: 500;
 }
+
+button.primary:hover {
+  background: #dbeafe;
+}
+
 .empty {
   margin: 0;
-  color: #888;
+  color: var(--text-tertiary);
   font-size: 13px;
 }
 </style>

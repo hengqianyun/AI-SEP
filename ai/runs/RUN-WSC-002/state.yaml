@@ -1,7 +1,7 @@
 runId: RUN-WSC-002
-currentNode: DEVELOPMENT
+currentNode: COMPLETED
 round: 2
-status: ACTIVE
+status: COMPLETED
 blockedBy: []
 completedNodes:
   - PRD_ANALYSIS
@@ -13,16 +13,18 @@ completedNodes:
   - DEVELOPMENT
   - CODE_REVIEW
   - TESTING
-activeWave: W5
-activeTaskIds:
-  - TASK-WSC-107
+  - INTEGRATION
+  - RELEASE_REVIEW
+  - COMPLETED
+activeWave: null
+activeTaskIds: []
 activeSnapshotId: SNAP-WSC-002
 activePlanId: PLAN-WSC-2.2
 candidatePlanPath: planning/proposals/PLAN-WSC-2.2.md
 approvedPlanPath: planning/approved/PLAN-WSC-2.2.md
 priorReviewPath: planning/reviews/wsc-2.1/round-1/
 reviewPath: planning/reviews/wsc-2.2/round-2/
-nextAction: developer/implement-TASK-WSC-107
+nextAction: none
 taskGate:
   TASK-WSC-101:
     verified: true
@@ -67,10 +69,53 @@ taskGate:
     codeReviewReport: planning/tasks/REV-TASK-WSC-106.md
     devReport: planning/tasks/DEV-TASK-WSC-106.md
   TASK-WSC-107:
-    verified: false
-    codeReview: PENDING
-    tester: PENDING
-lastCompletedWave: W4
+    verified: true
+    evidence: planning/tasks/TESTRUN-TASK-WSC-107.md
+    evidenceId: EVID-TASK-WSC-107-1
+    codeReview: APPROVE
+    tester: PASSED
+    codeReviewReport: planning/tasks/REV-TASK-WSC-107.md
+    devReport: planning/tasks/DEV-TASK-WSC-107.md
+fixGate:
+  bugId: BUG-WSC-E2E-001
+  fixId: FIX1
+  taskPacket: planning/tasks/TASK-WSC-107-FIX1.md
+  actorInstance: developer-wsc-e2e-fix1
+  output: planning/tasks/DEV-TASK-WSC-107-FIX1.md
+  status: VERIFIED_VIA_E2E_R2
+integrationGate:
+  decision: APPROVE
+  report: planning/reviews/integration/REV-WSC-INTEGRATION-002.md
+  actorInstance: integration-reviewer-wsc-002
+releaseGaps: []
+releaseGapClosed:
+  - MYSQL_ROLLBACK_DRILL_EVIDENCE
+  - FLYWAY_EMPTY_DB_APPLY_EVIDENCE
+releaseGatesEvidence: planning/tasks/TESTRUN-WSC-RELEASE-GATES-V11.md
+e2eGate:
+  evidenceId: TESTRUN-WSC-E2E-V11
+  result: PASSED
+  round: r2
+  report: planning/tasks/TESTRUN-WSC-E2E-V11.md
+  htmlReport: tests/e2e/reports/p0-wsc-v1.1/index.html
+  actorInstance: tester-wsc-e2e-v11-r2
+  openBugs: []
+  closedBugs:
+    - BUG-WSC-E2E-001
+  releaseReady: true
+  note: E2E+P0 clear; release approved by maintainer APPR-WSC-RELEASE-002
+releaseApproval:
+  identity: maintainer
+  decision: APPROVE
+  approvalId: APPR-WSC-RELEASE-002
+  path: ai/runs/RUN-WSC-002/approvals.yaml
+  decidedAt: 2026-08-02T13:03:30+08:00
+releaseEvidence:
+  flywayEmptyDbApply: PASSED
+  rollbackDrill: PASSED
+  evidence: planning/tasks/TESTRUN-WSC-RELEASE-GATES-V11.md
+  detailPath: ops/evidence/release-v11/
+lastCompletedWave: W5
 dispatch:
   wave: W5
   parallel: false
@@ -87,7 +132,7 @@ dispatch:
       actorInstance: developer-wsc-107
       output: planning/tasks/DEV-TASK-WSC-107.md
       writeSetCore: catalog/import/** + tests/fixtures/import/**
-      status: READY_TO_DISPATCH
+      status: VERIFIED
       dependsOnVerified:
         - TASK-WSC-105
-updatedAt: 2026-07-31T17:58:00+08:00
+updatedAt: 2026-08-02T13:03:34+08:00

@@ -1,0 +1,12 @@
+E2E_RUN=1
+baseURL=http://127.0.0.1:5173
+frontend=5173 OK (HTTP 200)
+backend_health=8080 UP
+catalogProbe=hasBrowse=1 hasImportBtn=1 hasModal=1 pageerrors=[]
+playwright_cli=C:\WorkSpace\AI-SEP\node_modules\.pnpm\@playwright+test@1.62.0\node_modules\@playwright\test\cli.js
+spec=specs/p0-wsc-v1.3.spec.ts
+reportDir=tests/e2e/reports/p0-wsc-v1.3/
+evidenceId=TESTRUN-WSC-E2E-V13
+round=r3-retest
+review=REV-TASK-WSC-304 R4 APPROVE
+executedAt=2026-08-02T19:12:11+08:00

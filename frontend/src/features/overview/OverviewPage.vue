@@ -78,68 +78,130 @@ function barHeight(count: number): string {
 <template>
   <div class="overview-page">
     <header class="page-header">
-      <div>
+      <div class="page-header-left">
         <h1>总览</h1>
         <p class="sub">核心运营指标与上链动态</p>
       </div>
-      <button type="button" class="btn" data-testid="overview-refresh" @click="loadAll">
-        刷新
-      </button>
+      <div class="page-header-right">
+        <span
+          v-if="metrics.state === 'success' || metrics.state === 'empty'"
+          class="page-update-time"
+        >
+          更新于 {{ updatedAtText }}
+        </span>
+        <button type="button" class="btn" data-testid="overview-refresh" @click="loadAll">
+          刷新
+        </button>
+      </div>
     </header>
 
-    <!-- 指标卡 REQ-OVW-001 -->
-    <section class="panel" aria-labelledby="metrics-title">
-      <div class="panel-head">
-        <h2 id="metrics-title">核心指标</h2>
-        <span v-if="metrics.state === 'success' || metrics.state === 'empty'" class="meta">
-          最近更新：{{ updatedAtText }}
-        </span>
-      </div>
-      <div v-if="metrics.state === 'loading'" class="state" data-testid="metrics-loading">
-        加载中…
-      </div>
-      <div v-else-if="metrics.state === 'error'" class="state error" data-testid="metrics-error">
-        <p>{{ metrics.error }}</p>
-        <button type="button" class="btn ghost" @click="loadMetrics">重试</button>
-      </div>
-      <div v-else-if="metrics.state === 'empty'" class="state empty" data-testid="metrics-empty">
-        暂无指标数据
-        <div class="metric-grid muted">
-          <div class="metric-card">
-            <div class="label">链上数据资产总数</div>
-            <div class="value">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="label">活跃企业数</div>
-            <div class="value">0</div>
-          </div>
-          <div class="metric-card">
-            <div class="label">今日新增存证</div>
-            <div class="value">0</div>
+    <!-- 指标卡 REQ-OVW-001 / REQ-UX-003 -->
+    <div v-if="metrics.state === 'loading'" class="state-card" data-testid="metrics-loading">
+      加载中…
+    </div>
+    <div v-else-if="metrics.state === 'error'" class="state-card error" data-testid="metrics-error">
+      <p>{{ metrics.error }}</p>
+      <button type="button" class="btn ghost" @click="loadMetrics">重试</button>
+    </div>
+    <div
+      v-else-if="metrics.state === 'empty'"
+      class="stats-grid muted"
+      data-testid="metrics-empty"
+    >
+      <article class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-title">链上数据资产总数</div>
+          <div class="stat-card-icon blue" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6" />
+              <line x1="8" y1="12" x2="21" y2="12" />
+              <line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" />
+              <line x1="3" y1="12" x2="3.01" y2="12" />
+              <line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
           </div>
         </div>
-      </div>
-      <div v-else-if="metrics.data" class="metric-grid" data-testid="metrics-success">
-        <div class="metric-card">
-          <div class="label">链上数据资产总数</div>
-          <div class="value">{{ metrics.data.assetTotal }}</div>
+        <div class="stat-card-value">0</div>
+        <div class="stat-card-desc">暂无指标数据</div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-title">活跃企业数</div>
+          <div class="stat-card-icon green" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
         </div>
-        <div class="metric-card">
-          <div class="label">活跃企业数</div>
-          <div class="value">{{ metrics.data.activeEnterprises }}</div>
+        <div class="stat-card-value">0</div>
+        <div class="stat-card-desc">暂无指标数据</div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-title">今日新增存证</div>
+          <div class="stat-card-icon orange" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
         </div>
-        <div class="metric-card">
-          <div class="label">今日新增存证</div>
-          <div class="value">{{ metrics.data.todayAttestations }}</div>
+        <div class="stat-card-value">0</div>
+        <div class="stat-card-desc">暂无指标数据</div>
+      </article>
+    </div>
+    <div v-else-if="metrics.data" class="stats-grid" data-testid="metrics-success">
+      <article class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-title">链上数据资产总数</div>
+          <div class="stat-card-icon blue" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6" />
+              <line x1="8" y1="12" x2="21" y2="12" />
+              <line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" />
+              <line x1="3" y1="12" x2="3.01" y2="12" />
+              <line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+          </div>
         </div>
-      </div>
-    </section>
+        <div class="stat-card-value">{{ metrics.data.assetTotal }}</div>
+        <div class="stat-card-desc">已登记并上链的数据条目数。</div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-title">活跃企业数</div>
+          <div class="stat-card-icon green" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card-value">{{ metrics.data.activeEnterprises }}</div>
+        <div class="stat-card-desc">参与数据生态的机构数量。</div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-card-header">
+          <div class="stat-card-title">今日新增存证</div>
+          <div class="stat-card-icon orange" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+        </div>
+        <div class="stat-card-value">{{ metrics.data.todayAttestations }}</div>
+        <div class="stat-card-desc">今天新上链的数据量。</div>
+      </article>
+    </div>
 
-    <div class="two-col">
+    <div class="overview-charts">
       <!-- 趋势 REQ-OVW-002 -->
-      <section class="panel" aria-labelledby="trend-title">
-        <div class="panel-head">
-          <h2 id="trend-title">近 {{ trendDays }} 天上链趋势</h2>
+      <section class="chart-card" aria-labelledby="trend-title">
+        <div class="card-header">
+          <div>
+            <h2 id="trend-title">近 {{ trendDays }} 天上链趋势</h2>
+            <span class="card-sub">近 {{ trendDays }} 天数据上链流量</span>
+          </div>
           <label class="days">
             窗口
             <select v-model.number="trendDays" @change="onTrendDaysChange">
@@ -158,16 +220,18 @@ function barHeight(count: number): string {
         <div v-else-if="trend.state === 'empty'" class="state empty" data-testid="trend-empty">
           暂无趋势数据
           <div ref="trendBox" class="trend-chart muted" aria-hidden="true">
-            <div
-              v-for="n in Math.min(trendDays, 30)"
-              :key="n"
-              class="bar-wrap"
-            >
+            <div v-for="n in Math.min(trendDays, 30)" :key="n" class="bar-wrap">
               <div class="bar" style="height: 0" />
             </div>
           </div>
         </div>
-        <div v-else ref="trendBox" class="trend-chart" data-testid="trend-success" :key="chartWidth">
+        <div
+          v-else
+          ref="trendBox"
+          class="trend-chart"
+          data-testid="trend-success"
+          :key="chartWidth"
+        >
           <div
             v-for="p in trend.data"
             :key="p.date"
@@ -181,8 +245,8 @@ function barHeight(count: number): string {
       </section>
 
       <!-- TOP10 REQ-OVW-003 -->
-      <section class="panel" aria-labelledby="top-title">
-        <div class="panel-head">
+      <section class="chart-card" aria-labelledby="top-title">
+        <div class="card-header">
           <h2 id="top-title">产品上链 TOP10</h2>
         </div>
         <div v-if="top.state === 'loading'" class="state" data-testid="top-loading">加载中…</div>
@@ -195,25 +259,28 @@ function barHeight(count: number): string {
         </div>
         <ol v-else class="top-list" data-testid="top-success">
           <li v-for="(item, idx) in top.data" :key="item.productId || item.productName">
-            <span class="rank">{{ idx + 1 }}</span>
-            <span class="name">{{ item.productName }}</span>
-            <span class="count">{{ item.count }}</span>
+            <span class="name" :title="item.productName">{{ item.productName }}</span>
             <div class="track">
               <div
                 class="fill"
+                :class="idx === 0 ? 'gold' : 'blue'"
                 :style="{ width: `${Math.round((item.count / maxTop) * 100)}%` }"
               />
             </div>
+            <span class="count">{{ item.count }} 次</span>
           </li>
         </ol>
       </section>
     </div>
 
-    <div class="two-col">
+    <div class="overview-bottom">
       <!-- 动态流 REQ-OVW-004 -->
-      <section class="panel" aria-labelledby="stream-title">
-        <div class="panel-head">
-          <h2 id="stream-title">最新上链动态</h2>
+      <section class="chart-card" aria-labelledby="stream-title">
+        <div class="card-header">
+          <div>
+            <h2 id="stream-title">最新上链动态</h2>
+            <span class="card-sub">最近动态</span>
+          </div>
         </div>
         <div v-if="stream.state === 'loading'" class="state" data-testid="stream-loading">加载中…</div>
         <div v-else-if="stream.state === 'error'" class="state error" data-testid="stream-error">
@@ -225,13 +292,16 @@ function barHeight(count: number): string {
         </div>
         <ul v-else class="stream-list" data-testid="stream-success">
           <li v-for="ev in stream.data" :key="ev.chainRecordId + ev.occurredAt">
-            <span class="type" :data-type="ev.type">{{ STREAM_TYPE_LABEL[ev.type] }}</span>
+            <span class="dot" :data-type="ev.type" aria-hidden="true" />
             <div class="body">
+              <div class="stream-head">
+                <span class="type" :data-type="ev.type">{{ STREAM_TYPE_LABEL[ev.type] }}</span>
+                <span class="time">{{ ev.relativeTime }}</span>
+              </div>
               <div class="subject">{{ ev.subject }}</div>
               <div class="action">{{ ev.actionSummary }}</div>
               <div class="meta-row">
-                <span>{{ ev.relativeTime }}</span>
-                <code :title="ev.chainRecordId">{{ ev.chainRecordId }}</code>
+                <code :title="ev.chainRecordId">上链记录：{{ ev.chainRecordId }}</code>
               </div>
             </div>
           </li>
@@ -239,9 +309,12 @@ function barHeight(count: number): string {
       </section>
 
       <!-- 分布 REQ-OVW-005 -->
-      <section class="panel" aria-labelledby="dist-title">
-        <div class="panel-head">
-          <h2 id="dist-title">行业 / 地域分布</h2>
+      <section class="chart-card" aria-labelledby="dist-title">
+        <div class="card-header">
+          <div>
+            <h2 id="dist-title">行业 / 地域分布</h2>
+            <span class="card-sub">行业与地域占比</span>
+          </div>
         </div>
         <div
           v-if="distribution.state === 'loading'"
@@ -267,7 +340,7 @@ function barHeight(count: number): string {
         </div>
         <div v-else class="dist" data-testid="distribution-success">
           <div>
-            <h3>行业占比</h3>
+            <h3>行业分布</h3>
             <ul class="pie-list">
               <li v-for="s in distribution.data?.byIndustry" :key="'i-' + s.name">
                 <span class="name">{{ s.name }}</span>
@@ -282,7 +355,7 @@ function barHeight(count: number): string {
             </ul>
           </div>
           <div>
-            <h3>地域对比</h3>
+            <h3>地域分布</h3>
             <ul class="region-list">
               <li v-for="s in distribution.data?.byRegion" :key="'r-' + s.name">
                 <span class="name">{{ s.name }}</span>
@@ -310,119 +383,226 @@ function barHeight(count: number): string {
   gap: 16px;
   max-width: 1200px;
 }
+
 .page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-h1 {
-  margin: 0;
-  font-size: 22px;
-  color: #1b2a3a;
-}
-.sub {
-  margin: 4px 0 0;
-  color: #667788;
-  font-size: 13px;
-}
-.panel {
-  background: #fff;
-  border: 1px solid #e2e6ec;
-  border-radius: 8px;
-  padding: 16px;
-}
-.panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
-h2 {
+
+.page-header-left h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sub {
   margin: 0;
-  font-size: 16px;
-  color: #1b2a3a;
-}
-h3 {
-  margin: 0 0 8px;
+  color: var(--text-secondary);
   font-size: 13px;
-  color: #445566;
 }
-.meta {
-  font-size: 12px;
-  color: #8899aa;
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.metric-grid {
+
+.page-update-time {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
-.metric-card {
-  padding: 14px 16px;
-  background: #f7f9fb;
-  border-radius: 6px;
-  border: 1px solid #e8edf2;
+
+.stat-card {
+  padding: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.metric-card .label {
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.stat-card-title {
   font-size: 13px;
-  color: #667788;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
-.metric-card .value {
-  margin-top: 6px;
+
+.stat-card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-menu);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.stat-card-icon.blue {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.stat-card-icon.green {
+  background: var(--green-light);
+  color: var(--green);
+}
+
+.stat-card-icon.orange {
+  background: var(--orange-light);
+  color: var(--orange);
+}
+
+.stat-card-value {
   font-size: 28px;
-  font-weight: 600;
-  color: #1b2a3a;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
-.metric-grid.muted .value {
-  color: #99aab8;
+
+.stat-card-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
-.two-col {
+
+.stats-grid.muted .stat-card-value {
+  color: var(--text-tertiary);
+}
+
+.overview-charts,
+.overview-bottom {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   gap: 16px;
 }
-.state {
-  padding: 24px 8px;
+
+.chart-card {
+  padding: 16px 20px 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.state-card {
+  padding: 28px 16px;
   text-align: center;
-  color: #667788;
+  color: var(--text-secondary);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
 }
+
+.state-card.error,
 .state.error {
-  color: #a33;
+  color: var(--red);
 }
+
+.state {
+  padding: 28px 8px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
 .state.empty {
-  color: #8899aa;
+  color: var(--text-tertiary);
 }
+
 .btn {
-  border: 1px solid #c5ced8;
-  background: #1b2a3a;
-  color: #fff;
-  border-radius: 6px;
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border-radius: var(--radius-menu);
+  padding: 8px 14px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s;
 }
-.btn.ghost {
-  background: #fff;
-  color: #1b2a3a;
-  margin-top: 8px;
-}
+
 .btn:hover {
-  opacity: 0.92;
+  background: #f9fafb;
 }
+
+.btn.ghost {
+  margin-top: 8px;
+  background: var(--card-bg);
+  color: var(--blue);
+  border-color: #bfdbfe;
+}
+
 .days {
   font-size: 12px;
-  color: #667788;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
+
 .days select {
-  border: 1px solid #c5ced8;
-  border-radius: 4px;
-  padding: 2px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  background: var(--card-bg);
+  color: var(--text-primary);
 }
+
 .trend-chart {
   display: flex;
   align-items: flex-end;
@@ -431,6 +611,7 @@ h3 {
   padding: 8px 0 0;
   overflow: hidden;
 }
+
 .bar-wrap {
   flex: 1 1 0;
   min-width: 0;
@@ -439,142 +620,197 @@ h3 {
   justify-content: center;
   height: 100%;
 }
+
 .bar {
   width: 100%;
   max-width: 14px;
-  background: linear-gradient(180deg, #3d6f99 0%, #1b2a3a 100%);
+  background: linear-gradient(180deg, var(--blue) 0%, #2563eb 100%);
   border-radius: 2px 2px 0 0;
   transition: height 0.2s ease;
 }
+
+.trend-chart.muted .bar {
+  background: var(--border-color);
+}
+
 .hint {
   margin: 8px 0 0;
   font-size: 12px;
-  color: #99aab8;
+  color: var(--text-tertiary);
 }
+
 .top-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
+
 .top-list li {
   display: grid;
-  grid-template-columns: 24px 1fr auto;
-  grid-template-rows: auto auto;
-  gap: 2px 8px;
+  grid-template-columns: minmax(0, 180px) 1fr 50px;
+  gap: 10px;
   align-items: center;
 }
-.rank {
-  grid-row: 1 / 3;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #e8edf2;
-  display: grid;
-  place-items: center;
-  font-size: 12px;
+
+.top-list .name {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-list .count {
+  font-size: 13px;
   font-weight: 600;
-  color: #1b2a3a;
-}
-.name {
-  font-size: 13px;
-  color: #1b2a3a;
-}
-.count {
-  font-size: 13px;
   font-variant-numeric: tabular-nums;
-  color: #445566;
+  color: var(--text-primary);
+  text-align: right;
 }
-.track {
-  grid-column: 2 / 4;
-  height: 6px;
-  background: #eef2f6;
-  border-radius: 3px;
+
+.top-list .track {
+  height: 18px;
+  background: #f3f4f6;
+  border-radius: 9px;
   overflow: hidden;
 }
-.fill {
+
+.top-list .fill {
   height: 100%;
-  background: #3d6f99;
-  border-radius: 3px;
+  border-radius: 0 9px 9px 0;
+  transition: width 0.3s ease;
 }
-.fill.industry {
-  background: #2a6a4f;
+
+.top-list .fill.gold {
+  background: linear-gradient(90deg, #fbbf24, var(--orange));
 }
-.fill.region {
-  background: #8a5a2b;
+
+.top-list .fill.blue {
+  background: linear-gradient(90deg, var(--blue), #2563eb);
 }
+
 .stream-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   max-height: 420px;
   overflow: auto;
 }
+
 .stream-list li {
   display: flex;
   gap: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eef2f6;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: var(--radius-menu);
+  border: 1px solid var(--border-color);
 }
-.type {
-  flex: 0 0 auto;
-  align-self: flex-start;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #e8edf2;
-  color: #1b2a3a;
-  white-space: nowrap;
+
+.dot {
+  width: 6px;
+  height: 6px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
 }
-.type[data-type='CATALOG_REGISTER'] {
-  background: #dce8f5;
+
+.dot[data-type='TRADE_ORDER'] {
+  background: var(--blue);
 }
-.type[data-type='DATA_REGISTER'] {
-  background: #dcefe4;
+
+.dot[data-type='CATALOG_REGISTER'] {
+  background: var(--orange);
 }
-.type[data-type='TRADE_ORDER'] {
-  background: #f5e6d4;
-}
+
 .body {
   min-width: 0;
   flex: 1;
 }
+
+.stream-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.type {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--green-light);
+  color: var(--green);
+  white-space: nowrap;
+}
+
+.type[data-type='CATALOG_REGISTER'] {
+  background: var(--orange-light);
+  color: var(--orange);
+}
+
+.type[data-type='TRADE_ORDER'] {
+  background: var(--blue-light);
+  color: var(--blue);
+}
+
+.time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
 .subject {
   font-size: 13px;
   font-weight: 600;
-  color: #1b2a3a;
+  color: var(--text-primary);
 }
+
 .action {
   font-size: 12px;
-  color: #556677;
+  color: var(--text-secondary);
   margin-top: 2px;
 }
+
 .meta-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
   margin-top: 4px;
   font-size: 11px;
-  color: #8899aa;
+  color: var(--text-tertiary);
 }
+
 .meta-row code {
   font-size: 11px;
-  color: #556677;
+  color: var(--text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  max-width: 100%;
   white-space: nowrap;
+  display: block;
 }
+
 .dist {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
+
+.dist h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 .pie-list,
 .region-list {
   list-style: none;
@@ -584,26 +820,65 @@ h3 {
   flex-direction: column;
   gap: 8px;
 }
+
 .pie-list li,
 .region-list li {
   display: grid;
-  grid-template-columns: 56px 1fr 40px;
+  grid-template-columns: 72px 1fr 40px;
   gap: 8px;
   align-items: center;
   font-size: 12px;
 }
+
+.pie-list .name,
+.region-list .name {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pie-list .track,
+.region-list .track {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pie-list .fill,
+.region-list .fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.fill.industry {
+  background: var(--green);
+}
+
+.fill.region {
+  background: var(--orange);
+}
+
 .pct,
 .val {
   text-align: right;
   font-variant-numeric: tabular-nums;
-  color: #556677;
+  color: var(--text-secondary);
 }
+
 @media (max-width: 960px) {
-  .two-col {
+  .overview-charts,
+  .overview-bottom {
     grid-template-columns: 1fr;
   }
-  .metric-grid {
+
+  .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .top-list li {
+    grid-template-columns: minmax(0, 1fr) 1.2fr 48px;
   }
 }
 </style>

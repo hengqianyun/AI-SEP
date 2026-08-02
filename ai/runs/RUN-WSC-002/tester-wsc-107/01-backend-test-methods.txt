@@ -1,0 +1,11 @@
+ProductImportIntegrationTest methods:
+- template_hasAllRequiredColumns
+- fullSuccess_searchableAndChained
+- partialSuccess_reportDownloadable_whitelistOnly
+- codeConflict_andCategoryMismatch_andRequiredMissing
+- oversize_requestLevelReject
+- invalidFormat_requestLevelReject
+- reportGet_forbiddenForUserAndUnauthenticated
+- ordinaryUser_importForbidden
+Surefire: Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS exitCode=0

@@ -1,0 +1,26 @@
+# RUN-WSC-004 批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
+
+approvals:
+  - id: APPR-WSC-RELEASE-004
+    runId: RUN-WSC-004
+    planId: PLAN-WSC-4.1
+    snapshotId: SNAP-WSC-004
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-08-02T19:36:45+08:00
+    source: chat
+    utterance: 批准发布
+    scope: release-package
+    basedOn:
+      - planning/approved/PLAN-WSC-4.1.md
+      - planning/reviews/integration/REV-WSC-INTEGRATION-004.md
+      - planning/tasks/TESTRUN-TASK-WSC-304.md
+      - TESTRUN-WSC-E2E-V13
+      - planning/tasks/TESTRUN-TASK-WSC-305.md
+      - product/requirements/SNAP-WSC-004.md
+    notes: |
+      policies.release.requireHumanApproval=true；approverIdentity=maintainer。
+      技术门禁（301..305 VERIFIED、E2E V13、集成审查、契约 2.1.0、HOTFIX 触底加载）已齐后的 V1.3 发布包人类批准。
+      contractsTarget: wsc-contracts@2.1.0；UX 基线 PLAN-WSC-3.1。

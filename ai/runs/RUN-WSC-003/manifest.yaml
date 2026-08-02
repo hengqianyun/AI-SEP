@@ -1,0 +1,22 @@
+runId: RUN-WSC-003
+projectId: WSC
+workflowId: ai-software-delivery
+workflowVersion: 1.0.0
+prd: product/prd/wsc-v1.2-ux.md
+createdAt: 2026-08-02T13:33:00+08:00
+createdBy: orchestrator
+mode: semi-automatic-pilot
+basedOnRun: RUN-WSC-002
+notes: |
+  独立 UI/UX 对齐需求：当前 Vue 实现与 design/prototypes/wsc-v1.1/index.html 差距过大。
+  功能基线继承 RUN-WSC-002 COMPLETED；本 Run 默认不改 contracts/后端。
+  视觉权威：design/prototypes/wsc-v1.1/index.html。
+artifacts:
+  prd: product/prd/wsc-v1.2-ux.md
+  prototype: design/prototypes/wsc-v1.1/index.html
+  functionalBaseline:
+    run: RUN-WSC-002
+    snapshot: product/requirements/SNAP-WSC-002.md
+    plan: planning/approved/PLAN-WSC-2.2.md
+    contracts: wsc-contracts@2.0.0
+  previousRun: ai/runs/RUN-WSC-002/

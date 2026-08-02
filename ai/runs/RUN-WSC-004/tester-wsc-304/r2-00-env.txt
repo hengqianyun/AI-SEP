@@ -1,0 +1,12 @@
+E2E_RUN=1
+baseURL=http://127.0.0.1:5173
+frontend=5173 OK (HTTP 200)
+backend_health=8080 UP
+playwright_cli=C:\WorkSpace\AI-SEP\node_modules\.pnpm\@playwright+test@1.62.0\node_modules\@playwright\test\cli.js
+note=pnpm run test:p0-v13 hit dual @playwright/test load; used direct cli equivalent
+spec=specs/p0-wsc-v1.3.spec.ts
+reportDir=tests/e2e/reports/p0-wsc-v1.3/
+evidenceId=TESTRUN-WSC-E2E-V13
+round=r2-retest
+executedAt=2026-08-02T18:48:16+08:00
+catalogDebug=r2-catalog-debug.txt (hasBrowse=0; pageerror useProductImport export)

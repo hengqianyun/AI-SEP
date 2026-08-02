@@ -1,0 +1,1 @@
+﻿E2E (tests/e2e) not in TASK-WSC-201 testScope -> SKIPPED (not faked PASS)

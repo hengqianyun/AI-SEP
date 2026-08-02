@@ -4,7 +4,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { useCanWrite } from '@/features/auth/composables/useCanWrite'
-import { useProductEditor } from './composables/useProductEditor'
+import {
+  DATA_FORM_OPTIONS,
+  UPDATE_FREQUENCY_OPTIONS,
+  useProductEditor,
+} from './composables/useProductEditor'
+import OpenApiEditorPanel from './components/OpenApiEditorPanel.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -22,6 +27,9 @@ const {
   state,
   feedback,
   form,
+  isApi,
+  isDataset,
+  isReport,
   isOther,
   l1Categories,
   l2Categories,
@@ -57,126 +65,333 @@ async function onSubmit() {
 function onCancel() {
   void router.push('/catalog')
 }
+
+function goBack() {
+  void router.push('/catalog')
+}
 </script>
 
 <template>
   <div class="product-editor" data-testid="product-editor">
-    <header class="page-header">
-      <h1>{{ mode === 'create' ? '新增数据产品' : '编辑数据产品' }}</h1>
-    </header>
-
-    <div v-if="state === 'loading'">加载中…</div>
-
-    <form v-else class="form" @submit.prevent="onSubmit">
-      <fieldset>
-        <legend>基础信息</legend>
-        <label>产品名称 * <input v-model="form.productName" required /></label>
-        <label>产品编码 * <input v-model="form.productCode" :readonly="mode === 'edit'" required /></label>
-        <label>
-          产品类型
-          <select v-model="form.productType">
-            <option value="DATASET">数据集</option>
-            <option value="REPORT">数据报告</option>
-            <option value="API">数据接口</option>
-            <option value="OTHER">其他数据产品</option>
-          </select>
-        </label>
-        <div class="category-cascade" data-testid="category-cascade">
-          <label>
-            空间（一级）*
-            <select v-model="form.l1CategoryId" required data-testid="cat-l1" @change="onL1Change">
-              <option disabled value="">请选择</option>
-              <option v-for="c in l1Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
-          </label>
-          <label>
-            行业（二级）*
-            <select
-              v-model="form.l2CategoryId"
-              required
-              :disabled="!form.l1CategoryId"
-              data-testid="cat-l2"
-              @change="onL2Change"
-            >
-              <option disabled value="">请选择</option>
-              <option v-for="c in l2Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
-          </label>
-          <label>
-            子类（三级）*
-            <select v-model="form.l3CategoryId" required :disabled="!form.l2CategoryId" data-testid="cat-l3">
-              <option disabled value="">请选择</option>
-              <option v-for="c in l3Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
-          </label>
-          <p v-if="selectedPathLabel" class="path-preview" data-testid="category-path-preview">
-            路径预览：{{ selectedPathLabel }}
-          </p>
-        </div>
-        <label>业务大类 <input v-model="form.businessCategory" /></label>
-        <label>业务子类 <input v-model="form.businessSubCategory" /></label>
-        <label>数据来源 <input v-model="form.dataSource" /></label>
-        <label>更新频率 <input v-model="form.updateFrequency" /></label>
-        <label>交付方式 <input v-model="form.deliveryMethod" /></label>
-        <label class="check"><input v-model="form.involvesPersonalInfo" type="checkbox" /> 涉及个人信息</label>
-        <label class="check"><input v-model="form.involvesPublicData" type="checkbox" /> 涉及公共数据</label>
-        <label>计费方式 <input v-model="form.billingMethod" /></label>
-        <label>价格 <input v-model="form.price" /></label>
-      </fieldset>
-
-      <fieldset>
-        <legend>供应商与产权</legend>
-        <label>供应商名称 <input v-model="form.supplierName" /></label>
-        <label>信用代码 <input v-model="form.supplierCreditCode" /></label>
-        <label>产权类型 <input v-model="form.propertyRightsType" /></label>
-      </fieldset>
-
-      <fieldset v-if="!isOther" data-testid="type-specific-editor">
-        <legend>类型专属字段</legend>
-        <label v-if="form.productType === 'DATASET'">
-          记录数 <input v-model="form.datasetRecordCount" type="number" />
-        </label>
-        <label v-else-if="form.productType === 'REPORT'">
-          页数 <input v-model="form.reportPageCount" type="number" />
-        </label>
-        <label v-else-if="form.productType === 'API'">
-          接口路径 <input v-model="form.apiEndpoint" />
-        </label>
-      </fieldset>
-      <p v-else class="hint" data-testid="type-specific-editor-absent">
-        其他数据产品无需填写类型专属字段（OQ-004）
-      </p>
-
-      <fieldset>
-        <legend>标签 / 简介 / 场景</legend>
-        <div class="tags">
-          <span v-for="t in form.tags" :key="t" class="tag">
-            {{ t }}
-            <button type="button" @click="removeTag(t)">×</button>
-          </span>
-          <input
-            v-model="form.tagInput"
-            placeholder="输入后回车添加"
-            @keydown="onTagKeydown"
-          />
-        </div>
-        <label>简介 <textarea v-model="form.summary" rows="3" /></label>
-        <label>应用场景 <textarea v-model="form.scenario" rows="3" /></label>
-      </fieldset>
-
-      <p
-        v-if="feedback"
-        :class="state === 'success' ? 'ok' : state === 'error' ? 'err' : ''"
-        data-testid="editor-feedback"
-      >
-        {{ feedback }}
-      </p>
-
-      <div class="actions">
-        <button type="submit" class="primary" :disabled="state === 'submitting'">
+    <header class="editor-header wsc-card">
+      <div class="editor-header-left">
+        <button type="button" class="editor-back" aria-label="返回" @click="goBack">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+        </button>
+        <h1 class="editor-title">{{ mode === 'create' ? '新增数据产品' : '编辑数据产品' }}</h1>
+      </div>
+      <div class="editor-header-right">
+        <button type="button" class="btn" @click="onCancel">取消</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          :disabled="state === 'submitting' || state === 'loading'"
+          @click="onSubmit"
+        >
           {{ state === 'submitting' ? '提交中…' : '提交' }}
         </button>
-        <button type="button" @click="onCancel">取消</button>
+      </div>
+    </header>
+
+    <div v-if="state === 'loading'" class="state-card wsc-card">加载中…</div>
+
+    <form v-else class="editor-body" :class="{ wide: isApi }" @submit.prevent="onSubmit">
+      <div class="editor-form-card wsc-card">
+        <section class="form-section">
+          <h2 class="form-section-title">基础信息</h2>
+          <div class="form-grid">
+            <label class="form-group">
+              <span class="form-label">产品名称 <span class="required">*</span></span>
+              <input v-model="form.productName" class="form-input" required />
+            </label>
+            <label class="form-group">
+              <span class="form-label">产品编码 <span class="required">*</span></span>
+              <input
+                v-model="form.productCode"
+                class="form-input"
+                :readonly="mode === 'edit'"
+                required
+              />
+            </label>
+            <label class="form-group">
+              <span class="form-label">产品类型</span>
+              <select v-model="form.productType" class="form-select" data-testid="product-type">
+                <option value="DATASET">数据集</option>
+                <option value="REPORT">数据报告</option>
+                <option value="API">数据接口</option>
+                <option value="OTHER">其他数据产品</option>
+              </select>
+            </label>
+            <div class="form-group full-width category-cascade" data-testid="category-cascade">
+              <div class="cascade-row">
+                <label class="form-group">
+                  <span class="form-label">空间（一级） <span class="required">*</span></span>
+                  <select
+                    v-model="form.l1CategoryId"
+                    class="form-select"
+                    required
+                    data-testid="cat-l1"
+                    @change="onL1Change"
+                  >
+                    <option disabled value="">请选择</option>
+                    <option v-for="c in l1Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+                  </select>
+                </label>
+                <label class="form-group">
+                  <span class="form-label">行业（二级） <span class="required">*</span></span>
+                  <select
+                    v-model="form.l2CategoryId"
+                    class="form-select"
+                    required
+                    :disabled="!form.l1CategoryId"
+                    data-testid="cat-l2"
+                    @change="onL2Change"
+                  >
+                    <option disabled value="">请选择</option>
+                    <option v-for="c in l2Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+                  </select>
+                </label>
+                <label class="form-group">
+                  <span class="form-label">子类（三级） <span class="required">*</span></span>
+                  <select
+                    v-model="form.l3CategoryId"
+                    class="form-select"
+                    required
+                    :disabled="!form.l2CategoryId"
+                    data-testid="cat-l3"
+                  >
+                    <option disabled value="">请选择</option>
+                    <option v-for="c in l3Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+                  </select>
+                </label>
+              </div>
+              <p
+                v-if="selectedPathLabel"
+                class="path-preview"
+                data-testid="category-path-preview"
+              >
+                路径预览：{{ selectedPathLabel }}
+              </p>
+            </div>
+            <label class="form-group">
+              <span class="form-label">业务大类</span>
+              <input v-model="form.businessCategory" class="form-input" />
+            </label>
+            <label class="form-group">
+              <span class="form-label">业务子类</span>
+              <input v-model="form.businessSubCategory" class="form-input" />
+            </label>
+            <label class="form-group">
+              <span class="form-label">数据来源</span>
+              <input v-model="form.dataSource" class="form-input" />
+            </label>
+            <label class="form-group">
+              <span class="form-label">更新频率</span>
+              <select v-model="form.updateFrequency" class="form-select" data-testid="update-frequency">
+                <option
+                  v-for="opt in UPDATE_FREQUENCY_OPTIONS"
+                  :key="opt.value || 'empty'"
+                  :value="opt.value"
+                >
+                  {{ opt.label }}
+                </option>
+              </select>
+            </label>
+            <label class="form-group">
+              <span class="form-label">交付方式</span>
+              <input v-model="form.deliveryMethod" class="form-input" />
+            </label>
+            <label class="form-group check">
+              <input v-model="form.involvesPersonalInfo" type="checkbox" />
+              <span>涉及个人信息</span>
+            </label>
+            <label class="form-group check">
+              <input v-model="form.involvesPublicData" type="checkbox" />
+              <span>涉及公共数据</span>
+            </label>
+            <label class="form-group">
+              <span class="form-label">计费方式</span>
+              <input v-model="form.billingMethod" class="form-input" />
+            </label>
+            <label class="form-group">
+              <span class="form-label">价格</span>
+              <input v-model="form.price" class="form-input" />
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h2 class="form-section-title">供应商与产权</h2>
+          <div class="form-grid">
+            <label class="form-group">
+              <span class="form-label">供应商名称</span>
+              <input v-model="form.supplierName" class="form-input" />
+            </label>
+            <label class="form-group">
+              <span class="form-label">信用代码</span>
+              <input v-model="form.supplierCreditCode" class="form-input" />
+            </label>
+            <label class="form-group">
+              <span class="form-label">产权类型</span>
+              <input v-model="form.propertyRightsType" class="form-input" />
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section" data-testid="type-specific-editor">
+          <h2 class="form-section-title">数据描述（按类型）</h2>
+
+          <div class="form-grid">
+            <label class="form-group">
+              <span class="form-label">时间范围</span>
+              <input
+                v-model="form.timeRange"
+                class="form-input"
+                placeholder="YYYY/MM/DD - YYYY/MM/DD"
+                data-testid="field-time-range"
+              />
+            </label>
+            <label class="form-group">
+              <span class="form-label">地域范围</span>
+              <input v-model="form.regionScope" class="form-input" data-testid="field-region-scope" />
+            </label>
+          </div>
+
+          <div v-if="isApi" class="type-block" data-testid="type-api-fields">
+            <OpenApiEditorPanel
+              v-model:endpoints="form.endpoints"
+              v-model:swagger-file-content="form.swaggerFileContent"
+              v-model:selected-id="form.selectedEndpointId"
+            />
+            <div class="form-grid" style="margin-top: 16px">
+              <label v-if="form.apiEndpointLegacy && !form.endpoints.length" class="form-group full-width">
+                <span class="form-label">旧接口路径（只读兼容）</span>
+                <input
+                  v-model="form.apiEndpointLegacy"
+                  class="form-input"
+                  readonly
+                  data-testid="legacy-api-endpoint"
+                />
+                <p class="form-hint">该产品仅有旧 endpoint 字段；可新增端点或从 Swagger 导入迁移。</p>
+              </label>
+              <label class="form-group full-width">
+                <span class="form-label">字段描述</span>
+                <textarea
+                  v-model="form.apiFieldDescription"
+                  class="form-textarea"
+                  rows="2"
+                  data-testid="api-field-description"
+                />
+              </label>
+              <label class="form-group full-width">
+                <span class="form-label">数据样例</span>
+                <textarea
+                  v-model="form.apiDataSample"
+                  class="form-textarea"
+                  rows="2"
+                  data-testid="api-data-sample"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div v-else-if="isDataset" class="type-block form-grid" data-testid="type-dataset-fields">
+            <label class="form-group">
+              <span class="form-label">数据规模</span>
+              <input v-model="form.dataScale" class="form-input" data-testid="dataset-data-scale" />
+            </label>
+            <label class="form-group">
+              <span class="form-label">数据形态</span>
+              <select v-model="form.dataForm" class="form-select" data-testid="dataset-data-form">
+                <option value="">请选择</option>
+                <option v-for="f in DATA_FORM_OPTIONS" :key="f" :value="f">{{ f }}</option>
+              </select>
+            </label>
+            <label class="form-group full-width">
+              <span class="form-label">字段描述</span>
+              <textarea
+                v-model="form.datasetFieldDescription"
+                class="form-textarea"
+                rows="2"
+                data-testid="dataset-field-description"
+              />
+            </label>
+            <label class="form-group full-width">
+              <span class="form-label">数据样例</span>
+              <textarea
+                v-model="form.datasetDataSample"
+                class="form-textarea"
+                rows="2"
+                data-testid="dataset-data-sample"
+              />
+            </label>
+          </div>
+
+          <div
+            v-else-if="isReport || isOther"
+            class="type-block form-grid"
+            :data-testid="isReport ? 'type-report-fields' : 'type-other-fields'"
+          >
+            <label class="form-group full-width">
+              <span class="form-label">数据内容描述</span>
+              <textarea
+                v-model="form.contentDescription"
+                class="form-textarea"
+                rows="3"
+                data-testid="content-description"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h2 class="form-section-title">标签 / 简介 / 场景</h2>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <span class="form-label">关键标签</span>
+              <div class="tags">
+                <span v-for="t in form.tags" :key="t" class="tag">
+                  {{ t }}
+                  <button type="button" aria-label="删除标签" @click="removeTag(t)">×</button>
+                </span>
+                <input
+                  v-model="form.tagInput"
+                  class="tag-input"
+                  placeholder="输入后回车添加"
+                  @keydown="onTagKeydown"
+                />
+              </div>
+              <p class="form-hint">按回车添加标签，点击 × 删除。</p>
+            </div>
+            <label class="form-group full-width">
+              <span class="form-label">简介</span>
+              <textarea v-model="form.summary" class="form-textarea" rows="3" />
+            </label>
+            <label class="form-group full-width">
+              <span class="form-label">应用场景</span>
+              <textarea v-model="form.scenario" class="form-textarea" rows="3" />
+            </label>
+          </div>
+        </section>
+
+        <p
+          v-if="feedback"
+          class="feedback"
+          :class="state === 'success' ? 'ok' : state === 'error' ? 'err' : ''"
+          data-testid="editor-feedback"
+        >
+          {{ feedback }}
+        </p>
+
+        <div class="form-footer">
+          <button type="button" class="btn" @click="onCancel">取消</button>
+          <button type="submit" class="btn btn-primary" :disabled="state === 'submitting'">
+            {{ state === 'submitting' ? '提交中…' : '提交' }}
+          </button>
+        </div>
       </div>
     </form>
   </div>
@@ -184,113 +399,303 @@ function onCancel() {
 
 <style scoped>
 .product-editor {
-  padding: 16px 20px 40px;
-  max-width: 840px;
+  padding: 0 0 40px;
+  color: var(--text-primary);
 }
-.page-header h1 {
-  margin: 0 0 16px;
-  font-size: 22px;
-}
-.form {
+
+.editor-header {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
 }
-fieldset {
-  border: 1px solid #e6ebf0;
-  border-radius: 6px;
-  padding: 12px 14px;
+
+.editor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.editor-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-menu);
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.editor-back:hover {
+  background: #f9fafb;
+  color: var(--text-primary);
+}
+
+.editor-back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.editor-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.editor-header-right {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-menu);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.btn:hover {
+  background: #f9fafb;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.state-card {
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.editor-body {
+  max-width: 900px;
+}
+
+.editor-body.wide {
+  max-width: 1100px;
+}
+
+.editor-form-card {
+  padding: 24px;
+}
+
+.form-section {
+  margin-bottom: 28px;
+}
+
+.form-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.form-section-title {
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 14px;
+  gap: 16px;
 }
-legend {
-  padding: 0 6px;
-  font-weight: 600;
+
+.type-block {
+  margin-top: 16px;
 }
-label {
+
+.form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   font-size: 13px;
-  color: #444;
+  color: var(--text-primary);
+  min-width: 0;
 }
-label.check {
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group.check {
   flex-direction: row;
   align-items: center;
   gap: 8px;
+  color: var(--text-secondary);
 }
-.category-cascade {
-  grid-column: 1 / -1;
+
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.required {
+  color: var(--red);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-menu);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  background: var(--card-bg);
+  font: inherit;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--blue);
+}
+
+.form-input:read-only {
+  background: #f9fafb;
+  color: var(--text-secondary);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 88px;
+  line-height: 1.6;
+}
+
+.cascade-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px 14px;
+  gap: 16px;
 }
+
 .path-preview {
-  grid-column: 1 / -1;
-  margin: 0;
+  margin: 10px 0 0;
   font-size: 12px;
-  color: #1f4b7a;
+  font-weight: 600;
+  color: var(--blue);
 }
-input,
-select,
-textarea {
-  font: inherit;
-  padding: 6px 8px;
-  border: 1px solid #cfd6df;
-  border-radius: 4px;
-}
+
 .tags {
-  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-menu);
+  background: var(--card-bg);
+  min-height: 40px;
 }
+
 .tag {
-  background: #eef2f6;
-  padding: 2px 6px;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--blue-light);
+  color: var(--blue);
+  padding: 2px 8px;
+  border-radius: 999px;
   font-size: 12px;
 }
+
 .tag button {
   border: none;
   background: none;
   cursor: pointer;
+  color: inherit;
+  padding: 0;
+  line-height: 1;
 }
-.hint {
-  color: #666;
-  font-size: 13px;
-  margin: 0;
-}
-.actions {
-  display: flex;
-  gap: 8px;
-}
-button {
-  padding: 6px 12px;
-  border: 1px solid #cfd6df;
-  border-radius: 4px;
-  background: #fff;
-  cursor: pointer;
+
+.tag-input {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  outline: none;
   font: inherit;
+  font-size: 13px;
+  background: transparent;
+  color: var(--text-primary);
 }
-button.primary {
-  border-color: #1f4b7a;
-  color: #1f4b7a;
+
+.form-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
 }
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+
+.feedback {
+  margin: 20px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-menu);
+  font-size: 13px;
+  border: 1px solid var(--border-color);
+  background: #f9fafb;
+  color: var(--text-secondary);
 }
-.ok {
-  color: #1a7f37;
+
+.feedback.ok {
+  color: var(--green);
+  background: var(--green-light);
+  border-color: transparent;
 }
-.err {
-  color: #a33;
+
+.feedback.err {
+  color: var(--red);
+  background: var(--red-light);
+  border-color: transparent;
 }
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
 @media (max-width: 720px) {
-  .category-cascade {
+  .editor-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .form-grid,
+  .cascade-row {
     grid-template-columns: 1fr;
   }
 }

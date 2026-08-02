@@ -1,0 +1,11 @@
+﻿file=C:\WorkSpace\AI-SEP\ai\runs\RUN-WSC-003\ux-gap-drafts\TASK-WSC-201.md
+header=| id | screenshot / pathKey | dimension | severity | status | evidence |
+gap_row=| GAP-UX-002-01 | 02 / `02-shell-sidebar.png` | 浠ょ墝 | P0 | closed | 鑽夌鎴浘 `ai/runs/RUN-WSC-003/ux-walkthrough/drafts/02-shell-sidebar.png`锛氫晶鏍?`#0b1120` / 232px銆佸搧鐗屽尯 Logo+銆屾帴鍏ョ宸ヤ綔鍙般€嶃€佽彍鍗曞浘鏍?鍦嗚/active銆佷富鍖烘祬鐏般€佷紒涓氫俊鎭崱銆佽鑹茶彍鍗曟繁鑹?active 钃濆己璋冿紱浠ょ墝瑙?`frontend/src/styles/tokens.css`锛埪?.1 鏈€灏忛泦锛?|
+covers_screenshot_02=True
+col_id=True
+col_screenshot=True
+col_dimension=True
+col_severity=True
+col_status=True
+col_evidence=True
+schema_check=PASS

@@ -1,0 +1,12 @@
+E2E_RUN=1
+baseURL=http://127.0.0.1:5173
+frontend=5173 OK (HTTP 200)
+backend_health=8080 UP
+playwright_cli=C:\WorkSpace\AI-SEP\node_modules\.pnpm\@playwright+test@1.62.0\node_modules\@playwright\test\cli.js
+spec=specs/p0-wsc-v1.3.spec.ts
+reportDir=tests/e2e/reports/p0-wsc-v1.3/
+evidenceId=TESTRUN-WSC-E2E-V13
+round=r4-gate
+review=REV-TASK-WSC-304 R5 APPROVE
+e2ePolicy=re-ran full suite (not reuse r3); change was unused-import only but retest preferred
+executedAt=2026-08-02T19:16:43+08:00

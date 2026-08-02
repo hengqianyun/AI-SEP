@@ -1,0 +1,161 @@
+
+Running 10 tests using 1 worker
+
+(node:44452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › specs\p0-wsc-v1.3.spec.ts:167:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1a) 登录/角色切换抽样 + 总览指标 (1.2s)
+  x   2 [chromium] › specs\p0-wsc-v1.3.spec.ts:178:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1b) 目录筛选/详情/上链不回退 (20.6s)
+(node:42728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  3 [chromium] › specs\p0-wsc-v1.3.spec.ts:198:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1c) 编辑入口可达（PROVIDER 新增产品页） (733ms)
+  x   4 [chromium] › specs\p0-wsc-v1.3.spec.ts:206:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 2) v0729 导入强制 partial-success：两计数 + 报告入口 (8.5s)
+(node:36656) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   5 [chromium] › specs\p0-wsc-v1.3.spec.ts:233:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 3) legacy-template → 态④ + ERR_IMPORT_TEMPLATE_UNSUPPORTED (8.7s)
+(node:17016) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  6 [chromium] › specs\p0-wsc-v1.3.spec.ts:260:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 4) OpenAPI 编辑：Swagger 回填 → 保存 → 再开不丢 (1.3s)
+  ok  7 [chromium] › specs\p0-wsc-v1.3.spec.ts:299:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 5) 详情只读：API 产品可见 endpoints / 文档信息 (970ms)
+  x   8 [chromium] › specs\p0-wsc-v1.3.spec.ts:337:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6) 三角色写入口矩阵 ADMIN/PROVIDER/USER（含导入） (20.5s)
+(node:45716) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   9 [chromium] › specs\p0-wsc-v1.3.spec.ts:392:9 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6x) 独立会话写入口矩阵 — PROVIDER (20.6s)
+(node:42308) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 10 [chromium] › specs\p0-wsc-v1.3.spec.ts:392:9 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6x) 独立会话写入口矩阵 — USER (659ms)
+
+
+  1) [chromium] › specs\p0-wsc-v1.3.spec.ts:178:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1b) 目录筛选/详情/上链不回退 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('catalog-browse')
+    Expected: visible
+    Timeout: 20000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 20000ms
+      - waiting for getByTestId('catalog-browse')
+
+
+      179 |     await loginAs(page, 'admin')
+      180 |     await page.goto('/catalog')
+    > 181 |     await expect(page.getByTestId('catalog-browse')).toBeVisible()
+          |                                                      ^
+      182 |     await page.getByLabel('产品类型').selectOption('DATASET')
+      183 |     await page.getByTestId('catalog-search').fill('电子病历')
+      184 |     await page.getByTestId('catalog-search-btn').click()
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:181:54
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-03a08-SC-E2E-V13-1b-目录筛选-详情-上链不回退-chromium\error-context.md
+
+  2) [chromium] › specs\p0-wsc-v1.3.spec.ts:206:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 2) v0729 导入强制 partial-success：两计数 + 报告入口 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#import-modal')
+    Expected: visible
+    Timeout: 8000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 8000ms
+      - waiting for locator('#import-modal')
+
+
+      156 |   await page.goto('/catalog?import=1')
+      157 |   const dialog = page.locator('#import-modal')
+    > 158 |   await expect(dialog).toBeVisible({ timeout: 8_000 })
+          |                        ^
+      159 |   await expect(page.getByRole('heading', { name: '批量导入产品' })).toBeVisible()
+      160 |   return dialog
+      161 | }
+        at openImportDialog (C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:158:24)
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:210:5
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-bcc44-强制-partial-success：两计数-报告入口-chromium\error-context.md
+
+  3) [chromium] › specs\p0-wsc-v1.3.spec.ts:233:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 3) legacy-template → 态④ + ERR_IMPORT_TEMPLATE_UNSUPPORTED 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#import-modal')
+    Expected: visible
+    Timeout: 8000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 8000ms
+      - waiting for locator('#import-modal')
+
+
+      156 |   await page.goto('/catalog?import=1')
+      157 |   const dialog = page.locator('#import-modal')
+    > 158 |   await expect(dialog).toBeVisible({ timeout: 8_000 })
+          |                        ^
+      159 |   await expect(page.getByRole('heading', { name: '批量导入产品' })).toBeVisible()
+      160 |   return dialog
+      161 | }
+        at openImportDialog (C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:158:24)
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:240:5
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-23d58-IMPORT-TEMPLATE-UNSUPPORTED-chromium\error-context.md
+
+  4) [chromium] › specs\p0-wsc-v1.3.spec.ts:337:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6) 三角色写入口矩阵 ADMIN/PROVIDER/USER（含导入） 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('catalog-open-import')
+    Expected: visible
+    Timeout: 20000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 20000ms
+      - waiting for getByTestId('catalog-open-import')
+
+
+      345 |     })
+      346 |     await page.goto('/catalog')
+    > 347 |     await expect(page.getByTestId('catalog-open-import')).toBeVisible()
+          |                                                           ^
+      348 |     await page.goto('/catalog?import=1')
+      349 |     await expect(page.locator('#import-modal')).toBeVisible({ timeout: 8_000 })
+      350 |     await page.locator('#import-modal-cancel').click()
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:347:59
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-99cdf-矩阵-ADMIN-PROVIDER-USER（含导入）-chromium\error-context.md
+
+  5) [chromium] › specs\p0-wsc-v1.3.spec.ts:392:9 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6x) 独立会话写入口矩阵 — PROVIDER 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('catalog-open-import')
+    Expected: visible
+    Timeout: 20000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 20000ms
+      - waiting for getByTestId('catalog-open-import')
+
+
+      396 |       if (matrix.importEntry) {
+      397 |         await page.goto('/catalog')
+    > 398 |         await expect(page.getByTestId('catalog-open-import')).toBeVisible()
+          |                                                               ^
+      399 |       } else {
+      400 |         await page.goto('/catalog')
+      401 |         await expect(page.getByTestId('catalog-open-import')).toHaveCount(0)
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:398:63
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-2de77-V13-6x-独立会话写入口矩阵-—-PROVIDER-chromium\error-context.md
+
+  5 failed
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:178:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1b) 目录筛选/详情/上链不回退 
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:206:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 2) v0729 导入强制 partial-success：两计数 + 报告入口 
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:233:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 3) legacy-template → 态④ + ERR_IMPORT_TEMPLATE_UNSUPPORTED 
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:337:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6) 三角色写入口矩阵 ADMIN/PROVIDER/USER（含导入） 
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:392:9 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6x) 独立会话写入口矩阵 — PROVIDER 
+  5 passed (1.5m)

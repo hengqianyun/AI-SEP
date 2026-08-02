@@ -1,0 +1,5 @@
+PASSED — tester-wsc-302
+vitest: 2 files / 16 tests EXIT=0
+typecheck: EXIT=0
+fixture + critical field assertions: present
+TESTRUN: planning/tasks/TESTRUN-TASK-WSC-302.md (EVID-TASK-WSC-302-1)

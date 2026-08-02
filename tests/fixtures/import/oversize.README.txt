@@ -1,0 +1,12 @@
+# oversize fixture
+
+本目录的 oversized 场景由 `ProductImportIntegrationTest` 运行时生成（>10MB 字节数组），
+映射请求级错误 `ERR_IMPORT_FILE_TOO_LARGE`，非行级结果态。
+
+也可本地生成：
+
+```bash
+# PowerShell
+$bytes = New-Object byte[] (10MB + 1)
+[System.IO.File]::WriteAllBytes("tests/fixtures/import/oversize.bin", $bytes)
+```

@@ -1,0 +1,20 @@
+﻿tester-wsc-305 manual /catalog sample
+executedAt: 2026-08-02T19:33:42+08:00
+url: http://127.0.0.1:5173/catalog
+role: ADMIN (已登录演示管理员)
+env: 5173=200, 8080 health UP
+
+checks:
+1) list pane [data-testid=catalog-list]
+   - overflowY=auto; scrollHeight=1205 > clientHeight=461 → canScroll=true (首屏已可滚)
+   - subtitle 初始: 已加载 20 / 共 35 条; rows=20
+2) no pager
+   - .el-pagination/.pagination count=0
+   - body 无「第 N 页/上一页/下一页」文案
+3) optional bottom loadMore
+   - scrollTop=scrollHeight + dispatch scroll
+   - 20 → 30 / 共 35 (rows=30) within first poll
+   - 再次触底 → 35 / 共 35; endText=已加载全部; hasPager=false
+4) screenshot: page-2026-08-02T11-33-42-966Z.png (Temp); 列表可见滚动条与「已加载全部」
+
+result: PASSED

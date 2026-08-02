@@ -50,21 +50,28 @@ async function copyFull() {
   font-size: 13px;
 }
 .label {
-  color: #666;
+  color: var(--text-secondary);
   min-width: 7em;
 }
 .value {
   font-family: ui-monospace, Consolas, monospace;
-  background: #f0f2f5;
+  background: #f9fafb;
+  border: 1px solid var(--border-color);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  word-break: break-all;
 }
 .copy-btn {
-  border: 1px solid #c5ccd6;
-  background: #fff;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
   padding: 2px 10px;
   cursor: pointer;
   font-size: 12px;
+  color: var(--text-primary);
+}
+.copy-btn:hover {
+  background: #f9fafb;
 }
 </style>

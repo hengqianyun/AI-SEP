@@ -1,0 +1,135 @@
+
+Running 10 tests using 1 worker
+
+(node:43708) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › specs\p0-wsc-v1.3.spec.ts:173:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1a) 登录/角色切换抽样 + 总览指标 (1.1s)
+  ok  2 [chromium] › specs\p0-wsc-v1.3.spec.ts:184:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1b) 目录筛选/详情/上链不回退 (1.1s)
+  ok  3 [chromium] › specs\p0-wsc-v1.3.spec.ts:204:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1c) 编辑入口可达（PROVIDER 新增产品页） (506ms)
+  x   4 [chromium] › specs\p0-wsc-v1.3.spec.ts:212:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 2) v0729 导入强制 partial-success：两计数 + 报告入口 (20.9s)
+(node:38756) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   5 [chromium] › specs\p0-wsc-v1.3.spec.ts:239:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 3) legacy-template → 态④ + ERR_IMPORT_TEMPLATE_UNSUPPORTED (20.9s)
+(node:36912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   6 [chromium] › specs\p0-wsc-v1.3.spec.ts:266:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 4) OpenAPI 编辑：Swagger 回填 → 保存 → 再开不丢 (21.0s)
+(node:4956) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   7 [chromium] › specs\p0-wsc-v1.3.spec.ts:305:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 5) 详情只读：API 产品可见 endpoints / 文档信息 (21.0s)
+(node:26296) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  8 [chromium] › specs\p0-wsc-v1.3.spec.ts:343:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6) 三角色写入口矩阵 ADMIN/PROVIDER/USER（含导入） (2.1s)
+  ok  9 [chromium] › specs\p0-wsc-v1.3.spec.ts:398:9 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6x) 独立会话写入口矩阵 — PROVIDER (584ms)
+  ok 10 [chromium] › specs\p0-wsc-v1.3.spec.ts:398:9 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6x) 独立会话写入口矩阵 — USER (510ms)
+
+
+  1) [chromium] › specs\p0-wsc-v1.3.spec.ts:212:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 2) v0729 导入强制 partial-success：两计数 + 报告入口 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('#import-step-result')
+    Expected: "partial_success"
+    Received: "all_row_failure"
+    Timeout:  20000ms
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 20000ms
+      - waiting for locator('#import-step-result')
+        43 × locator resolved to <section data-v-34f7a360="" id="import-step-result" data-testid="import-result" data-result-state="all_row_failure" class="result-panel state-all_row_failure">…</section>
+           - unexpected value "all_row_failure"
+
+
+      224 |
+      225 |     await expect(page.locator('#import-step-result')).toBeVisible({ timeout: 30_000 })
+    > 226 |     await expect(page.locator('#import-step-result')).toHaveAttribute(
+          |                                                       ^
+      227 |       'data-result-state',
+      228 |       'partial_success',
+      229 |     )
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:226:55
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-bcc44-强制-partial-success：两计数-报告入口-chromium\error-context.md
+
+  2) [chromium] › specs\p0-wsc-v1.3.spec.ts:239:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 3) legacy-template → 态④ + ERR_IMPORT_TEMPLATE_UNSUPPORTED 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('#import-step-result')
+    Expected: "file_rejected"
+    Received: "all_success"
+    Timeout:  20000ms
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 20000ms
+      - waiting for locator('#import-step-result')
+        43 × locator resolved to <section data-v-34f7a360="" id="import-step-result" data-testid="import-result" data-result-state="all_success" class="result-panel state-all_success">…</section>
+           - unexpected value "all_success"
+
+
+      250 |
+      251 |     await expect(page.locator('#import-step-result')).toBeVisible({ timeout: 30_000 })
+    > 252 |     await expect(page.locator('#import-step-result')).toHaveAttribute(
+          |                                                       ^
+      253 |       'data-result-state',
+      254 |       'file_rejected',
+      255 |     )
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:252:55
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-23d58-IMPORT-TEMPLATE-UNSUPPORTED-chromium\error-context.md
+
+  3) [chromium] › specs\p0-wsc-v1.3.spec.ts:266:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 4) OpenAPI 编辑：Swagger 回填 → 保存 → 再开不丢 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/catalog\/products\/prod-gen-/
+    Received string:  "http://127.0.0.1:5173/catalog/products/new"
+    Timeout: 20000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 20000ms
+        42 × locator resolved to <html lang="zh-CN">…</html>
+           - unexpected value "http://127.0.0.1:5173/catalog/products/new"
+
+
+      290 |     const submit = page.getByTestId('product-editor').locator('button[type="submit"]')
+      291 |     await submit.click()
+    > 292 |     await expect(page).toHaveURL(/\/catalog\/products\/prod-gen-/, { timeout: 20_000 })
+          |                        ^
+      293 |     const productId = page.url().split('/').pop()!
+      294 |
+      295 |     await page.goto(`/catalog/products/${productId}/edit`)
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:292:24
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-5639e-I-编辑：Swagger-回填-→-保存-→-再开不丢-chromium\error-context.md
+
+  4) [chromium] › specs\p0-wsc-v1.3.spec.ts:305:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 5) 详情只读：API 产品可见 endpoints / 文档信息 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/catalog\/products\/prod-gen-/
+    Received string:  "http://127.0.0.1:5173/catalog/products/new"
+    Timeout: 20000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 20000ms
+        42 × locator resolved to <html lang="zh-CN">…</html>
+           - unexpected value "http://127.0.0.1:5173/catalog/products/new"
+
+
+      326 |
+      327 |     await page.getByTestId('product-editor').locator('button[type="submit"]').click()
+    > 328 |     await expect(page).toHaveURL(/\/catalog\/products\/prod-gen-/, { timeout: 20_000 })
+          |                        ^
+      329 |
+      330 |     await expect(page.getByTestId('product-detail')).toBeVisible({ timeout: 15_000 })
+      331 |     await expect(page.getByTestId('type-specific')).toBeVisible()
+        at C:\WorkSpace\AI-SEP\tests\e2e\specs\p0-wsc-v1.3.spec.ts:328:24
+
+    Error Context: reports\test-results-v1.3\p0-wsc-v1.3-WSC-V1-3-E2E-P-1a387-情只读：API-产品可见-endpoints-文档信息-chromium\error-context.md
+
+  4 failed
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:212:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 2) v0729 导入强制 partial-success：两计数 + 报告入口 
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:239:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 3) legacy-template → 态④ + ERR_IMPORT_TEMPLATE_UNSUPPORTED 
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:266:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 4) OpenAPI 编辑：Swagger 回填 → 保存 → 再开不丢 
+    [chromium] › specs\p0-wsc-v1.3.spec.ts:305:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 5) 详情只读：API 产品可见 endpoints / 文档信息 
+  6 passed (1.6m)

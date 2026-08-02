@@ -1,0 +1,181 @@
+0	产品基础信息
+1	数据描述：共用
+2	数据描述A：数据接口
+3	数据描述B：数据集
+4	数据描述C：数据报告或其他
+5	产品名称（必填）
+6	产品类型（必填）
+7	行业分类（必填）
+8	产品简介（必填）
+9	交付方式
+10	时间范围
+11	地域范围
+12	更新频率
+13	接口定义
+14	字段描述
+15	数据样例
+16	数据规模
+17	数据形态
+18	数据内容描述
+19	产品的中文名称
+20	[数据接口,数据集,数据报告,其他数据产品]
+21	依据GB/T 4754—2017的门类代码
+22	产品简介信息
+23	[API、文件传输、数据沙箱、隐私保护计算]
+24	数据集所涉及数据的起始日期和结束日期。格式为 YYYY/MM/DD - YYYY/MM/DD，若不填写结束日期（如 YYYY/MM/DD - ），则表示保持更新到最新。
+25	[国际、全国、省级、市级、区县级、区县级以下]
+26	更新频率，数据产品的更新频率。可选值[实时、每日、每周、每月、每年、按需、不更新]
+27	接口参数（包括输入参数、输出参数），采用兼容 OpenAPI 的嵌套结构。
+28	包括3个内容，中间用Tab分隔（字段名、字段类型、说明）
+
+示例：
+字段名 描述 字段类型
+id 编码 string
+name 名称 string
+score 评分 string
+29	任意文本，可以是类JSON体
+30	任意文字，可以是xx条、xxGB等
+31	图片、文本、视频、音频、表格、其他
+32	任意文本，描述产品内容
+33	接口类产品示例
+34	数据接口
+35	建筑业
+36	企业安全信息核验接口，依托企业主体数据，支持统一社会信用代码查询，快速识别经营异常、失信等风险标签，输出风险等级，高效满足业务准入安全筛查需求。
+37	API
+38	1990/01/01 -
+39	全国
+40	每日
+41	openapi: 3.0.3
+info:
+  title: 企业安全信息核验接口
+  description: 企业主体安全信息实时核验服务
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/v1
+paths:
+  /enterprise/security/verify:
+    post:
+      summary: 企业安全信息核验
+      description: 根据统一社会信用代码核验企业安全风险相关信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 鉴权失败
+        '403':
+          description: 接口权限不足
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  security:
+    - ApiKeyAuth: []
+  schemas:
+    VerifyRequest:
+      type: object
+      required:
+        - uscc
+      properties:
+        uscc:
+          type: string
+          description: 统一社会信用代码
+          example: 91310101XXXXXXXXXX
+        name:
+          type: string
+          description: 企业名称（可选，辅助校验）
+          example: XX科技有限公司
+    VerifyResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 返回码 0成功
+          example: 0
+        msg:
+          type: string
+          description: 返回信息
+          example: success
+        data:
+          $ref: '#/components/schemas/EnterpriseSecurityInfo'
+    EnterpriseSecurityInfo:
+      type: object
+      properties:
+        uscc:
+          type: string
+          description: 统一社会信用代码
+        enterpriseName:
+          type: string
+          description: 企业名称
+        riskLevel:
+          type: string
+          enum: [SAFE, WARNING, DANGER]
+          description: 风险等级 安全/预警/高危
+        riskTags:
+          type: array
+          items:
+            type: string
+          description: 风险标签列表
+          example: ["行政处罚","经营异常"]
+        valid:
+          type: boolean
+          description: 企业主体是否有效
+42	msg string 返回提示信息
+data object 核验结果数据
+uscc string 统一社会信用代码
+enterpriseName string 企业名称
+43	{
+    "code": 0,
+    "msg": "success",
+    "data": {
+        "uscc": "91310101XXXXXXXXXX",
+        "enterpriseName": "XX贸易公司",
+        "riskLevel": "DANGER",
+        "riskTags": ["失信被执行人", "严重违法失信"],
+        "valid": false
+    }
+}
+44	数据集类产品示例
+45	数据集
+46	交通运输、仓储和邮政业
+47	公交站点信息数据集，汇聚全域公交站点基础数据，包含站点名称、坐标、所属线路等信息，支持批量调用查询，支撑交通规划、出行服务、空间分析等场景应用。
+48	文件传输
+49	2025/01/01 - 2026/01/01
+50	省级
+51	不更新
+52	1GB
+53	表格
+54	siteId string 站点唯一编码
+siteName string 公交站点名称
+longitude double 经度坐标
+latitude double 纬度坐标
+lines array [string] 途经公交线路编码列表
+district string 所属行政区
+55	 {
+            "siteId": "BS00123",
+            "siteName": "人民广场",
+            "longitude": 121.467,
+            "latitude": 31.231,
+            "lines": ["49路","108路"],
+            "district": "黄浦区"
+        }
+56	数据报告类
+57	数据报告
+58	信息传输、软件和信息技术服务业
+59	AI 模型行业研究报告数据集，汇总大模型市场规模、竞争格局、技术路线、企业动态等研究内容，提供标准化结构化报告数据，支撑产业分析、投资研判与战略决策。
+60	2026/08/01 -
+61	市级
+62	本报告聚焦国内 AI 大模型产业发展现状，涵盖市场规模测算、主流模型技术路线对比、产业链算力供给、商业化落地案例、行业竞争格局及相关政策解读，客观分析产业机遇与潜在风险，为企业战略规划、产业研判、投资决策提供详实的数据支撑与专业参考依据。

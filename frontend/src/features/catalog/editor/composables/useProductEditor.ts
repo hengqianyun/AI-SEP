@@ -4,15 +4,53 @@ import {
   getProduct,
   listCategories,
   updateProduct,
+  type ApiEndpoint,
   type Category,
   type ProductType,
   type ProductWrite,
+  type UpdateFrequency,
 } from '@/api/catalog'
+import {
+  OpenApiParseError,
+  assertSwaggerParsable,
+  createEmptyEndpoint,
+  parseOpenApiEndpoints,
+} from '../utils/parseOpenApi'
 
 export type EditorMode = 'create' | 'edit'
 export type FormState = 'idle' | 'loading' | 'ready' | 'submitting' | 'success' | 'error'
 
 const CODE_RE = /^[A-Z0-9]+-[A-Z0-9]+-[0-9]{4,}$/
+
+export const UPDATE_FREQUENCY_OPTIONS: { value: UpdateFrequency | ''; label: string }[] = [
+  { value: '', label: '（未选）' },
+  { value: 'REALTIME', label: '实时' },
+  { value: 'DAILY', label: '每日' },
+  { value: 'WEEKLY', label: '每周' },
+  { value: 'MONTHLY', label: '每月' },
+  { value: 'YEARLY', label: '每年' },
+  { value: 'ON_DEMAND', label: '按需' },
+  { value: 'NO_UPDATE', label: '不更新' },
+]
+
+export const DATA_FORM_OPTIONS = ['图片', '文本', '视频', '音频', '表格', '其他'] as const
+
+function deriveLegacyEndpoint(endpoints: ApiEndpoint[]): string {
+  const first = endpoints[0]
+  if (!first) return ''
+  const method = (first.method || '').toUpperCase()
+  const path = first.path || ''
+  return [method, path].filter(Boolean).join(' ')
+}
+
+function cloneEndpoints(eps: ApiEndpoint[]): ApiEndpoint[] {
+  return eps.map((e) => ({
+    ...e,
+    id: e.id || createEmptyEndpoint().id,
+    parameters: e.parameters ? e.parameters.map((p) => ({ ...p })) : [],
+    responses: e.responses ? e.responses.map((r) => ({ ...r })) : [],
+  }))
+}
 
 export function useProductEditor(mode: EditorMode) {
   const state = ref<FormState>('idle')
@@ -28,7 +66,7 @@ export function useProductEditor(mode: EditorMode) {
     businessCategory: '',
     businessSubCategory: '',
     dataSource: '',
-    updateFrequency: '',
+    updateFrequency: '' as UpdateFrequency | string,
     deliveryMethod: '',
     involvesPersonalInfo: false,
     involvesPublicData: false,
@@ -41,12 +79,26 @@ export function useProductEditor(mode: EditorMode) {
     scenario: '',
     tags: [] as string[],
     tagInput: '',
-    datasetRecordCount: '',
-    reportPageCount: '',
-    apiEndpoint: '',
+    timeRange: '',
+    regionScope: '',
+    swaggerFileContent: '',
+    endpoints: [] as ApiEndpoint[],
+    selectedEndpointId: '',
+    apiFieldDescription: '',
+    apiDataSample: '',
+    apiEndpointLegacy: '',
+    dataScale: '',
+    dataForm: '',
+    datasetFieldDescription: '',
+    datasetDataSample: '',
+    contentDescription: '',
   })
 
   const isOther = computed(() => form.productType === 'OTHER')
+  const isApi = computed(() => form.productType === 'API')
+  const isDataset = computed(() => form.productType === 'DATASET')
+  const isReport = computed(() => form.productType === 'REPORT')
+
   const l1Categories = computed(() => categories.value.filter((c) => c.level === 'L1'))
   const l2Categories = computed(() =>
     categories.value.filter((c) => c.level === 'L2' && c.parentId === form.l1CategoryId),
@@ -86,6 +138,64 @@ export function useProductEditor(mode: EditorMode) {
     form.l1CategoryId = String(l2?.parentId || '')
   }
 
+  function resetTypeSpecific() {
+    form.timeRange = ''
+    form.regionScope = ''
+    form.swaggerFileContent = ''
+    form.endpoints = []
+    form.selectedEndpointId = ''
+    form.apiFieldDescription = ''
+    form.apiDataSample = ''
+    form.apiEndpointLegacy = ''
+    form.dataScale = ''
+    form.dataForm = ''
+    form.datasetFieldDescription = ''
+    form.datasetDataSample = ''
+    form.contentDescription = ''
+  }
+
+  function loadTypeSpecific(ts?: {
+    api?: Record<string, unknown>
+    dataset?: Record<string, unknown>
+    report?: Record<string, unknown>
+    other?: Record<string, unknown>
+  }) {
+    resetTypeSpecific()
+    if (!ts) return
+    if (form.productType === 'API' && ts.api) {
+      const api = ts.api
+      form.swaggerFileContent = String(api.swaggerFileContent ?? '')
+      form.apiFieldDescription = String(api.fieldDescription ?? '')
+      form.apiDataSample = String(api.dataSample ?? '')
+      form.timeRange = String(api.timeRange ?? '')
+      form.regionScope = String(api.regionScope ?? '')
+      form.apiEndpointLegacy = String(api.endpoint ?? '')
+      const eps = Array.isArray(api.endpoints) ? (api.endpoints as ApiEndpoint[]) : []
+      form.endpoints = cloneEndpoints(eps)
+      form.selectedEndpointId = form.endpoints[0]?.id || ''
+    } else if (form.productType === 'DATASET' && ts.dataset) {
+      const d = ts.dataset
+      form.timeRange = String(d.timeRange ?? '')
+      form.regionScope = String(d.regionScope ?? '')
+      form.dataScale = String(d.dataScale ?? (d.recordCount != null ? String(d.recordCount) : ''))
+      form.dataForm = String(d.dataForm ?? '')
+      form.datasetFieldDescription = String(d.fieldDescription ?? '')
+      form.datasetDataSample = String(d.dataSample ?? '')
+    } else if (form.productType === 'REPORT' && ts.report) {
+      const r = ts.report
+      form.timeRange = String(r.timeRange ?? '')
+      form.regionScope = String(r.regionScope ?? '')
+      form.contentDescription = String(
+        r.contentDescription ?? (r.pageCount != null ? `页数：${r.pageCount}` : ''),
+      )
+    } else if (form.productType === 'OTHER' && ts.other) {
+      const o = ts.other
+      form.timeRange = String(o.timeRange ?? '')
+      form.regionScope = String(o.regionScope ?? '')
+      form.contentDescription = String(o.contentDescription ?? '')
+    }
+  }
+
   async function init(productId?: string) {
     state.value = 'loading'
     feedback.value = ''
@@ -101,7 +211,6 @@ export function useProductEditor(mode: EditorMode) {
         if (p.l3CategoryId) {
           resolveParentsFromL3(p.l3CategoryId)
         } else if (p.l2CategoryId) {
-          // 过渡：仅有 L2 时预填空间/行业，须再选手类
           form.l2CategoryId = p.l2CategoryId
           const l2 = categories.value.find((c) => c.id === p.l2CategoryId)
           form.l1CategoryId = String(l2?.parentId || '')
@@ -122,10 +231,7 @@ export function useProductEditor(mode: EditorMode) {
         form.summary = String(p.summary || '')
         form.scenario = String(p.scenario || '')
         form.tags = [...(p.tags || [])]
-        const ts = (p as { typeSpecific?: Record<string, Record<string, unknown>> }).typeSpecific
-        form.datasetRecordCount = String(ts?.dataset?.recordCount ?? '')
-        form.reportPageCount = String(ts?.report?.pageCount ?? '')
-        form.apiEndpoint = String(ts?.api?.endpoint ?? '')
+        loadTypeSpecific(p.typeSpecific as Parameters<typeof loadTypeSpecific>[0])
       }
       state.value = 'ready'
     } catch (e) {
@@ -152,6 +258,42 @@ export function useProductEditor(mode: EditorMode) {
     }
   }
 
+  function addEndpoint() {
+    const ep = createEmptyEndpoint()
+    form.endpoints.push(ep)
+    form.selectedEndpointId = ep.id || ''
+  }
+
+  function removeEndpoint(id: string) {
+    form.endpoints = form.endpoints.filter((e) => e.id !== id)
+    if (form.selectedEndpointId === id) {
+      form.selectedEndpointId = form.endpoints[0]?.id || ''
+    }
+  }
+
+  /** Swagger 导入回填：保留原文至 swaggerFileContent，替换 endpoints */
+  function applySwaggerFill(text: string): boolean {
+    const trimmed = text.trim()
+    if (!trimmed) {
+      feedback.value = '请粘贴或上传 OpenAPI/Swagger 文本'
+      state.value = 'error'
+      return false
+    }
+    try {
+      const parsed = parseOpenApiEndpoints(trimmed)
+      form.swaggerFileContent = trimmed
+      form.endpoints = parsed
+      form.selectedEndpointId = parsed[0]?.id || ''
+      if (state.value === 'error') state.value = 'ready'
+      feedback.value = ''
+      return true
+    } catch (e) {
+      feedback.value = e instanceof OpenApiParseError ? e.message : 'Swagger 解析失败'
+      state.value = 'error'
+      return false
+    }
+  }
+
   function buildBody(): ProductWrite | null {
     if (!form.productName.trim() || !form.productCode.trim()) {
       feedback.value = '请填写产品名称与产品编码'
@@ -168,6 +310,20 @@ export function useProductEditor(mode: EditorMode) {
       state.value = 'error'
       return null
     }
+
+    if (form.productType === 'API' && form.swaggerFileContent.trim()) {
+      try {
+        assertSwaggerParsable(form.swaggerFileContent)
+      } catch (e) {
+        feedback.value =
+          e instanceof OpenApiParseError
+            ? e.message
+            : 'Swagger 原文解析失败，请修正或清空后再提交'
+        state.value = 'error'
+        return null
+      }
+    }
+
     const body: ProductWrite = {
       productCode: form.productCode.trim(),
       productName: form.productName.trim(),
@@ -190,19 +346,57 @@ export function useProductEditor(mode: EditorMode) {
       scenario: form.scenario || undefined,
       tags: [...form.tags],
     }
-    if (form.productType === 'OTHER') {
-      // OQ-004: 不携带 typeSpecific
+
+    if (form.productType === 'API') {
+      const legacy =
+        form.apiEndpointLegacy.trim() || deriveLegacyEndpoint(form.endpoints) || undefined
+      body.typeSpecific = {
+        api: {
+          swaggerFileContent: form.swaggerFileContent || undefined,
+          endpoints: form.endpoints.map((e) => ({
+            id: e.id,
+            method: e.method,
+            path: e.path,
+            summary: e.summary,
+            description: e.description,
+            parameters: e.parameters?.map((p) => ({ ...p })),
+            responses: e.responses?.map((r) => ({ ...r })),
+            requestBodySchema: e.requestBodySchema,
+            responseBodySchema: e.responseBodySchema,
+          })),
+          fieldDescription: form.apiFieldDescription || undefined,
+          dataSample: form.apiDataSample || undefined,
+          timeRange: form.timeRange || undefined,
+          regionScope: form.regionScope || undefined,
+          endpoint: legacy,
+        },
+      }
     } else if (form.productType === 'DATASET') {
       body.typeSpecific = {
-        dataset: { recordCount: Number(form.datasetRecordCount) || 0 },
+        dataset: {
+          timeRange: form.timeRange || undefined,
+          regionScope: form.regionScope || undefined,
+          dataScale: form.dataScale || undefined,
+          dataForm: form.dataForm || undefined,
+          fieldDescription: form.datasetFieldDescription || undefined,
+          dataSample: form.datasetDataSample || undefined,
+        },
       }
     } else if (form.productType === 'REPORT') {
       body.typeSpecific = {
-        report: { pageCount: Number(form.reportPageCount) || 0 },
+        report: {
+          timeRange: form.timeRange || undefined,
+          regionScope: form.regionScope || undefined,
+          contentDescription: form.contentDescription || undefined,
+        },
       }
-    } else if (form.productType === 'API') {
+    } else if (form.productType === 'OTHER') {
       body.typeSpecific = {
-        api: { endpoint: form.apiEndpoint || '' },
+        other: {
+          timeRange: form.timeRange || undefined,
+          regionScope: form.regionScope || undefined,
+          contentDescription: form.contentDescription || undefined,
+        },
       }
     }
     return body
@@ -231,6 +425,9 @@ export function useProductEditor(mode: EditorMode) {
     feedback,
     form,
     isOther,
+    isApi,
+    isDataset,
+    isReport,
     l1Categories,
     l2Categories,
     l3Categories,
@@ -241,6 +438,12 @@ export function useProductEditor(mode: EditorMode) {
     addTag,
     removeTag,
     onTagKeydown,
+    addEndpoint,
+    removeEndpoint,
+    applySwaggerFill,
+    buildBody,
     submit,
+    UPDATE_FREQUENCY_OPTIONS,
+    DATA_FORM_OPTIONS,
   }
 }

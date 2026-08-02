@@ -1,0 +1,5 @@
+SKIPPED: browse page mount / catalog entry E2E not executable in this task.
+denyModify includes frontend/src/features/catalog/browse/**
+REV FIND-WSC-107-R1-001 (P2): CatalogBrowsePage has no ImportDialog mount.
+FE unit covers close->idle/onClosed only (useProductImport.spec.ts).
+Not marked PASS for browse entry reachability.

@@ -1,0 +1,4 @@
+﻿layer=e2e
+scope=tests/e2e
+result=SKIPPED
+reason=不在 TASK-WSC-202 testScope（本任务为 overview/auth views 视觉收敛 + typecheck/vitest + 草稿/差距可检；E2E 归后续走查/正式门禁）

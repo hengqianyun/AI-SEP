@@ -1,0 +1,26 @@
+# RUN-WSC-003 批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
+
+approvals:
+  - id: APPR-WSC-RELEASE-003
+    runId: RUN-WSC-003
+    planId: PLAN-WSC-3.1
+    snapshotId: SNAP-WSC-003
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-08-02T16:50:45+08:00
+    source: chat
+    utterance: 批准发布
+    scope: release-package
+    basedOn:
+      - planning/approved/PLAN-WSC-3.1.md
+      - planning/reviews/integration/REV-WSC-INTEGRATION-003.md
+      - planning/tasks/TESTRUN-TASK-WSC-206.md
+      - ai/runs/RUN-WSC-003/ux-walkthrough/WALKTHROUGH.md
+      - ai/runs/RUN-WSC-003/ux-gap-checklist.md
+    notes: |
+      policies.release.requireHumanApproval=true；approverIdentity=maintainer。
+      技术门禁（201..206 VERIFIED、走查签字、E2E V12-UX、集成审查、契约未变）已齐后的 UX 发布包人类批准。
+      功能基线：SNAP-WSC-002 / wsc-contracts@2.0.0（只读）。
+      接受保留：GAP-UX-006-01 载体 B（P1）。

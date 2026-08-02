@@ -1,0 +1,47 @@
+runId: RUN-WSC-003
+currentNode: COMPLETED
+round: 2
+status: COMPLETED
+blockedBy: []
+activeWave: null
+activeTaskIds: []
+verifiedTaskIds:
+  - TASK-WSC-201
+  - TASK-WSC-202
+  - TASK-WSC-203
+  - TASK-WSC-204
+  - TASK-WSC-205
+  - TASK-WSC-206
+activeSnapshotId: SNAP-WSC-003
+activePlanId: PLAN-WSC-3.1
+candidatePlanPath: planning/proposals/PLAN-WSC-3.1.md
+approvedPlanPath: planning/approved/PLAN-WSC-3.1.md
+prdPath: product/prd/wsc-v1.2-ux.md
+prototypePath: design/prototypes/wsc-v1.1/index.html
+reviewPath: planning/reviews/wsc-3.1/round-2/
+integrationReviewPath: planning/reviews/integration/REV-WSC-INTEGRATION-003.md
+approvalId: APPR-WSC-RELEASE-003
+approvalsPath: ai/runs/RUN-WSC-003/approvals.yaml
+basedOnRun: RUN-WSC-002
+e2eEvidenceId: TESTRUN-WSC-E2E-V12-UX
+e2eReport: planning/tasks/TESTRUN-TASK-WSC-206.md
+walkthroughPath: ai/runs/RUN-WSC-003/ux-walkthrough/WALKTHROUGH.md
+functionalBaseline:
+  snapshotId: SNAP-WSC-002
+  planId: PLAN-WSC-2.2
+  contracts: wsc-contracts@2.0.0
+completedNodes:
+  - PRD_ANALYSIS
+  - REQUIREMENT_REVIEW
+  - PLAN_DRAFT
+  - PLAN_REVIEW
+  - PLAN_APPROVED
+  - TASK_DISPATCH
+  - DEVELOPMENT
+  - CODE_REVIEW
+  - TESTING
+  - INTEGRATION
+  - RELEASE_REVIEW
+  - COMPLETED
+nextAction: null
+updatedAt: 2026-08-02T16:50:50+08:00

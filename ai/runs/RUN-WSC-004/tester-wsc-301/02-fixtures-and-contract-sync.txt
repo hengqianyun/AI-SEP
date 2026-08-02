@@ -1,0 +1,21 @@
+﻿VERSION=2.1.0
+True full-success.csv
+True partial-success.csv
+True all-fail.csv
+True legacy-template.csv
+True format-invalid.bin
+True openapi-shared-import.csv
+True openapi-shared-minimal.yaml
+True openapi-bad-text.csv
+True product-import-template-v0729.xlsx
+True oversize.README.txt
+codes.yaml hits=4
+openapi.yaml hits=4
+state-matrix.md hits=2
+requestLevel block:
+  requestLevel:
+    - ERR_IMPORT_FILE_TOO_LARGE
+    - ERR_IMPORT_FORMAT_INVALID
+    - ERR_IMPORT_TEMPLATE_UNSUPPORTED
+  rowLevelInReportOnly: [ERR_IMPORT_ROW_INVALID]
+  reportTtlHours: 24

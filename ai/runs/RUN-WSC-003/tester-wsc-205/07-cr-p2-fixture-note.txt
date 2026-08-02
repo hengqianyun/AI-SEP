@@ -1,0 +1,4 @@
+﻿CR FIND-WSC-205-R1-001 (P2): draft screenshots 08/09/10 are FIXTURE HTML viewport (badge FIXTURE · 脱敏演示数据 · TASK-WSC-205), not live Vue session detail/editor/chain.
+Tester did NOT start app / pixel-compare against real ProductDetailPage / ProductEditorPage / ChainPage shell.
+file_exists+schema => PASS; pixel-match-real-shell => PARTIAL/SKIPPED (no live contrast).
+Deviation note: not completely-unlike judgment deferred; fixture alone must not fake visual pixel PASS.

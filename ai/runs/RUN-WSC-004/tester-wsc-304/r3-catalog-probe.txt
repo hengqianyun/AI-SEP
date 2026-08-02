@@ -1,0 +1,16 @@
+{
+  "url": "http://127.0.0.1:5173/catalog?import=1",
+  "hasBrowse": 1,
+  "hasImportBtn": 1,
+  "hasModal": 1,
+  "pageerrors": [],
+  "consoleLogs": [
+    "[debug] [vite] connecting...",
+    "[debug] [vite] connected.",
+    "[error] Failed to load resource: the server responded with a status of 401 ()",
+    "[debug] [vite] connecting...",
+    "[debug] [vite] connected.",
+    "[debug] [vite] connecting...",
+    "[debug] [vite] connected."
+  ]
+}

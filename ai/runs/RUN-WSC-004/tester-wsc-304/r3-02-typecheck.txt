@@ -1,0 +1,5 @@
+command: pnpm exec vue-tsc --noEmit -p tsconfig.json --pretty false
+cwd: frontend
+EXIT=2
+error: src/features/catalog/import/composables/useProductImport.ts(12,3): error TS6133: 'IMPORT_REQUEST_ERROR_HINTS' is declared but its value is never read.
+completedAt=2026-08-02T19:12:00+08:00

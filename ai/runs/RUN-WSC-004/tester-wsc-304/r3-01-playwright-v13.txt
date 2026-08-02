@@ -1,0 +1,17 @@
+
+Running 10 tests using 1 worker
+
+(node:39968) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › specs\p0-wsc-v1.3.spec.ts:167:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1a) 登录/角色切换抽样 + 总览指标 (979ms)
+  ok  2 [chromium] › specs\p0-wsc-v1.3.spec.ts:178:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1b) 目录筛选/详情/上链不回退 (2.3s)
+  ok  3 [chromium] › specs\p0-wsc-v1.3.spec.ts:198:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 1c) 编辑入口可达（PROVIDER 新增产品页） (756ms)
+  ok  4 [chromium] › specs\p0-wsc-v1.3.spec.ts:206:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 2) v0729 导入强制 partial-success：两计数 + 报告入口 (917ms)
+  ok  5 [chromium] › specs\p0-wsc-v1.3.spec.ts:233:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 3) legacy-template → 态④ + ERR_IMPORT_TEMPLATE_UNSUPPORTED (774ms)
+  ok  6 [chromium] › specs\p0-wsc-v1.3.spec.ts:260:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 4) OpenAPI 编辑：Swagger 回填 → 保存 → 再开不丢 (1.1s)
+  ok  7 [chromium] › specs\p0-wsc-v1.3.spec.ts:299:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 5) 详情只读：API 产品可见 endpoints / 文档信息 (909ms)
+  ok  8 [chromium] › specs\p0-wsc-v1.3.spec.ts:337:7 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6) 三角色写入口矩阵 ADMIN/PROVIDER/USER（含导入） (1.9s)
+  ok  9 [chromium] › specs\p0-wsc-v1.3.spec.ts:392:9 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6x) 独立会话写入口矩阵 — PROVIDER (537ms)
+  ok 10 [chromium] › specs\p0-wsc-v1.3.spec.ts:392:9 › WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13) › 6x) 独立会话写入口矩阵 — USER (482ms)
+
+  10 passed (12.3s)

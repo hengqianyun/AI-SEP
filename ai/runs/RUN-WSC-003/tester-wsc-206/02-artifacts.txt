@@ -1,0 +1,23 @@
+﻿artifact-checks (tester-wsc-206):
+checklist=EXISTS ai/runs/RUN-WSC-003/ux-gap-checklist.md
+schema_3_1=PASS (cols id/screenshot|pathKey/dimension/severity/status/evidence)
+coverage_01_10=PASS (GAP rows for screenshots 01-10)
+P0_open=0
+P1_open=1 (GAP-UX-006-01 carrier B, non-P0, optional)
+screenshots_01_10=PASS
+  01-login.png|145934
+  02-shell-sidebar.png|35770
+  03-overview.png|73012
+  04-catalog-browse.png|84127
+  05-catalog-maintenance.png|45846
+  06-category-admin-modal.png|41797
+  07-import-modal.png|41591
+  08-product-detail.png|44057
+  09-product-editor.png|38333
+  10-chain.png|34864
+walkthrough=EXISTS ai/runs/RUN-WSC-003/ux-walkthrough/WALKTHROUGH.md
+desensitize_declaration=PASS (section present, checkboxes checked)
+viewport_checkboxes=PASS (1280x800 + 1440x900 structure present)
+po_ux_confirm_structure=PASS (table present)
+po_ux_human_sign=PENDING (cells empty; NOT a FAIL per testScope)
+role_matrix_in_spec=PASS (tests 6b + 6c PROVIDER/USER present and passed this run)

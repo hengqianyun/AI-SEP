@@ -1,0 +1,5 @@
+fixture yaml exists: true (tests/fixtures/import/openapi-shared-minimal.yaml)
+OPENAPI_SHARED_CRITICAL: method=POST path=/enterprise/security/verify summary=企业安全信息核验
+assertion sites: parseOpenApi.spec.ts + useProductEditor.spec.ts (OPENAPI_SHARED_CRITICAL.method/path/summary)
+vitest: 2 files / 16 tests EXIT=0
+typecheck: EXIT=0

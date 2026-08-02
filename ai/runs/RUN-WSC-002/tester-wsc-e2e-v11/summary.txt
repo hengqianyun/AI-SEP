@@ -1,0 +1,13 @@
+result=FAILED
+evidenceId=TESTRUN-WSC-E2E-V11
+exitCode=1
+html=tests/e2e/reports/p0-wsc-v1.1/index.html
+scenario1=PASSED
+scenario2=PASSED
+scenario3=PASSED
+scenario4=FAILED
+scenario5=PASSED
+scenario6=PASSED
+blocker=FIND-WSC-107-R1-001 ImportDialog not mounted on CatalogBrowsePage; /catalog?import=1 does not open dialog
+testrun=planning/tasks/TESTRUN-WSC-E2E-V11.md
+finalLog=ai/runs/RUN-WSC-002/tester-wsc-e2e-v11/04-playwright-v11-final.txt
