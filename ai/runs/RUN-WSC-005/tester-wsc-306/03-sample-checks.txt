@@ -1,0 +1,24 @@
+TASK-WSC-306 sample checks (source + Vitest; actor=tester-wsc-306)
+executedAt: 2026-08-02T21:39:30+08:00
+
+1) 新增产品按钮权限
+   - CatalogBrowsePage.vue: v-if="productWriteVisible" on data-testid="catalog-open-create"
+   - goCreate guards productWriteVisible; router.push('/catalog/products/new')
+   - header-actions: create button alongside catalog-open-import (productImportVisible)
+   - useCanWrite: canWriteProduct ADMIN/PROVIDER=true, USER=false; canImportProduct USER=false
+   - Vitest CatalogBrowsePage.spec.ts case 1 PASSED
+   RESULT: PASSED
+
+2) 无 WriteEntryDemo
+   - WorkbenchLayout.vue: no import / no <WriteEntryDemo> / no WriteEntry string
+   - Vitest case 4 PASSED (layoutSrc not contain WriteEntryDemo)
+   RESULT: PASSED
+
+3) sticky / 列表
+   - .pane.list padding: 0 20px 20px (no top padding)
+   - .list-head: position sticky; top:0; z-index:2; background: var(--card-bg); padding: 20px 0 12px
+   - list-head contains「产品列表」+「已加载 {{ products.length }} / 共 {{ total }} 条」
+   - Vitest case 2 PASSED
+   RESULT: PASSED
+
+Overall sample: PASSED

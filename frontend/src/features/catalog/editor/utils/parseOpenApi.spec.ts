@@ -55,4 +55,29 @@ describe('parseOpenApiEndpoints', () => {
     expect(parseOpenApiEndpoints('')).toEqual([])
     expect(parseOpenApiEndpoints('   ')).toEqual([])
   })
+
+  it('parses YAML with literal block scalar description containing list-like lines', () => {
+    const yaml = `
+openapi: 3.0.3
+info:
+  title: Users API
+  description: |
+    Manage users.
+    - Lists users
+    - Creates users
+  version: 1.0.0
+paths:
+  /users:
+    get:
+      summary: List users
+      responses:
+        '200':
+          description: ok
+`.trim()
+    const eps = parseOpenApiEndpoints(yaml)
+    expect(eps).toHaveLength(1)
+    expect(eps[0].method).toBe('GET')
+    expect(eps[0].path).toBe('/users')
+    expect(eps[0].summary).toBe('List users')
+  })
 })

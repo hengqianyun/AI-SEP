@@ -5,7 +5,6 @@ import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { canMaintainCatalog } from '@/features/auth/composables/useCanWrite'
 import RoleSwitcher from '@/features/shell/components/RoleSwitcher.vue'
-import WriteEntryDemo from '@/features/shell/components/WriteEntryDemo.vue'
 
 const auth = useAuthStore()
 const { enterpriseName, session, role } = storeToRefs(auth)
@@ -139,7 +138,6 @@ async function onLogout() {
 
     <div class="main">
       <RouterView />
-      <WriteEntryDemo />
     </div>
   </div>
 </template>
@@ -322,6 +320,7 @@ async function onLogout() {
   min-height: 100vh;
   padding: var(--main-padding);
   min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (max-width: 900px) {

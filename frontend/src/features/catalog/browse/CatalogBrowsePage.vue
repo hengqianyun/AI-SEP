@@ -137,6 +137,11 @@ function goEdit() {
   void router.push(`/catalog/products/${selectedProductId.value}/edit`)
 }
 
+function goCreate() {
+  if (!productWriteVisible.value) return
+  void router.push('/catalog/products/new')
+}
+
 function rowIndex(sectionOffset: number, idx: number) {
   return sectionOffset + idx + 1
 }
@@ -153,15 +158,26 @@ function padNo(n: number) {
         <h1>数据目录</h1>
         <p class="subtitle">按空间 / 行业浏览、子类分组预览数据产品</p>
       </div>
-      <button
-        v-if="productImportVisible"
-        type="button"
-        class="btn primary import-btn"
-        data-testid="catalog-open-import"
-        @click="openImport"
-      >
-        批量导入产品
-      </button>
+      <div class="header-actions">
+        <button
+          v-if="productWriteVisible"
+          type="button"
+          class="btn primary"
+          data-testid="catalog-open-create"
+          @click="goCreate"
+        >
+          新增产品
+        </button>
+        <button
+          v-if="productImportVisible"
+          type="button"
+          class="btn primary import-btn"
+          data-testid="catalog-open-import"
+          @click="openImport"
+        >
+          批量导入产品
+        </button>
+      </div>
     </header>
 
     <ImportDialog v-model="importOpen" @closed="onImportClosed" />
@@ -449,7 +465,7 @@ function padNo(n: number) {
 
 <style scoped>
 .catalog-browse {
-  /* 约束页面高度，使 .pane.list 自身滚动（REQ-UX-004 触底分页） */
+  /* 约束页面高度，使 .pane.list 自身滚动（REQ-UX-004 触底分页）；高分辨率填满主区 */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -457,7 +473,7 @@ function padNo(n: number) {
   max-height: calc(100vh - 2 * var(--main-padding, 24px));
   min-height: 0;
   overflow: hidden;
-  padding: 0 0 16px;
+  padding: 0;
   box-sizing: border-box;
   color: var(--text-primary);
   font-family: var(--font-family-sans);
@@ -498,6 +514,13 @@ function padNo(n: number) {
   margin: 4px 0 0;
   color: var(--text-secondary);
   font-size: 13px;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .nav-card {
@@ -659,20 +682,29 @@ function padNo(n: number) {
 
 .bi-pane {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
+  /* 宽屏下列表 + 预览按比例吃满视口，预览不低于原 380px */
+  grid-template-columns: minmax(0, 1.55fr) minmax(380px, 1fr);
   grid-template-rows: minmax(0, 1fr);
   gap: 16px;
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 280px;
   overflow: hidden;
 }
 
 .pane {
-  padding: 20px;
   overflow: auto;
   min-height: 0;
   max-height: 100%;
   overscroll-behavior: contain;
+}
+
+.pane.list {
+  /* 顶 padding 移入 sticky .list-head，避免 top:0 露缝 */
+  padding: 0 20px 20px;
+}
+
+.pane.preview {
+  padding: 20px;
 }
 
 .pane h2,
@@ -689,10 +721,10 @@ function padNo(n: number) {
   align-items: flex-start;
   position: sticky;
   top: 0;
+  z-index: 2;
   background: var(--card-bg);
-  z-index: 1;
-  padding-bottom: 12px;
-  margin-bottom: 4px;
+  padding: 20px 0 12px;
+  margin: 0 0 4px;
 }
 
 .list-subtitle {
@@ -971,7 +1003,7 @@ function padNo(n: number) {
 
 @media (max-width: 1100px) {
   .bi-pane {
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
   }
 }
 

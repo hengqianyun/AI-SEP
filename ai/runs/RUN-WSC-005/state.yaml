@@ -1,0 +1,26 @@
+runId: RUN-WSC-005
+currentNode: COMPLETED
+round: 1
+status: COMPLETED
+blockedBy: []
+completedNodes:
+  - DEVELOPMENT
+  - CODE_REVIEW
+  - TESTING
+  - RELEASE_REVIEW
+  - COMPLETED
+activeWave: null
+activeTaskIds: []
+verifiedTaskIds:
+  - TASK-WSC-306
+  - TASK-WSC-307
+activeSnapshotId: SNAP-WSC-004
+activePlanId: PLAN-WSC-4.1
+basedOnRun: RUN-WSC-004
+kind: HOTFIX
+scope: catalog-browse-ux + openapi-yaml-block-scalar
+releaseApproval: APPR-WSC-RELEASE-005
+approvalsPath: ai/runs/RUN-WSC-005/approvals.yaml
+nextAction: null
+updatedAt: 2026-08-02T21:40:45+08:00
+completedAt: 2026-08-02T21:40:45+08:00

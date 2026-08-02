@@ -1,0 +1,4 @@
+command: pnpm exec vue-tsc --noEmit -p tsconfig.json --pretty false
+cwd: frontend
+(no diagnostics)
+TYPECHECK_EXIT=0

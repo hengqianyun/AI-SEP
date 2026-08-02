@@ -92,7 +92,7 @@ type YamlNode = Record<string, unknown> | unknown[]
 
 /**
  * 最小缩进 YAML 解析（OpenAPI 文档子集；无依赖，方案 B）。
- * 支持：映射、列表、标量、单/双引号、布尔/数字/null。
+ * 支持：映射、列表、标量、字面量/折叠块标量（| / >）、单/双引号、布尔/数字/null。
  */
 export function parseYamlDocument(text: string): unknown {
   type Frame = { indent: number; node: YamlNode }
@@ -135,6 +135,9 @@ export function parseYamlDocument(text: string): unknown {
     return s
   }
 
+  /** `|` / `>`，可选 chomping/indent 指示（不完整实现 chomping 语义）。 */
+  const isBlockScalarIndicator = (v: string): boolean => /^[|>][+-]?(?:\d+)?$/.test(v)
+
   const lines = text.replace(/\r\n/g, '\n').split('\n')
   const root: Record<string, unknown> = {}
   const stack: Frame[] = [{ indent: -1, node: root }]
@@ -147,6 +150,42 @@ export function parseYamlDocument(text: string): unknown {
       return { indent: ind, content: stripInlineComment(L.slice(ind)) }
     }
     return null
+  }
+
+  /**
+   * 收集字面量/折叠块标量：吞掉缩进更深的行拼成字符串。
+   * 返回值的 endLine 为最后消费行下标（调用方应 `i = endLine`）。
+   */
+  const readBlockScalar = (
+    startLine: number,
+    keyIndent: number,
+  ): { value: string; endLine: number } => {
+    const collected: string[] = []
+    let contentIndent: number | null = null
+    let j = startLine
+    let lastConsumed = startLine - 1
+
+    while (j < lines.length) {
+      const L = lines[j]
+      if (!L.trim()) {
+        const next = peekNextSignificant(j + 1)
+        if (next && next.indent > keyIndent) {
+          collected.push('')
+          lastConsumed = j
+          j++
+          continue
+        }
+        break
+      }
+      const ind = L.search(/\S/)
+      if (ind <= keyIndent) break
+      if (contentIndent === null) contentIndent = ind
+      collected.push(L.length >= contentIndent ? L.slice(contentIndent) : L.trimStart())
+      lastConsumed = j
+      j++
+    }
+
+    return { value: collected.join('\n'), endLine: lastConsumed }
   }
 
   const ensureMap = (frame: Frame): Record<string, unknown> => {
@@ -182,7 +221,11 @@ export function parseYamlDocument(text: string): unknown {
         const obj: Record<string, unknown> = {}
         frame.node.push(obj)
         stack.push({ indent, node: obj })
-        if (v === '' || v === '|' || v === '>') {
+        if (isBlockScalarIndicator(v)) {
+          const block = readBlockScalar(i + 1, indent)
+          obj[k] = block.value
+          i = block.endLine
+        } else if (v === '') {
           const next = peekNextSignificant(i + 1)
           if (next && next.indent > indent && next.content.startsWith('- ')) {
             const arr: unknown[] = []
@@ -214,7 +257,11 @@ export function parseYamlDocument(text: string): unknown {
     const valuePart = content.slice(colon + 1).trim()
     const map = ensureMap(frame)
 
-    if (valuePart === '' || valuePart === '|' || valuePart === '>') {
+    if (isBlockScalarIndicator(valuePart)) {
+      const block = readBlockScalar(i + 1, indent)
+      map[key] = block.value
+      i = block.endLine
+    } else if (valuePart === '') {
       const next = peekNextSignificant(i + 1)
       if (next && next.indent > indent && next.content.startsWith('- ')) {
         const arr: unknown[] = []

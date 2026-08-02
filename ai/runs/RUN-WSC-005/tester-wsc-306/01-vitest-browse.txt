@@ -1,0 +1,13 @@
+
+ RUN  v2.1.9 C:/WorkSpace/AI-SEP/frontend
+
+ ✓ src/features/catalog/browse/composables/useCatalogImportEntry.spec.ts (4 tests) 15ms
+ ✓ src/features/catalog/browse/CatalogBrowsePage.spec.ts (4 tests) 4ms
+ ✓ src/features/catalog/browse/composables/useCatalogBrowse.spec.ts (19 tests) 16ms
+
+ Test Files  3 passed (3)
+      Tests  27 passed (27)
+   Start at  21:39:07
+   Duration  1.33s (transform 349ms, setup 0ms, collect 1.01s, tests 35ms, environment 1ms, prepare 993ms)
+
+VITEST_EXIT=0

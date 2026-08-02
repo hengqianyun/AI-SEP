@@ -1,0 +1,22 @@
+# RUN-WSC-005 批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
+
+approvals:
+  - id: APPR-WSC-RELEASE-005
+    runId: RUN-WSC-005
+    planId: PLAN-WSC-4.1
+    snapshotId: SNAP-WSC-004
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-08-02T21:40:30+08:00
+    source: chat
+    utterance: 批准发布，并提交前端代码
+    scope: hotfix-package
+    basedOn:
+      - planning/tasks/TESTRUN-TASK-WSC-306.md
+      - planning/tasks/TESTRUN-TASK-WSC-307.md
+      - planning/tasks/REV-TASK-WSC-306.md
+      - planning/tasks/REV-TASK-WSC-307.md
+    notes: |
+      HOTFIX：目录 UX（新增产品/隐藏写入口/sticky/高分屏）+ OpenAPI YAML 块标量解析。
