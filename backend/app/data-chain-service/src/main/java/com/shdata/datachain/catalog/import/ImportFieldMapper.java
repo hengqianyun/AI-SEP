@@ -1,16 +1,15 @@
 package com.shdata.datachain.catalog.productimport;
 
+import com.shdata.datachain.catalog.IndustryCategories;
 import com.shdata.datachain.catalog.browse.CatalogBrowseSeedStore;
-import com.shdata.datachain.catalog.browse.CatalogCategory;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/** 将 v0729 模板中文列值映射为产品写入 body（含 typeSpecific）。 */
+/** 将 v0729 模板中文列值映射为产品写入 body（含 typeSpecific；DEC-WSC-006）。 */
 final class ImportFieldMapper {
 
   private final CatalogBrowseSeedStore catalog;
@@ -44,10 +43,11 @@ final class ImportFieldMapper {
       throw new RowException("ERR_IMPORT_ROW_INVALID", "产品类型非法：" + productTypeRaw);
     }
 
-    String l3Id = resolveL3(categoryRaw);
-    if (l3Id == null) {
+    String industryCategory = IndustryCategories.normalizeOrNull(categoryRaw);
+    if (industryCategory == null) {
       throw new RowException(
-          "ERR_CATEGORY_LEAF_REQUIRED", "行业分类无法解析到可挂载三级节点：" + categoryRaw);
+          "ERR_IMPORT_ROW_INVALID",
+          "行业分类非法，须为 GB/T 4754 门类枚举：" + categoryRaw.trim());
     }
 
     rejectHeterogeneousColumns(productType, cells);
@@ -58,7 +58,7 @@ final class ImportFieldMapper {
     body.put("productName", productName.trim());
     body.put("productCode", productCode);
     body.put("productType", productType);
-    body.put("l3CategoryId", l3Id);
+    body.put("industryCategory", industryCategory);
     body.put("summary", summary.trim());
 
     String delivery = mapDelivery(cell(cells, "交付方式"));
@@ -217,55 +217,6 @@ final class ImportFieldMapper {
       }
     }
     throw new IllegalStateException("unable to allocate product code");
-  }
-
-  private String resolveL3(String raw) {
-    String v = raw.trim();
-    Optional<CatalogCategory> byId = catalog.findCategory(v);
-    if (byId.isPresent()) {
-      CatalogCategory c = byId.get();
-      if ("L3".equals(c.level())) {
-        return c.id();
-      }
-      return null;
-    }
-    String normalized = v.replace('／', '/').replaceAll("\\s*/\\s*", " / ").trim();
-    for (CatalogCategory c : catalog.categories()) {
-      if (!"L3".equals(c.level())) {
-        continue;
-      }
-      if (c.name() != null && c.name().equalsIgnoreCase(v)) {
-        return c.id();
-      }
-      String path = catalog.resolveCategoryPathFromL3(c.id());
-      if (path != null && path.equalsIgnoreCase(normalized)) {
-        return c.id();
-      }
-      String compact = path == null ? "" : path.replace(" / ", "/");
-      String compactIn = normalized.replace(" / ", "/");
-      if (compact.equalsIgnoreCase(compactIn)) {
-        return c.id();
-      }
-    }
-    // L2 名称：若其下恰有一个 L3 则采纳，否则无法唯一挂载
-    for (CatalogCategory c : catalog.categories()) {
-      if (!"L2".equals(c.level())) {
-        continue;
-      }
-      if (c.name() == null || !c.name().equalsIgnoreCase(v)) {
-        continue;
-      }
-      List<String> children = new java.util.ArrayList<>();
-      for (CatalogCategory child : catalog.categories()) {
-        if ("L3".equals(child.level()) && c.id().equals(child.parentId())) {
-          children.add(child.id());
-        }
-      }
-      if (children.size() == 1) {
-        return children.get(0);
-      }
-    }
-    return null;
   }
 
   private static String mapProductType(String raw) {

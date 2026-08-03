@@ -2,10 +2,9 @@ import { computed, reactive, ref } from 'vue'
 import {
   createProduct,
   getProduct,
-  listCategories,
+  INDUSTRY_CATEGORY_OPTIONS,
   updateProduct,
   type ApiEndpoint,
-  type Category,
   type ProductType,
   type ProductWrite,
   type UpdateFrequency,
@@ -34,7 +33,26 @@ export const UPDATE_FREQUENCY_OPTIONS: { value: UpdateFrequency | ''; label: str
   { value: 'NO_UPDATE', label: '不更新' },
 ]
 
+export const DELIVERY_METHOD_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: '（未选）' },
+  { value: 'API', label: 'API' },
+  { value: 'FILE', label: '文件传输' },
+  { value: 'SANDBOX', label: '数据沙箱' },
+  { value: 'PRIVACY_COMPUTE', label: '隐私保护计算' },
+]
+
+export const REGION_SCOPE_OPTIONS = [
+  '国际',
+  '全国',
+  '省级',
+  '市级',
+  '区县级',
+  '区县级以下',
+] as const
+
 export const DATA_FORM_OPTIONS = ['图片', '文本', '视频', '音频', '表格', '其他'] as const
+
+export { INDUSTRY_CATEGORY_OPTIONS }
 
 function deriveLegacyEndpoint(endpoints: ApiEndpoint[]): string {
   const first = endpoints[0]
@@ -56,12 +74,11 @@ function cloneEndpoints(eps: ApiEndpoint[]): ApiEndpoint[] {
 export function useProductEditor(mode: EditorMode) {
   const state = ref<FormState>('idle')
   const feedback = ref('')
-  const categories = ref<Category[]>([])
   const form = reactive({
     productCode: '',
     productName: '',
     productType: 'DATASET' as ProductType,
-    l1CategoryId: '',
+    industryCategory: '' as string,
     l2CategoryId: '',
     l3CategoryId: '',
     businessCategory: '',
@@ -99,45 +116,6 @@ export function useProductEditor(mode: EditorMode) {
   const isApi = computed(() => form.productType === 'API')
   const isDataset = computed(() => form.productType === 'DATASET')
   const isReport = computed(() => form.productType === 'REPORT')
-
-  const l1Categories = computed(() => categories.value.filter((c) => c.level === 'L1'))
-  const l2Categories = computed(() =>
-    categories.value.filter((c) => c.level === 'L2' && c.parentId === form.l1CategoryId),
-  )
-  const l3Categories = computed(() =>
-    categories.value.filter((c) => c.level === 'L3' && c.parentId === form.l2CategoryId),
-  )
-  const selectedPathLabel = computed(() => {
-    const parts: string[] = []
-    const l1 = categories.value.find((c) => c.id === form.l1CategoryId)
-    const l2 = categories.value.find((c) => c.id === form.l2CategoryId)
-    const l3 = categories.value.find((c) => c.id === form.l3CategoryId)
-    if (l1) parts.push(l1.name)
-    if (l2) parts.push(l2.name)
-    if (l3) parts.push(l3.name)
-    return parts.join(' / ')
-  })
-
-  function onL1Change() {
-    form.l2CategoryId = ''
-    form.l3CategoryId = ''
-  }
-
-  function onL2Change() {
-    form.l3CategoryId = ''
-  }
-
-  function resolveParentsFromL3(l3Id: string) {
-    const l3 = categories.value.find((c) => c.id === l3Id && c.level === 'L3')
-    if (!l3) {
-      form.l3CategoryId = l3Id
-      return
-    }
-    form.l3CategoryId = l3.id
-    form.l2CategoryId = String(l3.parentId || '')
-    const l2 = categories.value.find((c) => c.id === form.l2CategoryId)
-    form.l1CategoryId = String(l2?.parentId || '')
-  }
 
   function refreshAutoCode() {
     if (mode === 'create') {
@@ -212,22 +190,15 @@ export function useProductEditor(mode: EditorMode) {
     state.value = 'loading'
     feedback.value = ''
     try {
-      const catRes = await listCategories()
-      categories.value = catRes.data.items
       if (mode === 'edit' && productId) {
         const res = await getProduct(productId)
         const p = res.data
         form.productCode = p.productCode
         form.productName = p.productName
         form.productType = p.productType
-        if (p.l3CategoryId) {
-          resolveParentsFromL3(p.l3CategoryId)
-        } else if (p.l2CategoryId) {
-          form.l2CategoryId = p.l2CategoryId
-          const l2 = categories.value.find((c) => c.id === p.l2CategoryId)
-          form.l1CategoryId = String(l2?.parentId || '')
-          form.l3CategoryId = ''
-        }
+        form.industryCategory = String(p.industryCategory || '')
+        form.l3CategoryId = String(p.l3CategoryId || '')
+        form.l2CategoryId = String(p.l2CategoryId || '')
         form.businessCategory = String(p.businessCategory || '')
         form.businessSubCategory = String(p.businessSubCategory || '')
         form.dataSource = String(p.dataSource || '')
@@ -319,8 +290,8 @@ export function useProductEditor(mode: EditorMode) {
       state.value = 'error'
       return null
     }
-    if (!form.l3CategoryId) {
-      feedback.value = '请选择三级分类（空间 / 行业 / 子类）'
+    if (!form.industryCategory) {
+      feedback.value = '请选择行业分类（GB/T 4754 门类）'
       state.value = 'error'
       return null
     }
@@ -342,8 +313,9 @@ export function useProductEditor(mode: EditorMode) {
       productCode: form.productCode.trim(),
       productName: form.productName.trim(),
       productType: form.productType,
-      l3CategoryId: form.l3CategoryId,
-      l2CategoryId: form.l2CategoryId,
+      industryCategory: form.industryCategory,
+      l3CategoryId: form.l3CategoryId || undefined,
+      l2CategoryId: form.l2CategoryId || undefined,
       businessCategory: form.businessCategory || undefined,
       businessSubCategory: form.businessSubCategory || undefined,
       dataSource: form.dataSource || undefined,
@@ -442,12 +414,6 @@ export function useProductEditor(mode: EditorMode) {
     isApi,
     isDataset,
     isReport,
-    l1Categories,
-    l2Categories,
-    l3Categories,
-    selectedPathLabel,
-    onL1Change,
-    onL2Change,
     onProductTypeChange,
     init,
     addTag,
@@ -459,6 +425,9 @@ export function useProductEditor(mode: EditorMode) {
     buildBody,
     submit,
     UPDATE_FREQUENCY_OPTIONS,
+    DELIVERY_METHOD_OPTIONS,
+    REGION_SCOPE_OPTIONS,
     DATA_FORM_OPTIONS,
+    INDUSTRY_CATEGORY_OPTIONS,
   }
 }

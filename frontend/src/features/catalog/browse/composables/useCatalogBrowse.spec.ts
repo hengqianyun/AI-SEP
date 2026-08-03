@@ -116,7 +116,26 @@ describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
       true,
     )
   })
+
+  it('groupProductsByL3 puts all unmounted products into single 「未分类数据」 section', () => {
+    const cats: Category[] = [{ id: 'l3a', name: '脱敏病历', level: 'L3', parentId: 'l2' }]
+    const products = [
+      { id: '1', industryCategory: '建筑业', productName: 'A' },
+      { id: '2', industryCategory: '建筑业', productName: 'B' },
+      { id: '3', industryCategory: '制造业', productName: 'C' },
+      { id: '4', productName: 'D' },
+      { id: '5', l3CategoryId: 'l3a', industryCategory: '建筑业', productName: 'E' },
+    ] as Product[]
+    const sections = groupProductsByL3(products, cats)
+    expect(sections).toHaveLength(2)
+    expect(sections[0]).toMatchObject({ l3CategoryId: 'l3a', title: '脱敏病历', count: 1 })
+    const uncategorized = sections.find((s) => s.title === '未分类数据')
+    expect(uncategorized?.count).toBe(4)
+    expect(uncategorized?.products.map((p) => p.id)).toEqual(['1', '2', '3', '4'])
+    expect(sections.some((s) => s.title === '建筑业' || s.title === '制造业')).toBe(false)
+  })
 })
+
 
 describe('isNearScrollBottom (REQ-UX-004 / TASK-WSC-305)', () => {
   it('returns true when remaining scroll distance is below threshold', () => {

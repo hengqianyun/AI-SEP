@@ -15,7 +15,7 @@
 | REQ-CAT-002 | 列表 query（含 l2/l3）；筛选空态 | 无结果空态 |
 | REQ-CAT-003 | 路由：详情/上链/编辑；RBAC 编辑可见性 | 普通用户无编辑 |
 | REQ-CAT-004 | Product/CatalogSnapshot；`categoryPath` + `categoryPathParts`；`ProductCode` | 详情三级路径 |
-| REQ-CAT-005 | `POST/PUT /catalog/products`（`l3CategoryId`）；FORMAT/CONFLICT；`ERR_CATEGORY_LEAF_REQUIRED`；OQ-004 | 新建/编辑/上链 |
+| REQ-CAT-005 | `POST/PUT /catalog/products`（必填 `industryCategory`；`l3CategoryId` 可空）；FORMAT/CONFLICT；显式非法 L3 → `ERR_CATEGORY_LEAF_REQUIRED`；OQ-004；DEC-WSC-006 | 新建/编辑/上链 |
 | REQ-CAT-006 | categories CRUD（L1/L2/L3）；`ERR_CATEGORY_HAS_PRODUCTS` | 有挂载禁止删；非管理员 403 |
 | REQ-CAT-007 | `/catalog/maintenance/**`；条目≡产品；分页字段同 Browse | 管理员维护；提供方/用户 403 |
 | REQ-CAT-008 | `/catalog/products/import*`；模板列最小集；请求级 vs 行级错误；报告 TTL | ≤10MB；四态；报告鉴权 |

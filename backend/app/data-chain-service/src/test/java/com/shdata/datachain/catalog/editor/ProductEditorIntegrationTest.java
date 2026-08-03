@@ -62,6 +62,7 @@ class ProductEditorIntegrationTest {
                           "productCode":"GEN-OTH-9001",
                           "productName":"其他类型产品",
                           "productType":"OTHER",
+                          "industryCategory":"卫生和社会工作",
                           "l3CategoryId":"cat-l3-emr-desense",
                           "summary":"OQ-004-revised",
                           "updateFrequency":"NO_UPDATE",
@@ -124,6 +125,7 @@ class ProductEditorIntegrationTest {
                           "productCode":"GEN-API-9001",
                           "productName":"接口冲突产品",
                           "productType":"API",
+                          "industryCategory":"卫生和社会工作",
                           "l3CategoryId":"cat-l3-emr-desense",
                           "typeSpecific":{
                             "api":{
@@ -178,6 +180,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"GEN-DS-9001",
                       "productName":"数据集扩展",
                       "productType":"DATASET",
+                      "industryCategory":"卫生和社会工作",
                       "l3CategoryId":"cat-l3-emr-struct",
                       "typeSpecific":{
                         "dataset":{
@@ -206,6 +209,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"GEN-RP-9001",
                       "productName":"报告扩展",
                       "productType":"REPORT",
+                      "industryCategory":"卫生和社会工作",
                       "l3CategoryId":"cat-l3-credit-score",
                       "typeSpecific":{
                         "report":{
@@ -230,6 +234,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"GEN-API-9002",
                       "productName":"旧endpoint可读",
                       "productType":"API",
+                      "industryCategory":"卫生和社会工作",
                       "l3CategoryId":"cat-l3-emr-desense",
                       "typeSpecific":{
                         "api":{
@@ -260,6 +265,7 @@ class ProductEditorIntegrationTest {
                           "productCode":"MED-EDT-9002",
                           "productName":"可编辑产品",
                           "productType":"DATASET",
+                          "industryCategory":"卫生和社会工作",
                           "l3CategoryId":"cat-l3-emr-desense",
                           "typeSpecific":{"dataset":{"recordCount":10}}
                         }
@@ -281,6 +287,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"MED-EDT-9002",
                       "productName":"可编辑产品-v2",
                       "productType":"DATASET",
+                      "industryCategory":"卫生和社会工作",
                       "l3CategoryId":"cat-l3-emr-struct",
                       "typeSpecific":{"dataset":{"recordCount":20}}
                     }
@@ -321,6 +328,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"bad-code",
                       "productName":"坏编码",
                       "productType":"OTHER",
+                      "industryCategory":"卫生和社会工作",
                       "l3CategoryId":"cat-l3-emr-desense"
                     }
                     """))
@@ -338,6 +346,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"MED-EDT-9002",
                       "productName":"冲突",
                       "productType":"OTHER",
+                      "industryCategory":"卫生和社会工作",
                       "l3CategoryId":"cat-l3-emr-desense"
                     }
                     """))
@@ -364,6 +373,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"GEN-FAIL-9003",
                       "productName":"应回滚",
                       "productType":"OTHER",
+                      "industryCategory":"卫生和社会工作",
                       "l3CategoryId":"cat-l3-emr-desense"
                     }
                     """))
@@ -376,7 +386,7 @@ class ProductEditorIntegrationTest {
   }
 
   @Test
-  void create_rejectsNonL3_andL2Only() throws Exception {
+  void create_requiresIndustryCategory_andRejectsInvalidL3() throws Exception {
     stubAttest("sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "did:wsc:sim:leaf");
     MockHttpSession session = login("admin", "demo");
 
@@ -389,13 +399,12 @@ class ProductEditorIntegrationTest {
                     """
                     {
                       "productCode":"GEN-LEAF-9004",
-                      "productName":"缺三级",
-                      "productType":"OTHER",
-                      "l2CategoryId":"cat-l2-emr"
+                      "productName":"缺行业分类",
+                      "productType":"OTHER"
                     }
                     """))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.code").value("ERR_CATEGORY_LEAF_REQUIRED"));
+        .andExpect(jsonPath("$.code").value("ERR_VALIDATION"));
 
     mockMvc
         .perform(
@@ -406,8 +415,27 @@ class ProductEditorIntegrationTest {
                     """
                     {
                       "productCode":"GEN-LEAF-9005",
-                      "productName":"挂二级",
+                      "productName":"有门类无挂载",
                       "productType":"OTHER",
+                      "industryCategory":"建筑业"
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.industryCategory").value("建筑业"))
+        .andExpect(jsonPath("$.data.l3CategoryId").doesNotExist());
+
+    mockMvc
+        .perform(
+            post("/api/v1/catalog/products")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "productCode":"GEN-LEAF-9006",
+                      "productName":"挂二级非法",
+                      "productType":"OTHER",
+                      "industryCategory":"建筑业",
                       "l3CategoryId":"cat-l2-emr"
                     }
                     """))
@@ -429,6 +457,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"GEN-USR-9006",
                       "productName":"普通用户不可写",
                       "productType":"OTHER",
+                      "industryCategory":"卫生和社会工作",
                       "l3CategoryId":"cat-l3-emr-desense"
                     }
                     """))

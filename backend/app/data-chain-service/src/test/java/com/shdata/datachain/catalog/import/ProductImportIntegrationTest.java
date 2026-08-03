@@ -128,6 +128,8 @@ class ProductImportIntegrationTest {
             .findFirst()
             .orElseThrow();
     assertThat(created.productCode()).matches("^[A-Z0-9]+-[A-Z0-9]+-[0-9]{4,}$");
+    assertThat(created.industryCategory()).isEqualTo("建筑业");
+    assertThat(created.l3CategoryId()).isNull();
     assertThat(created.updateFrequency()).isEqualTo("NO_UPDATE");
     assertThat(created.typeSpecific()).isNotNull();
     assertThat(created.typeSpecific().get("dataset")).isInstanceOf(Map.class);
@@ -292,7 +294,11 @@ class ProductImportIntegrationTest {
     mockMvc
         .perform(get("/api/v1/catalog/products/import/reports/" + catReport).session(session))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.rows[0].reasonCode").value("ERR_CATEGORY_LEAF_REQUIRED"));
+        .andExpect(jsonPath("$.data.rows[0].reasonCode").value("ERR_IMPORT_ROW_INVALID"))
+        .andExpect(
+            jsonPath(
+                "$.data.rows[0].reasonMessage",
+                org.hamcrest.Matchers.containsString("行业分类非法")));
 
     MvcResult req =
         mockMvc

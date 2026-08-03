@@ -51,7 +51,10 @@ export function isRetryableListState(state: LoadState): boolean {
   return state === 'error'
 }
 
-/** 将扁平产品列表按三级子类分节（稳定顺序：分类树顺序，未知落末尾）。 */
+/**
+ * 将扁平产品列表分节：有 l3 按三级子类；无挂载一律归入单一「未分类数据」分节。
+ * industryCategory 仅为产品字段，不作分节 key（DEC-WSC-006 / TASK-WSC-502）。
+ */
 export function groupProductsByL3(
   products: Product[],
   categories: Category[],
@@ -59,9 +62,10 @@ export function groupProductsByL3(
   const l3Order = categories.filter((c) => c.level === 'L3').map((c) => c.id)
   const l3Name = new Map(categories.filter((c) => c.level === 'L3').map((c) => [c.id, c.name]))
   const buckets = new Map<string, Product[]>()
+  const UNCATEGORIZED_KEY = '__uncategorized__'
 
   for (const p of products) {
-    const key = p.l3CategoryId || '__unknown__'
+    const key = p.l3CategoryId || UNCATEGORIZED_KEY
     const list = buckets.get(key) ?? []
     list.push(p)
     buckets.set(key, list)
@@ -81,8 +85,8 @@ export function groupProductsByL3(
   }
   for (const [id, list] of buckets) {
     const title =
-      id === '__unknown__'
-        ? '未关联子类'
+      id === UNCATEGORIZED_KEY || id === '__unknown__'
+        ? '未分类数据'
         : (list[0]?.categoryPath?.split('/').pop()?.trim() ?? id)
     sections.push({ l3CategoryId: id, title, count: list.length, products: list })
   }

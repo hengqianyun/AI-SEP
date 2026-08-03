@@ -1,6 +1,6 @@
 /**
- * Catalog API — 对齐 contracts/openapi (wsc-contracts@2.1.0)
- * 三级分类；目录维护条目≡产品；Browse 分页 page/pageSize/total；v0729 同步导入。
+ * Catalog API — 对齐 contracts/openapi (wsc-contracts@2.2.0)
+ * industryCategory（GB/T 门类）；l3CategoryId 可空；Browse 分页；v0729 同步导入。
  * typeSpecific：api/dataset/report/other；OTHER 允许 contentDescription。
  */
 import { apiRequest, getApiBaseUrl } from './client'
@@ -82,17 +82,42 @@ export type TypeSpecificFields = {
   other?: TypeSpecificReportOrOther
 }
 
+/** GB/T 4754 门类中文原文（对齐 v0729 C 列；DEC-WSC-006） */
+export const INDUSTRY_CATEGORY_OPTIONS = [
+  '农、林、牧、渔业',
+  '采矿业',
+  '制造业',
+  '电力、热力、燃气及水生产和供应业',
+  '建筑业',
+  '批发和零售业',
+  '交通运输、仓储和邮政业',
+  '住宿和餐饮业',
+  '信息传输、软件和信息技术服务业',
+  '金融业',
+  '房地产业',
+  '租赁和商务服务业',
+  '科学研究和技术服务业',
+  '水利、环境和公共设施管理业',
+  '居民服务、修理和其他服务业',
+  '教育',
+  '卫生和社会工作',
+  '文化、体育和娱乐业',
+  '公共管理、社会保障和社会组织',
+  '国际组织',
+] as const
+
+export type IndustryCategory = (typeof INDUSTRY_CATEGORY_OPTIONS)[number]
+
 export type ProductWrite = {
   productCode: string
   productName: string
   productType: ProductType
-  /** V1.1+ 契约权威：挂三级 */
-  l3CategoryId?: string
-  /**
-   * V1.0 兼容：既有 catalog 编辑页仍必填写入。
-   * OpenAPI 产品挂载字段为 `l3CategoryId`。
-   */
-  l2CategoryId: string
+  /** 必填：GB/T 4754 门类中文原文 */
+  industryCategory: IndustryCategory | string
+  /** 可选目录树三级挂载（非行业分类语义） */
+  l3CategoryId?: string | null
+  /** 可选；有 l3 时可派生 */
+  l2CategoryId?: string
   businessCategory?: string
   businessSubCategory?: string
   dataSource?: string

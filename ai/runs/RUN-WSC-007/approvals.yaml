@@ -1,0 +1,24 @@
+# RUN-WSC-007 批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
+
+approvals:
+  - id: APPR-WSC-RELEASE-007
+    runId: RUN-WSC-007
+    planId: PLAN-WSC-4.1
+    snapshotId: SNAP-WSC-004
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-08-03T13:04:30+08:00
+    source: chat
+    utterance: 批准发布
+    scope: hotfix-package
+    basedOn:
+      - planning/tasks/TESTRUN-TASK-WSC-501.md
+      - planning/tasks/REV-TASK-WSC-501.md
+      - planning/tasks/TESTRUN-TASK-WSC-502.md
+      - planning/tasks/REV-TASK-WSC-502.md
+      - design/decisions/DEC-WSC-006.md
+    notes: |
+      HOTFIX：industryCategory 为 GB/T 门类产品字段；导入/无挂载归入「未分类数据」；
+      行业分类不作目录节点。契约 wsc-contracts@2.2.0。

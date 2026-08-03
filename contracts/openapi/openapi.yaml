@@ -1,11 +1,12 @@
 openapi: 3.0.3
 info:
   title: WSC Access Workbench API
-  version: 2.1.0
+  version: 2.2.0
   description: |
-    wsc-contracts@2.1.0 — 接入端工作台 V1.3（OpenAPI 结构 + v0729 导入）。
+    wsc-contracts@2.2.0 — 接入端工作台 V1.3（OpenAPI 结构 + v0729 导入；DEC-WSC-006）。
     统一响应包装：{ code, message, data, correlationId }；成功时 code="0"。
     产品编码格式（DEC-WSC-001）：`{DOMAIN}-{FEATURE}-{NNNN}`，DOMAIN/FEATURE 为大写字母与数字，NNNN 至少 4 位数字。
+    产品字段 industryCategory：GB/T 4754 门类中文原文（非目录树节点）；l3CategoryId 可空（方案 A）。
     typeSpecific：按 productType 填充 api/dataset/report/other；OTHER 允许 contentDescription 及共用时间/地域（修订 OQ-004）。
     typeSpecific.api：swaggerFileContent（原文归档）+ endpoints[]（派生存贮）；兼容旧 endpoint。
     导入模板：v0729 列名行（无产品编码列；编码由服务端生成）。旧模板 → ERR_IMPORT_TEMPLATE_UNSUPPORTED。
@@ -316,6 +317,7 @@ paths:
                   productCode: MED-EMR-0002
                   productName: 电子病历数据集
                   productType: DATASET
+                  industryCategory: 卫生和社会工作
                   l3CategoryId: "cat-l3-1"
                   typeSpecific:
                     dataset:
@@ -326,7 +328,7 @@ paths:
                   productCode: GEN-MISC-0001
                   productName: 其他产品示例
                   productType: OTHER
-                  l3CategoryId: "cat-l3-1"
+                  industryCategory: 建筑业
                   typeSpecific:
                     other:
                       contentDescription: 其他数据产品内容说明
@@ -338,7 +340,7 @@ paths:
                   productCode: MED-API-0002
                   productName: 核验接口
                   productType: API
-                  l3CategoryId: "cat-l3-1"
+                  industryCategory: 信息传输、软件和信息技术服务业
                   typeSpecific:
                     api:
                       swaggerFileContent: "openapi: 3.0.3\ninfo:\n  title: demo\n  version: 1.0.0\npaths: {}\n"
@@ -612,8 +614,9 @@ paths:
         HTTP 为错误响应，无部分写入；不得伪装为行级结果态。
         行级失败：文件已接受并处理完后返回成功 envelope + successCount/failureCount/reportId；
         failureCount>0 时 reportId 必填。ERR_IMPORT_ROW_INVALID 仅作报告内原因码。
-        行业分类列语义：须解析到可挂载三级（三级 id、名称或「空间/行业/子类」完整路径）；
-        无法解析到 L3 → 行级失败。模板无产品编码列时服务端按 DEC-WSC-001 自动生成。
+        行业分类列语义：GB/T 4754 门类中文原文枚举（对齐 v0729 C 列 dataValidation，写入 industryCategory）；
+        非法门类 → 行级失败（ERR_IMPORT_ROW_INVALID）。不再要求解析为三级叶子。
+        模板无产品编码列时服务端按 DEC-WSC-001 自动生成。
       operationId: importProducts
       requestBody:
         required: true
@@ -725,7 +728,7 @@ paths:
                         - rowNumber: 4
                           productCode: "MED-EMR-0099"
                           reasonCode: ERR_IMPORT_ROW_INVALID
-                          reasonMessage: 行业分类仅二级标签，缺少三级
+                          reasonMessage: 行业分类非法，须为 GB/T 4754 门类枚举：电子病历
                         - rowNumber: 8
                           productCode: "BAD-CODE"
                           reasonCode: ERR_PRODUCT_CODE_FORMAT
@@ -1179,18 +1182,48 @@ components:
         other:
           $ref: "#/components/schemas/TypeSpecificReportOrOther"
 
+    IndustryCategory:
+      type: string
+      description: |
+        GB/T 4754—2017 门类中文原文（产品字段，非目录树节点；DEC-WSC-006）。
+        枚举对齐 v0729 模板「行业分类」列 dataValidation。
+      enum:
+        - 农、林、牧、渔业
+        - 采矿业
+        - 制造业
+        - 电力、热力、燃气及水生产和供应业
+        - 建筑业
+        - 批发和零售业
+        - 交通运输、仓储和邮政业
+        - 住宿和餐饮业
+        - 信息传输、软件和信息技术服务业
+        - 金融业
+        - 房地产业
+        - 租赁和商务服务业
+        - 科学研究和技术服务业
+        - 水利、环境和公共设施管理业
+        - 居民服务、修理和其他服务业
+        - 教育
+        - 卫生和社会工作
+        - 文化、体育和娱乐业
+        - 公共管理、社会保障和社会组织
+        - 国际组织
+
     ProductWrite:
       type: object
-      required: [productCode, productName, productType, l3CategoryId]
+      required: [productCode, productName, productType, industryCategory]
       properties:
         productCode:
           $ref: "#/components/schemas/ProductCode"
         productName: { type: string }
         productType:
           $ref: "#/components/schemas/ProductType"
+        industryCategory:
+          $ref: "#/components/schemas/IndustryCategory"
         l3CategoryId:
           type: string
-          description: 须挂载可挂载的三级节点（L3）
+          nullable: true
+          description: 可选目录树三级挂载；非行业分类语义；可空（方案 A）
         businessCategory: { type: string }
         businessSubCategory: { type: string }
         dataSource: { $ref: "#/components/schemas/DataSource" }
@@ -1445,7 +1478,7 @@ components:
         v0729 权威列名行（xlsx 第 2 行；分组行不参与等值判定）。
         V1.1 最小列 example（含产品编码、数据来源/个信等）已废止。
         模板无产品编码列；编码由服务端按 DEC-WSC-001 自动生成。
-        行业分类列：三级 id、名称或「空间/行业/子类」完整路径。
+        行业分类列：GB/T 4754 门类中文原文枚举（写入 industryCategory；非三级叶子）。
       properties:
         columns:
           type: array

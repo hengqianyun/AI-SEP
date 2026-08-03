@@ -6,6 +6,9 @@ import { useAuthStore } from '@/features/auth/store/authStore'
 import { useCanWrite } from '@/features/auth/composables/useCanWrite'
 import {
   DATA_FORM_OPTIONS,
+  DELIVERY_METHOD_OPTIONS,
+  INDUSTRY_CATEGORY_OPTIONS,
+  REGION_SCOPE_OPTIONS,
   UPDATE_FREQUENCY_OPTIONS,
   useProductEditor,
 } from './composables/useProductEditor'
@@ -31,12 +34,6 @@ const {
   isDataset,
   isReport,
   isOther,
-  l1Categories,
-  l2Categories,
-  l3Categories,
-  selectedPathLabel,
-  onL1Change,
-  onL2Change,
   onProductTypeChange,
   init,
   onTagKeydown,
@@ -132,57 +129,18 @@ function goBack() {
                 <option value="OTHER">其他数据产品</option>
               </select>
             </label>
-            <div class="form-group full-width category-cascade" data-testid="category-cascade">
-              <div class="cascade-row">
-                <label class="form-group">
-                  <span class="form-label">空间（一级） <span class="required">*</span></span>
-                  <select
-                    v-model="form.l1CategoryId"
-                    class="form-select"
-                    required
-                    data-testid="cat-l1"
-                    @change="onL1Change"
-                  >
-                    <option disabled value="">请选择</option>
-                    <option v-for="c in l1Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-                  </select>
-                </label>
-                <label class="form-group">
-                  <span class="form-label">行业（二级） <span class="required">*</span></span>
-                  <select
-                    v-model="form.l2CategoryId"
-                    class="form-select"
-                    required
-                    :disabled="!form.l1CategoryId"
-                    data-testid="cat-l2"
-                    @change="onL2Change"
-                  >
-                    <option disabled value="">请选择</option>
-                    <option v-for="c in l2Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-                  </select>
-                </label>
-                <label class="form-group">
-                  <span class="form-label">子类（三级） <span class="required">*</span></span>
-                  <select
-                    v-model="form.l3CategoryId"
-                    class="form-select"
-                    required
-                    :disabled="!form.l2CategoryId"
-                    data-testid="cat-l3"
-                  >
-                    <option disabled value="">请选择</option>
-                    <option v-for="c in l3Categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-                  </select>
-                </label>
-              </div>
-              <p
-                v-if="selectedPathLabel"
-                class="path-preview"
-                data-testid="category-path-preview"
+            <label class="form-group" data-testid="industry-category">
+              <span class="form-label">行业分类 <span class="required">*</span></span>
+              <select
+                v-model="form.industryCategory"
+                class="form-select"
+                required
+                data-testid="industry-category-select"
               >
-                路径预览：{{ selectedPathLabel }}
-              </p>
-            </div>
+                <option disabled value="">请选择</option>
+                <option v-for="c in INDUSTRY_CATEGORY_OPTIONS" :key="c" :value="c">{{ c }}</option>
+              </select>
+            </label>
             <label class="form-group">
               <span class="form-label">业务大类</span>
               <input v-model="form.businessCategory" class="form-input" />
@@ -209,7 +167,19 @@ function goBack() {
             </label>
             <label class="form-group">
               <span class="form-label">交付方式</span>
-              <input v-model="form.deliveryMethod" class="form-input" />
+              <select
+                v-model="form.deliveryMethod"
+                class="form-select"
+                data-testid="delivery-method"
+              >
+                <option
+                  v-for="opt in DELIVERY_METHOD_OPTIONS"
+                  :key="opt.value || 'empty'"
+                  :value="opt.value"
+                >
+                  {{ opt.label }}
+                </option>
+              </select>
             </label>
             <label class="form-group check">
               <input v-model="form.involvesPersonalInfo" type="checkbox" />
@@ -263,7 +233,14 @@ function goBack() {
             </label>
             <label class="form-group">
               <span class="form-label">地域范围</span>
-              <input v-model="form.regionScope" class="form-input" data-testid="field-region-scope" />
+              <select
+                v-model="form.regionScope"
+                class="form-select"
+                data-testid="field-region-scope"
+              >
+                <option value="">请选择</option>
+                <option v-for="r in REGION_SCOPE_OPTIONS" :key="r" :value="r">{{ r }}</option>
+              </select>
             </label>
           </div>
 

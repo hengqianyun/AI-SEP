@@ -35,6 +35,7 @@ tests/e2e/reports/
 *.tsbuildinfo
 
 # Misc
+temp/
 *.swp
 *.swo
 AI-SEP.zip

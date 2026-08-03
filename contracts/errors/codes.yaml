@@ -1,8 +1,9 @@
-# wsc-contracts@2.1.0 — 错误码目录
+# wsc-contracts@2.2.0 — 错误码目录
 # 与 contracts/openapi/openapi.yaml 示例及统一响应包装一致
 # 继承 V1.1；V1.3 新增 ERR_IMPORT_TEMPLATE_UNSUPPORTED（旧模板/非 v0729 表头整文件拒绝）
+# V2.2：行业分类改为 industryCategory 门类枚举；ERR_CATEGORY_LEAF_REQUIRED 仅用于显式非法 L3 / 维护关联
 
-version: "2.1.0"
+version: "2.2.0"
 package: wsc-contracts
 
 codes:
@@ -29,7 +30,7 @@ codes:
     httpStatus: 400
     code: ERR_CATEGORY_LEAF_REQUIRED
     message: "产品须挂载三级分类节点"
-    refs: [REQ-CAT-005, REQ-CAT-007, REQ-CAT-008]
+    refs: [REQ-CAT-005, REQ-CAT-007]
 
   ERR_MAINTENANCE_FORBIDDEN:
     httpStatus: 403

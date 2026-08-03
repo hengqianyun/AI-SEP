@@ -2,6 +2,7 @@ package com.shdata.datachain.catalog.editor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shdata.datachain.catalog.IndustryCategories;
 import com.shdata.datachain.catalog.browse.CatalogBrowseSeedStore;
 import com.shdata.datachain.catalog.browse.CatalogCategory;
 import com.shdata.datachain.catalog.browse.CatalogProduct;
@@ -19,9 +20,10 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 
 /**
- * 产品新增/编辑 + 同事务模拟存证（DEC-WSC-001/002；TASK-WSC-301 typeSpecific 2.1.0）。
+ * 产品新增/编辑 + 同事务模拟存证（DEC-WSC-001/002；TASK-WSC-301 typeSpecific；DEC-WSC-006）。
  *
- * <p>适配失败时不落产品半成品、不写孤儿上链行。须挂载 L3（{@code ERR_CATEGORY_LEAF_REQUIRED}）。
+ * <p>适配失败时不落产品半成品、不写孤儿上链行。必填 {@code industryCategory}（GB/T 门类）；
+ * {@code l3CategoryId} 可空；若显式传入则须为可挂载 L3。
  * OTHER 允许 {@code typeSpecific.other.contentDescription}；API 写冲突以客户端 endpoints 为准。
  */
 @Service
@@ -148,9 +150,11 @@ public class ProductEditorService {
     snap.put("productType", product.productType());
     snap.put("categoryPath", product.categoryPath());
     snap.put("categoryPathParts", categoryPathParts(product.l3CategoryId()));
+    snap.put("industryCategory", product.industryCategory());
     Map<String, Object> basic = new LinkedHashMap<>();
     basic.put("businessCategory", product.businessCategory());
     basic.put("businessSubCategory", product.businessSubCategory());
+    basic.put("industryCategory", product.industryCategory());
     basic.put("dataSource", product.dataSource());
     basic.put("updateFrequency", product.updateFrequency());
     basic.put("deliveryMethod", product.deliveryMethod());
@@ -194,6 +198,7 @@ public class ProductEditorService {
     String productName = stringVal(body.get("productName"), "").trim();
     String productCode = stringVal(body.get("productCode"), "").trim();
     String productType = stringVal(body.get("productType"), "").trim();
+    String industryCategoryRaw = stringVal(body.get("industryCategory"), "").trim();
     String l3CategoryId = stringVal(body.get("l3CategoryId"), "").trim();
 
     if (productName.isEmpty() || productCode.isEmpty()) {
@@ -212,20 +217,31 @@ public class ProductEditorService {
       throw new BusinessException(400, "ERR_VALIDATION", "产品类型非法", null);
     }
 
-    if (l3CategoryId.isEmpty()) {
-      throw new BusinessException(
-          400, "ERR_CATEGORY_LEAF_REQUIRED", "产品须挂载三级分类节点", null);
+    if (industryCategoryRaw.isEmpty()) {
+      throw new BusinessException(400, "ERR_VALIDATION", "行业分类为必填项", null);
     }
-    Optional<CatalogCategory> l3 = catalog.findCategory(l3CategoryId);
-    if (l3.isEmpty() || !"L3".equals(l3.get().level())) {
+    String industryCategory = IndustryCategories.normalizeOrNull(industryCategoryRaw);
+    if (industryCategory == null) {
       throw new BusinessException(
-          400, "ERR_CATEGORY_LEAF_REQUIRED", "产品须挂载三级分类节点", null);
+          400, "ERR_VALIDATION", "行业分类非法，须为 GB/T 4754 门类枚举：" + industryCategoryRaw, null);
     }
-    String l2CategoryId = catalog.resolveL2IdFromL3(l3CategoryId);
-    String l1CategoryId = catalog.resolveL1IdFromL3(l3CategoryId);
-    if (l2CategoryId == null || l1CategoryId == null) {
-      throw new BusinessException(
-          400, "ERR_CATEGORY_LEAF_REQUIRED", "产品须挂载三级分类节点", null);
+
+    String l2CategoryId = null;
+    String l1CategoryId = null;
+    if (!l3CategoryId.isEmpty()) {
+      Optional<CatalogCategory> l3 = catalog.findCategory(l3CategoryId);
+      if (l3.isEmpty() || !"L3".equals(l3.get().level())) {
+        throw new BusinessException(
+            400, "ERR_CATEGORY_LEAF_REQUIRED", "产品须挂载三级分类节点", null);
+      }
+      l2CategoryId = catalog.resolveL2IdFromL3(l3CategoryId);
+      l1CategoryId = catalog.resolveL1IdFromL3(l3CategoryId);
+      if (l2CategoryId == null || l1CategoryId == null) {
+        throw new BusinessException(
+            400, "ERR_CATEGORY_LEAF_REQUIRED", "产品须挂载三级分类节点", null);
+      }
+    } else {
+      l3CategoryId = null;
     }
 
     @SuppressWarnings("unchecked")
@@ -246,6 +262,7 @@ public class ProductEditorService {
         productCode,
         productName,
         productType,
+        industryCategory,
         l3CategoryId,
         l2CategoryId,
         l1CategoryId,
@@ -360,7 +377,8 @@ public class ProductEditorService {
 
   private CatalogProduct toProduct(
       String id, ValidatedWrite w, int chainCount, Integer latestVersionNo) {
-    String path = catalog.resolveCategoryPathFromL3(w.l3CategoryId());
+    String path =
+        w.l3CategoryId() == null ? null : catalog.resolveCategoryPathFromL3(w.l3CategoryId());
     return new CatalogProduct(
         id,
         w.productCode(),
@@ -388,6 +406,7 @@ public class ProductEditorService {
         w.price(),
         w.propertyRightsType(),
         w.l3CategoryId(),
+        w.industryCategory(),
         Instant.now());
   }
 
@@ -419,6 +438,7 @@ public class ProductEditorService {
         p.price(),
         p.propertyRightsType(),
         p.l3CategoryId(),
+        p.industryCategory(),
         Instant.now());
   }
 
@@ -428,6 +448,7 @@ public class ProductEditorService {
     m.put("productCode", p.productCode());
     m.put("productName", p.productName());
     m.put("productType", p.productType());
+    m.put("industryCategory", p.industryCategory());
     m.put("l2CategoryId", p.l2CategoryId());
     if (p.l3CategoryId() != null) {
       m.put("l3CategoryId", p.l3CategoryId());
@@ -492,6 +513,7 @@ public class ProductEditorService {
       String productCode,
       String productName,
       String productType,
+      String industryCategory,
       String l3CategoryId,
       String l2CategoryId,
       String l1CategoryId,

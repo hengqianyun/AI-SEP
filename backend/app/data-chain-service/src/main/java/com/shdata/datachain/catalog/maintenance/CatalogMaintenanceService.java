@@ -165,6 +165,7 @@ public class CatalogMaintenanceService {
             src.price(),
             src.propertyRightsType(),
             l3Id,
+            src.industryCategory(),
             Instant.now());
     catalog.upsertProduct(updated);
     return updated;

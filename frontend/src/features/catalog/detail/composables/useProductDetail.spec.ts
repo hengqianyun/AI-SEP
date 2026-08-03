@@ -11,6 +11,7 @@ vi.mock('@/api/catalog', () => ({
           productCode: 'GEN-API-0001',
           productName: '旧接口产品',
           productType: 'API',
+          industryCategory: '信息传输、软件和信息技术服务业',
           l2CategoryId: 'cat-l2-emr',
           l3CategoryId: 'cat-l3-emr-desense',
           categoryPath: '医疗卫生 / 电子病历 / 脱敏病历',
@@ -27,6 +28,7 @@ vi.mock('@/api/catalog', () => ({
         productCode: 'GEN-MISC-0005',
         productName: '其他',
         productType: 'OTHER',
+        industryCategory: '建筑业',
         l2CategoryId: 'cat-l2-emr',
         l3CategoryId: 'cat-l3-emr-desense',
         categoryPath: '医疗卫生 / 电子病历 / 脱敏病历',
@@ -45,6 +47,7 @@ describe('useProductDetail', () => {
     await d.load('prod-1')
     expect(d.state.value).toBe('ready')
     expect(d.product.value?.productType).toBe('OTHER')
+    expect(d.product.value?.industryCategory).toBe('建筑业')
     expect(d.product.value?.l3CategoryId).toBe('cat-l3-emr-desense')
     expect(d.product.value?.categoryPath).toContain('脱敏病历')
     expect(d.product.value?.typeSpecific?.other?.contentDescription).toBe('其他内容')

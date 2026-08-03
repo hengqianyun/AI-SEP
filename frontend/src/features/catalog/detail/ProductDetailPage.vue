@@ -88,8 +88,12 @@ function goBack() {
               <span class="detail-label">产品类型</span>
               <span class="detail-value">{{ product.productType }}</span>
             </div>
+            <div class="detail-item" data-testid="industry-category">
+              <span class="detail-label">行业分类</span>
+              <span class="detail-value">{{ product.industryCategory || '—' }}</span>
+            </div>
             <div class="detail-item detail-item-path" data-testid="category-path">
-              <span class="detail-label">分类路径（三级）</span>
+              <span class="detail-label">目录挂载路径（可选）</span>
               <span class="detail-value path">{{ product.categoryPath || '—' }}</span>
             </div>
             <div class="detail-item">

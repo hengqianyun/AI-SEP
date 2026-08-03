@@ -7,8 +7,8 @@ import java.util.Map;
 /**
  * 目录产品（列表/预览/详情/编辑共用字段）。
  *
- * <p>V1.1：产品挂载点为三级（{@code l3CategoryId}）；保留 {@code l1}/{@code l2} 便于筛选。
- * 兼容构造器（无 l3）供 editor 等尚未切换的写路径编译；缺省 {@code l3CategoryId=null}。
+ * <p>V2.2 / DEC-WSC-006：{@code industryCategory} 为 GB/T 4754 门类产品字段；
+ * {@code l3CategoryId} 为可选目录挂载，可空。
  */
 public record CatalogProduct(
     String id,
@@ -37,9 +37,10 @@ public record CatalogProduct(
     String price,
     String propertyRightsType,
     String l3CategoryId,
+    String industryCategory,
     Instant updatedAt) {
 
-  /** 兼容无三级挂载的旧构造（editor 等）。 */
+  /** 兼容无三级挂载、无行业分类的旧构造。 */
   public CatalogProduct(
       String id,
       String productCode,
@@ -93,10 +94,11 @@ public record CatalogProduct(
         price,
         propertyRightsType,
         null,
+        null,
         null);
   }
 
-  /** 兼容无 {@code updatedAt} 的构造。 */
+  /** 兼容无 {@code industryCategory}/{@code updatedAt} 的构造。 */
   public CatalogProduct(
       String id,
       String productCode,
@@ -151,6 +153,67 @@ public record CatalogProduct(
         price,
         propertyRightsType,
         l3CategoryId,
+        null,
         null);
+  }
+
+  /** 兼容无 {@code industryCategory} 的构造（含 updatedAt）。 */
+  public CatalogProduct(
+      String id,
+      String productCode,
+      String productName,
+      String productType,
+      String l2CategoryId,
+      String l1CategoryId,
+      String categoryPath,
+      int chainCount,
+      Integer latestVersionNo,
+      String dataSource,
+      String deliveryMethod,
+      Boolean involvesPublicData,
+      Boolean involvesPersonalInfo,
+      String summary,
+      String scenario,
+      String supplierName,
+      String supplierCreditCode,
+      List<String> tags,
+      Map<String, Object> typeSpecific,
+      String businessCategory,
+      String businessSubCategory,
+      String updateFrequency,
+      String billingMethod,
+      String price,
+      String propertyRightsType,
+      String l3CategoryId,
+      Instant updatedAt) {
+    this(
+        id,
+        productCode,
+        productName,
+        productType,
+        l2CategoryId,
+        l1CategoryId,
+        categoryPath,
+        chainCount,
+        latestVersionNo,
+        dataSource,
+        deliveryMethod,
+        involvesPublicData,
+        involvesPersonalInfo,
+        summary,
+        scenario,
+        supplierName,
+        supplierCreditCode,
+        tags,
+        typeSpecific,
+        businessCategory,
+        businessSubCategory,
+        updateFrequency,
+        billingMethod,
+        price,
+        propertyRightsType,
+        l3CategoryId,
+        null,
+        updatedAt);
   }
 }

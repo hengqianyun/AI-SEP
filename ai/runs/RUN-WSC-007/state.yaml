@@ -1,0 +1,28 @@
+runId: RUN-WSC-007
+currentNode: COMPLETED
+round: 2
+status: COMPLETED
+blockedBy: []
+releasePaused: false
+completedNodes:
+  - DEVELOPMENT
+  - CODE_REVIEW
+  - TESTING
+  - RELEASE_REVIEW
+activeWave: null
+activeTaskIds: []
+verifiedTaskIds:
+  - TASK-WSC-501
+  - TASK-WSC-502
+activeSnapshotId: SNAP-WSC-004
+activePlanId: PLAN-WSC-4.1
+basedOnRun: RUN-WSC-006
+kind: HOTFIX
+scope: |
+  industryCategory product field; unmounted/imported products under 未分类数据 only
+poDecision: A
+decision: DEC-WSC-006
+releaseApprovalId: APPR-WSC-RELEASE-007
+nextAction: null
+updatedAt: 2026-08-03T13:04:45+08:00
+completedAt: 2026-08-03T13:04:45+08:00

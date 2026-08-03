@@ -2,17 +2,22 @@ package com.shdata.datachain.security;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.jayway.jsonpath.JsonPath;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -54,7 +59,7 @@ class SessionAuthIntegrationTest {
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"productCode\":\"TST-ADM-0001\",\"productName\":\"矩阵管理员产品\",\"productType\":\"OTHER\",\"l2CategoryId\":\"cat-l2-emr\"}"))
+                    "{\"productCode\":\"TST-ADM-0001\",\"productName\":\"矩阵管理员产品\",\"productType\":\"OTHER\",\"industryCategory\":\"卫生和社会工作\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
     mockMvc
@@ -63,18 +68,15 @@ class SessionAuthIntegrationTest {
         .andExpect(jsonPath("$.code").value("0"));
     mockMvc
         .perform(
-            put("/api/v1/catalog/maintenance/entries/p-1")
+            put("/api/v1/catalog/maintenance/entries/prod-pending-001")
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"l3CategoryId\":\"cat-l3-1\"}"))
+                .content("{\"l3CategoryId\":\"cat-l3-txn-retail\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
+    String reportId = importWithErrors(session);
     mockMvc
-        .perform(post("/api/v1/catalog/products/import").session(session))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.code").value("0"));
-    mockMvc
-        .perform(get("/api/v1/catalog/products/import/reports/rep-admin").session(session))
+        .perform(get("/api/v1/catalog/products/import/reports/" + reportId).session(session))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
   }
@@ -109,15 +111,12 @@ class SessionAuthIntegrationTest {
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"productCode\":\"TST-PRV-0001\",\"productName\":\"矩阵提供方产品\",\"productType\":\"OTHER\",\"l2CategoryId\":\"cat-l2-emr\"}"))
+                    "{\"productCode\":\"TST-PRV-0001\",\"productName\":\"矩阵提供方产品\",\"productType\":\"OTHER\",\"industryCategory\":\"卫生和社会工作\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
+    String reportId = importWithErrors(session);
     mockMvc
-        .perform(post("/api/v1/catalog/products/import").session(session))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.code").value("0"));
-    mockMvc
-        .perform(get("/api/v1/catalog/products/import/reports/rep-prv").session(session))
+        .perform(get("/api/v1/catalog/products/import/reports/" + reportId).session(session))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
   }
@@ -203,6 +202,43 @@ class SessionAuthIntegrationTest {
                 .content("{\"username\":\"admin\",\"password\":\"wrong\"}"))
         .andExpect(status().isUnauthorized())
         .andExpect(jsonPath("$.code").value("401"));
+  }
+
+  /** 真实导入 multipart（行级失败）以探测写权限并拿到可下载 reportId。 */
+  private String importWithErrors(MockHttpSession session) throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                multipart("/api/v1/catalog/products/import")
+                    .file(importFixture("all-fail.csv"))
+                    .session(session))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("0"))
+            .andExpect(jsonPath("$.data.reportId").isNotEmpty())
+            .andReturn();
+    return JsonPath.read(result.getResponse().getContentAsString(), "$.data.reportId");
+  }
+
+  private static MockMultipartFile importFixture(String name) throws Exception {
+    byte[] bytes = Files.readAllBytes(resolveImportFixtures().resolve(name));
+    return new MockMultipartFile("file", name, "text/csv", bytes);
+  }
+
+  private static Path resolveImportFixtures() {
+    Path cwd = Path.of("").toAbsolutePath();
+    Path[] candidates =
+        new Path[] {
+          cwd.resolve("tests/fixtures/import"),
+          cwd.resolve("../../tests/fixtures/import").normalize(),
+          cwd.resolve("../../../tests/fixtures/import").normalize(),
+          Path.of("C:/WorkSpace/AI-SEP/tests/fixtures/import")
+        };
+    for (Path p : candidates) {
+      if (Files.isDirectory(p) && Files.exists(p.resolve("all-fail.csv"))) {
+        return p;
+      }
+    }
+    return cwd.resolve("tests/fixtures/import");
   }
 
   private MockHttpSession login(String username, String password, String role) throws Exception {

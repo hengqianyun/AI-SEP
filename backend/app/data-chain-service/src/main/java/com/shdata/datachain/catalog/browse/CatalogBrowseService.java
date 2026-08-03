@@ -121,6 +121,9 @@ public class CatalogBrowseService {
     m.put("productCode", p.productCode());
     m.put("productName", p.productName());
     m.put("productType", p.productType());
+    if (p.industryCategory() != null) {
+      m.put("industryCategory", p.industryCategory());
+    }
     m.put("l2CategoryId", p.l2CategoryId());
     if (p.l3CategoryId() != null) {
       m.put("l3CategoryId", p.l3CategoryId());
