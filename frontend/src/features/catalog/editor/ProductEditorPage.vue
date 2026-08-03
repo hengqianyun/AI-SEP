@@ -37,6 +37,7 @@ const {
   selectedPathLabel,
   onL1Change,
   onL2Change,
+  onProductTypeChange,
   init,
   onTagKeydown,
   removeTag,
@@ -112,13 +113,19 @@ function goBack() {
               <input
                 v-model="form.productCode"
                 class="form-input"
-                :readonly="mode === 'edit'"
+                readonly
                 required
               />
+              <p v-if="mode === 'create'" class="form-hint">自动生成</p>
             </label>
             <label class="form-group">
               <span class="form-label">产品类型</span>
-              <select v-model="form.productType" class="form-select" data-testid="product-type">
+              <select
+                v-model="form.productType"
+                class="form-select"
+                data-testid="product-type"
+                @change="onProductTypeChange"
+              >
                 <option value="DATASET">数据集</option>
                 <option value="REPORT">数据报告</option>
                 <option value="API">数据接口</option>
@@ -399,6 +406,9 @@ function goBack() {
 
 <style scoped>
 .product-editor {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 0 0 40px;
   color: var(--text-primary);
 }
@@ -497,15 +507,20 @@ function goBack() {
 }
 
 .editor-body {
-  max-width: 900px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-.editor-body.wide {
-  max-width: 1100px;
+/* API 宽布局：流体铺满；约束子项以免 OpenAPI 面板横向挤爆 */
+.editor-body.wide .type-block {
+  min-width: 0;
 }
 
 .editor-form-card {
   padding: 24px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .form-section {
@@ -531,8 +546,15 @@ function goBack() {
   gap: 16px;
 }
 
+@media (min-width: 1400px) {
+  .form-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .type-block {
   margin-top: 16px;
+  min-width: 0;
 }
 
 .form-group {

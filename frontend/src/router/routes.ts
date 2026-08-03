@@ -6,7 +6,6 @@ import PlaceholderView from '@/views/PlaceholderView.vue'
  * 目录维护业务页路由由后续任务追加；本任务不实现 catalog/shell/auth/chain 业务页。
  */
 export const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: '/overview' },
   {
     path: '/overview',
     name: 'overview',

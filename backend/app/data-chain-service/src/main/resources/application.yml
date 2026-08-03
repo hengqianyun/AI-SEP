@@ -6,9 +6,9 @@ spring:
     name: data-chain-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:data_chain}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    url: jdbc:mysql://${DB_HOST:58.33.102.13}:${DB_PORT:30116}/${DB_NAME:data_chain}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:data_chain}
+    password: ${DB_PASSWORD:KRmrjLfAS6BT5tsN}
     hikari:
       minimum-idle: 2
       maximum-pool-size: 10
@@ -31,10 +31,10 @@ spring:
     validate-on-migrate: true
     validate-migration-naming: true
   redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:}
-    database: ${REDIS_DATABASE:0}
+    host: ${REDIS_HOST:58.33.102.13}
+    port: ${REDIS_PORT:16379}
+    password: ${REDIS_PASSWORD:PyV_7ITZEWuGZMHi}
+    database: ${REDIS_DATABASE:5}
   sql:
     init:
       mode: never

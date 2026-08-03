@@ -3,6 +3,7 @@ package com.shdata.datachain.catalog.maintenance;
 import com.shdata.datachain.catalog.browse.CatalogBrowseSeedStore;
 import com.shdata.datachain.catalog.browse.CatalogCategory;
 import com.shdata.datachain.catalog.browse.CatalogProduct;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -163,7 +164,8 @@ public class CatalogMaintenanceService {
             src.billingMethod(),
             src.price(),
             src.propertyRightsType(),
-            l3Id);
+            l3Id,
+            Instant.now());
     catalog.upsertProduct(updated);
     return updated;
   }
@@ -285,7 +287,8 @@ public class CatalogMaintenanceService {
         "面议",
         "面议",
         "数据使用权",
-        null);
+        null,
+        Instant.now());
   }
 
   static final class BusinessException extends RuntimeException {

@@ -116,6 +116,7 @@ export type Product = ProductWrite & {
   chainCount: number
   categoryPath?: string
   latestVersionNo?: number
+  updatedAt?: string
 }
 
 export type ProductPage = {

@@ -8,6 +8,7 @@ import com.shdata.datachain.catalog.browse.CatalogProduct;
 import com.shdata.datachain.chain.ChainAttestationPort;
 import com.shdata.datachain.chain.InMemoryChainStore;
 import com.shdata.datachain.security.AuthAuditLogger;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -386,7 +387,8 @@ public class ProductEditorService {
         w.billingMethod(),
         w.price(),
         w.propertyRightsType(),
-        w.l3CategoryId());
+        w.l3CategoryId(),
+        Instant.now());
   }
 
   private static CatalogProduct withChainMeta(CatalogProduct p, int chainCount, int latestVersionNo) {
@@ -416,7 +418,8 @@ public class ProductEditorService {
         p.billingMethod(),
         p.price(),
         p.propertyRightsType(),
-        p.l3CategoryId());
+        p.l3CategoryId(),
+        Instant.now());
   }
 
   private Map<String, Object> toMap(CatalogProduct p) {
@@ -449,6 +452,9 @@ public class ProductEditorService {
     m.put("propertyRightsType", p.propertyRightsType());
     if (p.typeSpecific() != null && !p.typeSpecific().isEmpty()) {
       m.put("typeSpecific", new LinkedHashMap<>(p.typeSpecific()));
+    }
+    if (p.updatedAt() != null) {
+      m.put("updatedAt", p.updatedAt().toString());
     }
     return m;
   }

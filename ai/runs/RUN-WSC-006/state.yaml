@@ -1,0 +1,24 @@
+runId: RUN-WSC-006
+currentNode: COMPLETED
+round: 1
+status: COMPLETED
+blockedBy: []
+completedNodes:
+  - DEVELOPMENT
+  - CODE_REVIEW
+  - TESTING
+  - RELEASE_REVIEW
+activeWave: null
+activeTaskIds: []
+verifiedTaskIds:
+  - TASK-WSC-401
+  - TASK-WSC-402
+activeSnapshotId: SNAP-WSC-004
+activePlanId: PLAN-WSC-4.1
+basedOnRun: RUN-WSC-005
+kind: FEATURE
+scope: portal + hires; HOTFIX detail/editor fluid width
+releasePaused: false
+releaseApprovalId: APPR-WSC-RELEASE-006
+nextAction: null
+updatedAt: 2026-08-03T10:44:45+08:00

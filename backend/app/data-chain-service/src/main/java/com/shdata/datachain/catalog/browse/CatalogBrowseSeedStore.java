@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.time.Instant;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.stereotype.Component;
@@ -174,6 +175,9 @@ public class CatalogBrowseSeedStore {
   }
 
   private void seed() {
+    Instant base = Instant.parse("2026-06-01T08:00:00Z");
+    int seq = 0;
+
     // L1 空间
     categories.add(new CatalogCategory("cat-l1-health", "医疗卫生", "L1", null));
     categories.add(new CatalogCategory("cat-l1-finance", "金融服务", "L1", null));
@@ -218,7 +222,8 @@ public class CatalogBrowseSeedStore {
             "DAY",
             "按次",
             "面议",
-            "数据使用权"));
+            "数据使用权",
+            base.plusSeconds(++seq * 3600L)));
 
     products.add(
         product(
@@ -247,7 +252,8 @@ public class CatalogBrowseSeedStore {
             "WEEK",
             "按次",
             "面议",
-            "数据使用权"));
+            "数据使用权",
+            base.plusSeconds(++seq * 3600L)));
 
     products.add(
         product(
@@ -276,7 +282,8 @@ public class CatalogBrowseSeedStore {
             "WEEK",
             "包年",
             "面议",
-            "数据使用权"));
+            "数据使用权",
+            base.plusSeconds(++seq * 3600L)));
 
     products.add(
         product(
@@ -305,7 +312,8 @@ public class CatalogBrowseSeedStore {
             "REALTIME",
             "按调用",
             "面议",
-            "数据使用权"));
+            "数据使用权",
+            base.plusSeconds(++seq * 3600L)));
 
     products.add(
         product(
@@ -334,7 +342,8 @@ public class CatalogBrowseSeedStore {
             "DAY",
             "免费试用",
             "0",
-            "数据使用权"));
+            "数据使用权",
+            base.plusSeconds(++seq * 3600L)));
 
     products.add(
         product(
@@ -363,7 +372,8 @@ public class CatalogBrowseSeedStore {
             "MONTH",
             "面议",
             "面议",
-            "数据使用权"));
+            "数据使用权",
+            base.plusSeconds(++seq * 3600L)));
 
     // 额外种子便于滚动分页（同筛选下多页）
     for (int i = 1; i <= 18; i++) {
@@ -395,7 +405,8 @@ public class CatalogBrowseSeedStore {
               "DAY",
               "按次",
               "面议",
-              "数据使用权"));
+              "数据使用权",
+              base.plusSeconds(++seq * 3600L)));
     }
   }
 
@@ -425,7 +436,8 @@ public class CatalogBrowseSeedStore {
       String updateFrequency,
       String billingMethod,
       String price,
-      String propertyRightsType) {
+      String propertyRightsType,
+      Instant updatedAt) {
     return new CatalogProduct(
         id,
         code,
@@ -452,6 +464,7 @@ public class CatalogBrowseSeedStore {
         billingMethod,
         price,
         propertyRightsType,
-        l3);
+        l3,
+        updatedAt);
   }
 }

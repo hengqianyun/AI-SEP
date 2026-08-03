@@ -217,6 +217,23 @@ class CatalogBrowseIntegrationTest {
                 Matchers.everyItem(Matchers.containsString("脱敏病历"))));
   }
 
+  @Test
+  void listProducts_sortedByUpdatedAtDesc() throws Exception {
+    MockHttpSession session = login("user", "demo");
+    mockMvc
+        .perform(
+            get("/api/v1/catalog/products")
+                .session(session)
+                .param("l3CategoryId", "cat-l3-emr-desense")
+                .param("page", "1")
+                .param("pageSize", "20"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("0"))
+        .andExpect(jsonPath("$.data.items[0].productCode").value("MED-PG-0018"))
+        .andExpect(jsonPath("$.data.items[0].updatedAt").isNotEmpty())
+        .andExpect(jsonPath("$.data.items[1].updatedAt").isNotEmpty());
+  }
+
   private MockHttpSession login(String username, String password) throws Exception {
     MvcResult result =
         mockMvc

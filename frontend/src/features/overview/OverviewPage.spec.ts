@@ -18,6 +18,8 @@ describe('OverviewPage visual tokens (TASK-WSC-202)', () => {
     expect(src).toContain('data-testid="metrics-loading"')
     expect(src).toContain('data-testid="metrics-empty"')
     expect(src).toContain('data-testid="overview-refresh"')
+    expect(src).toContain('width: 100%')
+    expect(src).not.toContain('max-width: 1200px')
     expect(src).not.toMatch(/from ['"]ant-design-vue/)
   })
 })

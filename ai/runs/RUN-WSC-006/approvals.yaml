@@ -1,0 +1,22 @@
+# RUN-WSC-006 批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
+
+approvals:
+  - id: APPR-WSC-RELEASE-006
+    runId: RUN-WSC-006
+    planId: PLAN-WSC-4.1
+    snapshotId: SNAP-WSC-004
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-08-03T10:44:30+08:00
+    source: chat
+    utterance: 批准发布
+    scope: feature-package
+    basedOn:
+      - planning/tasks/TESTRUN-TASK-WSC-401.md
+      - planning/tasks/REV-TASK-WSC-401.md
+      - planning/tasks/TESTRUN-TASK-WSC-402.md
+      - planning/tasks/REV-TASK-WSC-402.md
+    notes: |
+      门户静态页 + 高分屏适配；HOTFIX 详情/编辑流体宽度。

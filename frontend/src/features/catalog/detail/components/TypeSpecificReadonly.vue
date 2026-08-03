@@ -61,6 +61,12 @@ const apiBlock = computed(() => props.typeSpecific?.api)
   gap: 12px;
 }
 
+@media (min-width: 1400px) {
+  .detail-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .detail-item {
   display: flex;
   flex-direction: column;

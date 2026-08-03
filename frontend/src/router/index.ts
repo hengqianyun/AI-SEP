@@ -5,20 +5,12 @@ import {
 } from 'vue-router'
 import { routes as contractRoutes } from './routes'
 import LoginView from '@/features/auth/views/LoginView.vue'
+import PortalLayout from '@/layouts/PortalLayout.vue'
 import WorkbenchLayout from '@/layouts/WorkbenchLayout.vue'
 import { useAuthStore } from '@/features/auth/store/authStore'
 
-/**
- * 在不修改 routes.ts（001 冻结清单）的前提下：
- * - 增加 /login
- * - 将契约路由挂到 WorkbenchLayout 下
- * - 挂载登录守卫
- */
 function nestUnderLayout(raw: RouteRecordRaw[]): RouteRecordRaw[] {
   return raw.map((r) => {
-    if (r.redirect != null && (r.path === '/' || r.path === '')) {
-      return { path: '', redirect: r.redirect }
-    }
     const path =
       typeof r.path === 'string' && r.path.startsWith('/') ? r.path.slice(1) : r.path
     return { ...r, path }
@@ -33,6 +25,31 @@ export const router = createRouter({
       name: 'login',
       component: LoginView,
       meta: { public: true, title: '登录' },
+    },
+    {
+      path: '/',
+      component: PortalLayout,
+      meta: { public: true },
+      children: [
+        {
+          path: '',
+          name: 'portal-home',
+          component: () => import('@/features/portal/HomePage.vue'),
+          meta: { public: true, title: '数据要素流通门户' },
+        },
+        {
+          path: 'workspace',
+          name: 'portal-workspace',
+          component: () => import('@/features/portal/WorkspaceIntroPage.vue'),
+          meta: { public: true, title: '接入端简介' },
+        },
+        {
+          path: 'docs',
+          name: 'portal-docs',
+          component: () => import('@/features/portal/DocsPage.vue'),
+          meta: { public: true, title: '标准接入文档' },
+        },
+      ],
     },
     {
       path: '/',

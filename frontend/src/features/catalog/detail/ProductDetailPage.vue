@@ -195,6 +195,9 @@ function goBack() {
 
 <style scoped>
 .product-detail {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 0 0 40px;
   color: var(--text-primary);
 }
@@ -302,7 +305,9 @@ function goBack() {
 }
 
 .detail-page-body {
-  max-width: 1100px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .detail-page-card {
@@ -330,6 +335,12 @@ function goBack() {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+}
+
+@media (min-width: 1400px) {
+  .detail-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .detail-item {

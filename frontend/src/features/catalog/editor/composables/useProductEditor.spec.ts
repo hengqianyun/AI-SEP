@@ -32,11 +32,13 @@ const sharedYaml = readFileSync(
 )
 
 function fillRequired(ed: ReturnType<typeof useProductEditor>) {
-  ed.form.productCode = 'GEN-NEW-0001'
   ed.form.productName = '测试产品'
   ed.form.l1CategoryId = 'cat-l1-health'
   ed.form.l2CategoryId = 'cat-l2-emr'
   ed.form.l3CategoryId = 'cat-l3-emr-desense'
+  if (!ed.form.productCode) {
+    ed.form.productCode = 'GEN-NEW-0001'
+  }
 }
 
 describe('useProductEditor', () => {
@@ -47,6 +49,38 @@ describe('useProductEditor', () => {
     createProduct.mockImplementation(async (body: { l3CategoryId?: string }) => ({
       data: { id: 'prod-new', productCode: 'GEN-NEW-0001', l3CategoryId: body.l3CategoryId },
     }))
+  })
+
+  it('create init auto-generates code; onProductTypeChange regenerates', async () => {
+    const ed = useProductEditor('create')
+    await ed.init()
+    expect(ed.form.productCode).toMatch(/^[A-Z0-9]+-[A-Z0-9]+-[0-9]{4,}$/)
+    const before = ed.form.productCode
+    ed.form.productType = 'API'
+    ed.onProductTypeChange()
+    expect(ed.form.productCode).toMatch(/^API-SVC-/)
+    expect(ed.form.productCode).not.toBe(before)
+  })
+
+  it('edit mode keeps productCode on productType change', async () => {
+    getProduct.mockResolvedValueOnce({
+      data: {
+        id: 'prod-x',
+        productCode: 'MED-EMR-0001',
+        productName: '已有产品',
+        productType: 'DATASET',
+        l3CategoryId: 'cat-l3-emr-desense',
+        l2CategoryId: 'cat-l2-emr',
+        chainCount: 1,
+        tags: [],
+      },
+    })
+    const ed = useProductEditor('edit')
+    await ed.init('prod-x')
+    const code = ed.form.productCode
+    ed.form.productType = 'API'
+    ed.onProductTypeChange()
+    expect(ed.form.productCode).toBe(code)
   })
 
   it('blocks submit without name/code and shows error feedback', async () => {

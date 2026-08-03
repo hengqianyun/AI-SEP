@@ -16,6 +16,7 @@ import {
   createEmptyEndpoint,
   parseOpenApiEndpoints,
 } from '../utils/parseOpenApi'
+import { generateProductCode } from '../utils/productCode'
 
 export type EditorMode = 'create' | 'edit'
 export type FormState = 'idle' | 'loading' | 'ready' | 'submitting' | 'success' | 'error'
@@ -138,6 +139,17 @@ export function useProductEditor(mode: EditorMode) {
     form.l1CategoryId = String(l2?.parentId || '')
   }
 
+  function refreshAutoCode() {
+    if (mode === 'create') {
+      form.productCode = generateProductCode(form.productType)
+    }
+  }
+
+  function onProductTypeChange() {
+    resetTypeSpecific()
+    refreshAutoCode()
+  }
+
   function resetTypeSpecific() {
     form.timeRange = ''
     form.regionScope = ''
@@ -232,6 +244,8 @@ export function useProductEditor(mode: EditorMode) {
         form.scenario = String(p.scenario || '')
         form.tags = [...(p.tags || [])]
         loadTypeSpecific(p.typeSpecific as Parameters<typeof loadTypeSpecific>[0])
+      } else {
+        refreshAutoCode()
       }
       state.value = 'ready'
     } catch (e) {
@@ -434,6 +448,7 @@ export function useProductEditor(mode: EditorMode) {
     selectedPathLabel,
     onL1Change,
     onL2Change,
+    onProductTypeChange,
     init,
     addTag,
     removeTag,

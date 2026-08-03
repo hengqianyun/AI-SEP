@@ -1,11 +1,13 @@
 package com.shdata.datachain.catalog.browse;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.time.Instant;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +56,10 @@ public class CatalogBrowseService {
                     involvesPublicData == null
                         || involvesPublicData.equals(p.involvesPublicData()))
             .filter(p -> matchesKeyword(keyword, p))
+            .sorted(
+                Comparator.comparing(
+                        (CatalogProduct p) -> p.updatedAt() != null ? p.updatedAt() : Instant.EPOCH)
+                    .reversed())
             .collect(Collectors.toList());
 
     long total = filtered.size();
@@ -139,6 +145,9 @@ public class CatalogBrowseService {
     m.put("propertyRightsType", p.propertyRightsType());
     if (p.typeSpecific() != null && !p.typeSpecific().isEmpty()) {
       m.put("typeSpecific", new LinkedHashMap<>(p.typeSpecific()));
+    }
+    if (p.updatedAt() != null) {
+      m.put("updatedAt", p.updatedAt().toString());
     }
     return m;
   }

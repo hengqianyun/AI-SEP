@@ -1,5 +1,6 @@
 package com.shdata.datachain.catalog.browse;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,8 @@ public record CatalogProduct(
     String billingMethod,
     String price,
     String propertyRightsType,
-    String l3CategoryId) {
+    String l3CategoryId,
+    Instant updatedAt) {
 
   /** 兼容无三级挂载的旧构造（editor 等）。 */
   public CatalogProduct(
@@ -90,6 +92,65 @@ public record CatalogProduct(
         billingMethod,
         price,
         propertyRightsType,
+        null,
+        null);
+  }
+
+  /** 兼容无 {@code updatedAt} 的构造。 */
+  public CatalogProduct(
+      String id,
+      String productCode,
+      String productName,
+      String productType,
+      String l2CategoryId,
+      String l1CategoryId,
+      String categoryPath,
+      int chainCount,
+      Integer latestVersionNo,
+      String dataSource,
+      String deliveryMethod,
+      Boolean involvesPublicData,
+      Boolean involvesPersonalInfo,
+      String summary,
+      String scenario,
+      String supplierName,
+      String supplierCreditCode,
+      List<String> tags,
+      Map<String, Object> typeSpecific,
+      String businessCategory,
+      String businessSubCategory,
+      String updateFrequency,
+      String billingMethod,
+      String price,
+      String propertyRightsType,
+      String l3CategoryId) {
+    this(
+        id,
+        productCode,
+        productName,
+        productType,
+        l2CategoryId,
+        l1CategoryId,
+        categoryPath,
+        chainCount,
+        latestVersionNo,
+        dataSource,
+        deliveryMethod,
+        involvesPublicData,
+        involvesPersonalInfo,
+        summary,
+        scenario,
+        supplierName,
+        supplierCreditCode,
+        tags,
+        typeSpecific,
+        businessCategory,
+        businessSubCategory,
+        updateFrequency,
+        billingMethod,
+        price,
+        propertyRightsType,
+        l3CategoryId,
         null);
   }
 }
