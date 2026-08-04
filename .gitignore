@@ -16,6 +16,12 @@ target/
 !**/*.example.yml
 !**/.env.example
 
+# Ops / run smoke credentials & session cookies
+**/cookie.txt
+**/_ops-cookie.txt
+**/_ops-login.json
+**/*-login-body.json
+
 # IDE / OS
 .idea/
 .vscode/
