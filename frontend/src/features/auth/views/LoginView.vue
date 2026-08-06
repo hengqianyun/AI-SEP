@@ -43,7 +43,6 @@ async function onSubmit() {
           <h1>接入端工作台</h1>
         </div>
       </div>
-      <p class="hint">演示账号：admin / provider / user，密码均为 demo</p>
       <label>
         用户名
         <input
@@ -132,13 +131,6 @@ h1 {
   font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
-}
-
-.hint {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 13px;
-  line-height: 1.5;
 }
 
 label {

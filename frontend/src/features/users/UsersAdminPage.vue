@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import type { Role } from '@/api/auth'
 import {
   createUser,
+  deleteUser,
   listUsers,
   updateUser,
   type AdminUser,
@@ -21,6 +22,7 @@ const error = ref<string | null>(null)
 
 const createOpen = ref(false)
 const creating = ref(false)
+const createError = ref<string | null>(null)
 const form = ref({
   username: '',
   password: '',
@@ -34,6 +36,14 @@ const editing = ref(false)
 const editTarget = ref<AdminUser | null>(null)
 const editRole = ref<Role>('PROVIDER')
 
+const disableOpen = ref(false)
+const disabling = ref(false)
+const disableTarget = ref<AdminUser | null>(null)
+
+const deleteOpen = ref(false)
+const deleting = ref(false)
+const deleteTarget = ref<AdminUser | null>(null)
+
 function resetCreateForm() {
   form.value = {
     username: '',
@@ -46,13 +56,14 @@ function resetCreateForm() {
 
 function openCreate() {
   if (!allowed.value) return
-  error.value = null
+  createError.value = null
   resetCreateForm()
   createOpen.value = true
 }
 
 function closeCreate() {
   createOpen.value = false
+  createError.value = null
 }
 
 function openEditRole(u: AdminUser) {
@@ -66,6 +77,32 @@ function openEditRole(u: AdminUser) {
 function closeEdit() {
   editOpen.value = false
   editTarget.value = null
+}
+
+function openDisableConfirm(u: AdminUser) {
+  if (!allowed.value) return
+  error.value = null
+  disableTarget.value = u
+  disableOpen.value = true
+}
+
+function closeDisableConfirm() {
+  if (disabling.value) return
+  disableOpen.value = false
+  disableTarget.value = null
+}
+
+function openDeleteConfirm(u: AdminUser) {
+  if (!allowed.value) return
+  error.value = null
+  deleteTarget.value = u
+  deleteOpen.value = true
+}
+
+function closeDeleteConfirm() {
+  if (deleting.value) return
+  deleteOpen.value = false
+  deleteTarget.value = null
 }
 
 async function load() {
@@ -88,7 +125,7 @@ async function load() {
 async function onCreate() {
   if (!allowed.value) return
   creating.value = true
-  error.value = null
+  createError.value = null
   try {
     await createUser({
       username: form.value.username.trim(),
@@ -98,10 +135,11 @@ async function onCreate() {
       enterpriseName: form.value.enterpriseName.trim() || undefined,
     })
     createOpen.value = false
+    createError.value = null
     resetCreateForm()
     await load()
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '创建失败'
+    createError.value = e instanceof Error ? e.message : '创建失败'
   } finally {
     creating.value = false
   }
@@ -115,6 +153,46 @@ async function softDelete(userId: string) {
     await load()
   } catch (e) {
     error.value = e instanceof Error ? e.message : '删除失败'
+  }
+}
+
+async function enableUser(u: AdminUser) {
+  if (!allowed.value) return
+  error.value = null
+  try {
+    await updateUser(u.userId, { deleted: false })
+    await load()
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : '启用失败'
+  }
+}
+
+async function confirmDisable() {
+  if (!allowed.value || !disableTarget.value) return
+  disabling.value = true
+  error.value = null
+  try {
+    await softDelete(disableTarget.value.userId)
+    disableOpen.value = false
+    disableTarget.value = null
+  } finally {
+    disabling.value = false
+  }
+}
+
+async function confirmHardDelete() {
+  if (!allowed.value || !deleteTarget.value) return
+  deleting.value = true
+  error.value = null
+  try {
+    await deleteUser(deleteTarget.value.userId)
+    deleteOpen.value = false
+    deleteTarget.value = null
+    await load()
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : '删除失败'
+  } finally {
+    deleting.value = false
   }
 }
 
@@ -191,6 +269,7 @@ onMounted(() => {
               <th>显示名</th>
               <th>角色</th>
               <th>企业</th>
+              <th>启用状态</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -200,22 +279,51 @@ onMounted(() => {
               <td>{{ u.displayName }}</td>
               <td data-testid="user-row-role-label">{{ roleLabel(u.role) }}</td>
               <td>{{ u.enterpriseName }}</td>
+              <td>
+                <span
+                  v-if="!u.deleted"
+                  data-testid="user-status-enabled"
+                >已启用</span>
+                <span
+                  v-else
+                  data-testid="user-status-disabled"
+                >已停用</span>
+              </td>
               <td class="actions">
+                <template v-if="!u.deleted">
+                  <button
+                    type="button"
+                    class="link edit"
+                    data-testid="user-edit-role"
+                    @click="openEditRole(u)"
+                  >
+                    编辑角色
+                  </button>
+                  <button
+                    type="button"
+                    class="link danger"
+                    data-testid="user-soft-delete"
+                    @click="openDisableConfirm(u)"
+                  >
+                    停用
+                  </button>
+                </template>
                 <button
+                  v-else
                   type="button"
                   class="link edit"
-                  data-testid="user-edit-role"
-                  @click="openEditRole(u)"
+                  data-testid="user-enable"
+                  @click="enableUser(u)"
                 >
-                  编辑角色
+                  启用
                 </button>
                 <button
                   type="button"
                   class="link danger"
-                  data-testid="user-soft-delete"
-                  @click="softDelete(u.userId)"
+                  data-testid="user-hard-delete"
+                  @click="openDeleteConfirm(u)"
                 >
-                  停用
+                  删除
                 </button>
               </td>
             </tr>
@@ -238,6 +346,14 @@ onMounted(() => {
               ×
             </button>
           </header>
+          <p
+            v-if="createError"
+            class="error modal-error"
+            role="alert"
+            data-testid="user-create-error"
+          >
+            {{ createError }}
+          </p>
           <div class="form-grid">
             <label>
               用户名
@@ -320,6 +436,100 @@ onMounted(() => {
               @click="saveEditRole"
             >
               保存
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-if="disableOpen && disableTarget"
+        class="modal-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="user-disable-title"
+        data-testid="user-disable-confirm-dialog"
+      >
+        <div class="modal-card wsc-surface">
+          <header class="modal-header">
+            <h2 id="user-disable-title">确认停用</h2>
+            <button
+              type="button"
+              class="modal-close"
+              aria-label="关闭"
+              :disabled="disabling"
+              @click="closeDisableConfirm"
+            >
+              ×
+            </button>
+          </header>
+          <p class="modal-meta" data-testid="user-disable-confirm-message">
+            确定停用账号 <strong>{{ disableTarget.username }}</strong> 吗？停用后该用户将无法登录。
+          </p>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn"
+              :disabled="disabling"
+              data-testid="user-disable-cancel"
+              @click="closeDisableConfirm"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              class="btn primary danger-confirm"
+              :disabled="disabling"
+              data-testid="user-disable-confirm"
+              @click="confirmDisable"
+            >
+              {{ disabling ? '停用中…' : '确认停用' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-if="deleteOpen && deleteTarget"
+        class="modal-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="user-delete-title"
+        data-testid="user-delete-confirm-dialog"
+      >
+        <div class="modal-card wsc-surface">
+          <header class="modal-header">
+            <h2 id="user-delete-title">确认删除</h2>
+            <button
+              type="button"
+              class="modal-close"
+              aria-label="关闭"
+              :disabled="deleting"
+              @click="closeDeleteConfirm"
+            >
+              ×
+            </button>
+          </header>
+          <p class="modal-meta" data-testid="user-delete-confirm-message">
+            确定永久删除账号 <strong>{{ deleteTarget.username }}</strong> 吗？删除后不可恢复。
+          </p>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn"
+              :disabled="deleting"
+              data-testid="user-delete-cancel"
+              @click="closeDeleteConfirm"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              class="btn primary danger-confirm"
+              :disabled="deleting"
+              data-testid="user-delete-confirm"
+              @click="confirmHardDelete"
+            >
+              {{ deleting ? '删除中…' : '确认删除' }}
             </button>
           </div>
         </div>
@@ -434,6 +644,17 @@ select {
   cursor: not-allowed;
 }
 
+.btn.danger-confirm {
+  border-color: #b42318;
+  background: #b42318;
+  color: #fff;
+}
+
+.btn.danger-confirm:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .state {
   margin: 12px 0 0;
   font-size: 13px;
@@ -451,6 +672,14 @@ select {
 
 .banner {
   margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--red-light);
+  font-size: 13px;
+}
+
+.modal-error {
+  margin: 0 0 12px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   background: var(--red-light);

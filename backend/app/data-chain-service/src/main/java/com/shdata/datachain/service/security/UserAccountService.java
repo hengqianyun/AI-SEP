@@ -95,7 +95,8 @@ public class UserAccountService implements ApplicationRunner {
     @Transactional(readOnly = true)
     public List<AdminUser> listUsers() {
         List<AdminUser> items = new ArrayList<>();
-        for (SysUserEntity u : userRepo.findByDelFlagOrderByIdAsc(false)) {
+        // 管理端需展示已停用账号，便于「启用」恢复；登录仍只认 delFlag=false。
+        for (SysUserEntity u : userRepo.findAllByOrderByIdAsc()) {
             items.add(toView(u));
         }
         return items;
@@ -166,9 +167,33 @@ public class UserAccountService implements ApplicationRunner {
         }
         if (Boolean.TRUE.equals(deleted)) {
             e.setDelFlag(true);
+        } else if (Boolean.FALSE.equals(deleted)) {
+            e.setDelFlag(false);
         }
         e.setUpdateBy(actorUserId == null ? "" : actorUserId);
         return toView(userRepo.save(e));
+    }
+
+    /**
+     * 物理删除用户行（硬删）。停用/启用仍走 {@link #updateUser} 的 deleted 软删。
+     *
+     * @param userId 目标用户主键
+     * @param actorUserId 当前操作者会话 userId（字符串形式的数字 id）
+     * @throws BusinessException 用户不存在（404）或禁止删除自身（400 ERR_USER_DELETE_SELF）
+     */
+    @Transactional
+    public void deleteUser(long userId, String actorUserId) {
+        if (String.valueOf(userId).equals(actorUserId)) {
+            throw new BusinessException(400, "ERR_USER_DELETE_SELF", "不能删除当前登录账号", null);
+        }
+        SysUserEntity e =
+                userRepo
+                        .findById(userId)
+                        .orElseThrow(
+                                () ->
+                                        new BusinessException(
+                                                404, "ERR_USER_NOT_FOUND", "用户不存在", null));
+        userRepo.delete(e);
     }
 
     private static AdminUser toView(SysUserEntity u) {

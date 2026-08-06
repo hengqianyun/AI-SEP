@@ -13,6 +13,7 @@ import com.shdata.datachain.model.SessionPrincipal;
 import com.shdata.datachain.service.security.UserAccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -116,6 +117,37 @@ public class AdminUserController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiEnvelope.error("ERR_VALIDATION", ex.getMessage(), null, correlationId));
+        }
+    }
+
+    /**
+     * 物理删除用户（硬删）。软删仍为 PUT deleted:true。
+     *
+     * @param userId 路径用户 id
+     * @param request HTTP 请求（取会话主体）
+     * @return 200 且 data 含 deleted:true；映射 BusinessException
+     */
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Map<String, Object>> delete(
+            @PathVariable String userId, HttpServletRequest request) {
+        ResponseEntity<Map<String, Object>> denied = requireAdmin(request);
+        if (denied != null) {
+            return denied;
+        }
+        String correlationId = CorrelationIdSupport.resolve(request);
+        SessionPrincipal principal = AuthController.currentPrincipal(request);
+        try {
+            long id = Long.parseLong(userId);
+            users.deleteUser(id, principal.userId());
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("deleted", true);
+            return ResponseEntity.ok(ApiEnvelope.ok(data, correlationId));
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiEnvelope.error("ERR_VALIDATION", "userId 无效", null, correlationId));
+        } catch (BusinessException ex) {
+            return ResponseEntity.status(ex.httpStatus())
+                    .body(ApiEnvelope.error(ex.code(), ex.getMessage(), ex.data(), correlationId));
         }
     }
 

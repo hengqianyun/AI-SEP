@@ -2,6 +2,7 @@ package com.shdata.datachain.security;
 
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -158,6 +159,29 @@ class SysUserAuthSecurityIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"tmp602\",\"password\":\"secret602\"}"))
         .andExpect(status().isUnauthorized());
+
+    // 列表含已停用账号；可 PUT deleted:false 重新启用并恢复登录
+    mockMvc
+        .perform(get("/api/v1/admin/users").session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.items[?(@.username=='tmp602')].deleted").value(org.hamcrest.Matchers.hasItem(true)));
+
+    mockMvc
+        .perform(
+            put("/api/v1/admin/users/" + userId)
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"deleted\":false}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.deleted").value(false));
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/session")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"tmp602\",\"password\":\"secret602\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.role").value("PROVIDER"));
   }
 
   @Test
@@ -183,6 +207,59 @@ class SysUserAuthSecurityIntegrationTest {
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"displayName\":\"ghost\"}"))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code").value("ERR_USER_NOT_FOUND"));
+  }
+
+  @Test
+  void adminUsers_hardDelete_removesFromList_andCannotDeleteSelf() throws Exception {
+    MockHttpSession session = login("admin", "demo");
+
+    MvcResult sessionRes =
+        mockMvc
+            .perform(get("/api/v1/auth/session").session(session))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.userId").exists())
+            .andReturn();
+    String selfId =
+        com.jayway.jsonpath.JsonPath.read(
+            sessionRes.getResponse().getContentAsString(), "$.data.userId");
+
+    mockMvc
+        .perform(delete("/api/v1/admin/users/" + selfId).session(session))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("ERR_USER_DELETE_SELF"));
+
+    MvcResult created =
+        mockMvc
+            .perform(
+                post("/api/v1/admin/users")
+                    .session(session)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{\"username\":\"tmp_hard_del\",\"password\":\"secret_hd\",\"role\":\"USER\",\"displayName\":\"硬删临时\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.username").value("tmp_hard_del"))
+            .andReturn();
+    String userId =
+        com.jayway.jsonpath.JsonPath.read(
+            created.getResponse().getContentAsString(), "$.data.userId");
+
+    mockMvc
+        .perform(delete("/api/v1/admin/users/" + userId).session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("0"))
+        .andExpect(jsonPath("$.data.deleted").value(true));
+
+    mockMvc
+        .perform(get("/api/v1/admin/users").session(session))
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.data.items[?(@.username=='tmp_hard_del')]")
+                .value(org.hamcrest.Matchers.empty()));
+
+    mockMvc
+        .perform(delete("/api/v1/admin/users/" + userId).session(session))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.code").value("ERR_USER_NOT_FOUND"));
   }

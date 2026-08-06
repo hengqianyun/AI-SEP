@@ -39,12 +39,55 @@ describe('UsersAdminPage (TASK-WSC-602 / TASK-WSC-606)', () => {
     expect(src).toContain('user-edit-role-dialog')
   })
 
+  it('create failures surface inside create dialog via createError', () => {
+    expect(src).toContain('createError')
+    expect(src).toContain('data-testid="user-create-error"')
+    expect(src).toMatch(/user-create-dialog[\s\S]*?user-create-error/)
+    expect(src).toContain("createError.value = e instanceof Error ? e.message : '创建失败'")
+    expect(src).toMatch(/function openCreate[\s\S]*?createError\.value = null/)
+    expect(src).toMatch(/function closeCreate[\s\S]*?createError\.value = null/)
+  })
+
+  it('启用状态 column + enable for disabled / disable+edit for active', () => {
+    expect(src).toContain('启用状态')
+    expect(src).toContain('已启用')
+    expect(src).toContain('已停用')
+    expect(src).toContain('data-testid="user-status-enabled"')
+    expect(src).toContain('data-testid="user-status-disabled"')
+    expect(src).toContain('data-testid="user-enable"')
+    expect(src).toContain("deleted: false")
+    expect(src).toContain('enableUser')
+  })
+
+  it('disable requires secondary confirm dialog before soft-delete', () => {
+    expect(src).toContain('openDisableConfirm')
+    expect(src).toContain('data-testid="user-disable-confirm-dialog"')
+    expect(src).toContain('data-testid="user-disable-confirm"')
+    expect(src).toContain('data-testid="user-disable-cancel"')
+    expect(src).toMatch(/data-testid="user-soft-delete"[\s\S]*?@click="openDisableConfirm\(u\)"/)
+    expect(src).not.toMatch(/data-testid="user-soft-delete"[\s\S]*?@click="softDelete\(/)
+  })
+
+  it('hard-delete requires secondary confirm dialog and wires deleteUser', () => {
+    expect(src).toContain('deleteUser')
+    expect(src).toContain('openDeleteConfirm')
+    expect(src).toContain('confirmHardDelete')
+    expect(src).toContain('data-testid="user-hard-delete"')
+    expect(src).toContain('data-testid="user-delete-confirm-dialog"')
+    expect(src).toContain('data-testid="user-delete-confirm"')
+    expect(src).toContain('data-testid="user-delete-cancel"')
+    expect(src).toMatch(/data-testid="user-hard-delete"[\s\S]*?@click="openDeleteConfirm\(u\)"/)
+    expect(src).not.toMatch(/data-testid="user-hard-delete"[\s\S]*?@click="deleteUser\(/)
+    expect(src).toMatch(/await deleteUser\(deleteTarget\.value\.userId\)/)
+  })
+
   it('ADMIN-only UI: non-ADMIN structurally gated; soft-delete via PUT deleted', () => {
     expect(src).toContain("role.value === 'ADMIN'")
     expect(src).toContain('deleted: true')
     expect(src).toContain('listUsers')
     expect(src).toContain('createUser')
     expect(src).toContain('updateUser')
+    expect(src).toContain('deleteUser')
   })
 
   it('shell whitelist: admin-users ADMIN-only; my-products PROVIDER (V1.4)', () => {

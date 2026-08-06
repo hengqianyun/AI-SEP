@@ -15,6 +15,7 @@ describe('LoginView shell brand UX (TASK-WSC-202)', () => {
     expect(src).toContain('var(--sidebar-bg)')
     expect(src).toContain('auth.login')
     expect(src).toContain('接入端工作台')
+    expect(src).not.toContain('演示账号')
     expect(src).not.toMatch(/background:\s*#1f4b7a/)
   })
 })

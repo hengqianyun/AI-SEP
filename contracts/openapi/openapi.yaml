@@ -393,7 +393,8 @@ paths:
       tags: [admin]
       summary: 更新用户角色/资料或软删（仅 ADMIN；REQ-USER-001）
       description: |
-        可改角色、资料、密码；软删权威形状为 PUT deleted: true（本版不采用 DELETE）。
+        可改角色、资料、密码；软删/启用权威形状为 PUT deleted: true/false。
+        物理删除见同路径 DELETE（硬删行，与软删并存）。
         用户不存在 → ERR_USER_NOT_FOUND（404）。
         响应 AdminUser 禁止含 password / passwordHash。
       operationId: updateUser
@@ -439,6 +440,62 @@ paths:
                     message: 用户不存在
                     data: null
                     correlationId: "corr-users-404"
+    delete:
+      tags: [admin]
+      summary: 物理删除用户（硬删；仅 ADMIN）
+      description: |
+        从 DB 物理删除该用户行，列表不再出现。软删/启用仍为 PUT deleted。
+        禁止删除当前登录账号 → ERR_USER_DELETE_SELF（400）。
+        用户不存在 → ERR_USER_NOT_FOUND（404）。
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: 已物理删除
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEmpty"
+              examples:
+                ok:
+                  value:
+                    code: "0"
+                    message: OK
+                    data:
+                      deleted: true
+                    correlationId: "corr-users-hard-delete"
+        "400":
+          description: 禁止删除自身
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                deleteSelf:
+                  value:
+                    code: ERR_USER_DELETE_SELF
+                    message: 不能删除当前登录账号
+                    data: null
+                    correlationId: "corr-users-delete-self"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                notFound:
+                  value:
+                    code: ERR_USER_NOT_FOUND
+                    message: 用户不存在
+                    data: null
+                    correlationId: "corr-users-delete-404"
 
   /catalog/products:
     get:
