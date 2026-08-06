@@ -1,7 +1,8 @@
 /**
  * Catalog API — 对齐 contracts/openapi (wsc-contracts@2.2.0)
- * industryCategory（GB/T 门类）；l3CategoryId 可空；Browse 分页；v0729 同步导入。
+ * industryCategory（GB/T 门类）；l3CategoryId 可空；Browse 分页 + mine；L2 分布；v0729 同步导入。
  * typeSpecific：api/dataset/report/other；OTHER 允许 contentDescription。
+ * 产品写/导入仅 PROVIDER（契约叙述；鉴权由后端强制）。
  */
 import { apiRequest, getApiBaseUrl } from './client'
 
@@ -141,6 +142,8 @@ export type Product = ProductWrite & {
   chainCount: number
   categoryPath?: string
   latestVersionNo?: number
+  /** 创建者 userId；mine=true 过滤依据 */
+  createBy?: string | null
   updatedAt?: string
 }
 
@@ -149,6 +152,18 @@ export type ProductPage = {
   page: number
   pageSize: number
   total: number
+}
+
+export type L2DistributionItem = {
+  code: string
+  name: string
+  count: number
+}
+
+export type L2Distribution = {
+  /** 真实产品总数（非 Top5 之和） */
+  totalProducts: number
+  items: L2DistributionItem[]
 }
 
 export type MaintenanceEntry = {
@@ -231,6 +246,10 @@ export function updateCategory(
 
 export function deleteCategory(categoryId: string) {
   return apiRequest<null>(`/catalog/categories/${categoryId}`, { method: 'DELETE' })
+}
+
+export function getL2Distribution() {
+  return apiRequest<L2Distribution>('/catalog/l2-distribution')
 }
 
 export function listProducts(query: Record<string, string | number | boolean | undefined> = {}) {

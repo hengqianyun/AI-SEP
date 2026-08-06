@@ -1,0 +1,11 @@
+﻿executedAt: 2026-08-06T16:40:00+08:00
+actorInstance: tester-wsc-606-r1
+
+E2E_RUN=1
+E2E_BASE_URL=http://127.0.0.1:5173
+
+probe:
+  5173: HTTP 200 (Listen 127.0.0.1:5173)
+  8080: /actuator/health UP (Listen 0.0.0.0:8080)
+
+note: frontend + backend already up; no env BLOCKED

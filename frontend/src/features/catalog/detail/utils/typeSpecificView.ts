@@ -36,7 +36,7 @@ function previewSwagger(raw: string, max = 480): string {
   return `${trimmed.slice(0, max)}…`
 }
 
-/** ADMIN / PROVIDER 显示编辑入口；USER 结构不可达。REQ-RBAC-001 */
+/** PROVIDER 显示编辑入口（我的数据产品）；USER/ADMIN 结构不可达。REQ-RBAC-001 V1.4 */
 export function isDetailEditEntryVisible(role: Role | null | undefined): boolean {
   return canWriteProduct(role)
 }

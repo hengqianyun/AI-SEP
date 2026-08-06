@@ -1,8 +1,8 @@
-package com.shdata.datachain.demo.service;
+package com.shdata.datachain.service.demo;
 
-import com.shdata.datachain.demo.entity.DemoEntity;
-import com.shdata.datachain.demo.model.DemoRequest;
-import com.shdata.datachain.demo.repository.DemoRepository;
+import com.shdata.datachain.entity.DemoEntity;
+import com.shdata.datachain.model.DemoRequest;
+import com.shdata.datachain.repository.DemoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

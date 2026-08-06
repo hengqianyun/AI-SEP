@@ -1,0 +1,114 @@
+runId: RUN-WSC-008
+currentNode: COMPLETED
+round: 2
+status: COMPLETED
+blockedBy: []
+releasePaused: false
+completedNodes:
+  - PLAN_REVIEW
+  - PLAN_APPROVED
+  - DEVELOPMENT
+  - CODE_REVIEW
+  - TESTING
+  - INTEGRATION
+  - RELEASE_REVIEW
+  - COMPLETED
+protocolRepair:
+  reason: 主会话旁路实现并伪造 SNAPSHOT_APPROVED/PLAN_APPROVED/verifiedTaskIds
+  voidedApprovals: [SNAP-WSC-005, PLAN-WSC-5.1]
+  codeTreeNote: frontend/backend 可能含预落地改动；未经验证不得记入 verifiedTaskIds
+  snapshotReapprovedAt: 2026-08-06T14:45:00+08:00
+activeWave: null
+activeTaskIds: []
+verifiedTaskIds: [TASK-WSC-601, TASK-WSC-602, TASK-WSC-603, TASK-WSC-604, TASK-WSC-605, TASK-WSC-606, TASK-WSC-607]
+activeSnapshotId: SNAP-WSC-005
+activePlanId: PLAN-WSC-5.2
+approvedPlanPath: planning/approved/PLAN-WSC-5.2.md
+basedOnRun: RUN-WSC-007
+kind: FEATURE
+scope: |
+  V1.4: CirculationSeatMap on catalog; persistent sys_user + admin users;
+  我的数据产品 (PROVIDER write/import); catalog read-only for product write;
+  contracts@2.2.0 RBAC revise; HOTFIX 606 UX; HOTFIX 607 PROVIDER maintenance mine-scope
+reviewRound: 2
+e2eEvidence: TESTRUN-WSC-E2E-V14
+e2eReportDir: tests/e2e/reports/p0-wsc-v1.4/
+integrationReview: planning/reviews/integration/REV-WSC-INTEGRATION-008.md
+integrationReviewDecision: APPROVE
+integrationReviewer: integration-reviewer-wsc-008
+snapshotStatus: APPROVED
+releaseApprovalId: APPR-WSC-RELEASE-008
+approvalsPath: ai/runs/RUN-WSC-008/approvals.yaml
+openBugsNonBlocking:
+  - BUG-WSC-606-TESTRUN-001
+humanDecisions:
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    wave: W1
+    taskIds: [TASK-WSC-601]
+    at: 2026-08-05T15:05:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    wave: W2
+    taskIds: [TASK-WSC-602]
+    at: 2026-08-05T16:34:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    wave: W3
+    taskIds: [TASK-WSC-603]
+    at: 2026-08-05T18:00:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    wave: W4
+    taskIds: [TASK-WSC-604]
+    at: 2026-08-06T10:53:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    wave: W5
+    taskIds: [TASK-WSC-605]
+    at: 2026-08-06T11:11:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: APPROVE_SNAPSHOT
+    snapshotId: SNAP-WSC-005
+    at: 2026-08-06T14:45:00+08:00
+    utterance: 批准快照
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    wave: HOTFIX
+    taskIds: [TASK-WSC-606]
+    at: 2026-08-06T15:32:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    wave: HOTFIX
+    taskIds: [TASK-WSC-607]
+    at: 2026-08-06T16:55:00+08:00
+    utterance: 确认
+  - identity: maintainer
+    action: APPROVE_RELEASE
+    approvalId: APPR-WSC-RELEASE-008
+    at: 2026-08-06T17:36:00+08:00
+    utterance: 批准发布
+taskStatus:
+  TASK-WSC-601:
+    status: VERIFIED
+  TASK-WSC-602:
+    status: VERIFIED
+  TASK-WSC-603:
+    status: VERIFIED
+  TASK-WSC-604:
+    status: VERIFIED
+  TASK-WSC-605:
+    status: VERIFIED
+  TASK-WSC-606:
+    status: VERIFIED
+  TASK-WSC-607:
+    status: VERIFIED
+nextAction: null
+updatedAt: 2026-08-06T17:36:00+08:00
+completedAt: 2026-08-06T17:36:00+08:00

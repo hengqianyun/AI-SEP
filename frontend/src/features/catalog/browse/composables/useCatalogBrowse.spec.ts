@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { computed, nextTick, ref } from 'vue'
 import type { Category, Product } from '@/api/catalog'
 import { productTypeLabel } from '../utils/labels'
 import { truncateSensitiveId } from '../utils/truncateSensitive'
@@ -21,7 +22,6 @@ import {
   isNearScrollBottom,
   isRetryableListState,
   needsMoreContentToScroll,
-  resolveIndustryQuery,
   shouldAutoLoadMore,
   useCatalogBrowse,
 } from './useCatalogBrowse'
@@ -51,11 +51,11 @@ describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
     expect(isRetryableListState('ready')).toBe(false)
   })
 
-  it('default filters include industryFilterId (L2/L3)', () => {
+  it('default filters include industryCategory (GB/T 门类)', () => {
     const f = createDefaultFilters()
     expect(f.l1CategoryId).toBe('')
     expect(f.l2CategoryId).toBe('')
-    expect(f.industryFilterId).toBe('')
+    expect(f.industryCategory).toBe('')
     expect(f.productType).toBe('')
     expect(f.q).toBe('')
   })
@@ -65,26 +65,6 @@ describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
     expect(productTypeLabel('REPORT')).toBe('数据报告')
     expect(productTypeLabel('API')).toBe('数据接口')
     expect(productTypeLabel('OTHER')).toBe('其他数据产品')
-  })
-
-  it('resolveIndustryQuery maps L2 and L3 filter ids', () => {
-    const cats: Category[] = [
-      { id: 'l1', name: '空间', level: 'L1' },
-      { id: 'l2', name: '行业', level: 'L2', parentId: 'l1' },
-      { id: 'l3', name: '子类', level: 'L3', parentId: 'l2' },
-    ]
-    expect(resolveIndustryQuery('', cats)).toEqual({
-      l2CategoryId: undefined,
-      l3CategoryId: undefined,
-    })
-    expect(resolveIndustryQuery('l2', cats)).toEqual({
-      l2CategoryId: 'l2',
-      l3CategoryId: undefined,
-    })
-    expect(resolveIndustryQuery('l3', cats)).toEqual({
-      l2CategoryId: undefined,
-      l3CategoryId: 'l3',
-    })
   })
 
   it('groupProductsByL3 sections by subcategory with counts', () => {
@@ -370,6 +350,19 @@ describe('useCatalogBrowse loadMore / hasMore (REQ-CAT-001 / REQ-UX-004)', () =>
     expect(browse.products.value.map((p) => p.id)).toEqual(['a', 'b', 'c'])
     expect(browse.hasMore.value).toBe(false)
   })
+
+  it('applyFilters sends industryCategory query (not L2/L3 tree id)', async () => {
+    listProducts.mockResolvedValue({
+      data: { items: [product('a')], total: 1, page: 1, pageSize: 10 },
+    })
+    const browse = useCatalogBrowse()
+    browse.filters.value.industryCategory = '建筑业'
+    await browse.applyFilters()
+    expect(listProducts).toHaveBeenCalledWith(
+      expect.objectContaining({ industryCategory: '建筑业', page: 1 }),
+    )
+    expect(listProducts.mock.calls[0]![0]).not.toHaveProperty('l3CategoryId')
+  })
 })
 
 describe('§3.6 sensitive id truncate (browse)', () => {
@@ -378,5 +371,64 @@ describe('§3.6 sensitive id truncate (browse)', () => {
     const shown = truncateSensitiveId(code)
     expect(shown).toContain('…')
     expect(shown.length).toBeLessThan(code.length)
+  })
+})
+
+describe('useCatalogBrowse mine reactivity (FIND-WSC-603-R1-001)', () => {
+  beforeEach(() => {
+    listProducts.mockReset()
+    listCategories.mockReset()
+    getProduct.mockReset()
+    listCategories.mockResolvedValue({ data: { items: [] as Category[] } })
+    getProduct.mockImplementation(async (id: string) => ({
+      data: product(id),
+    }))
+    listProducts.mockResolvedValue({
+      data: { items: [product('a')], total: 1, page: 1, pageSize: 10 },
+    })
+  })
+
+  it('catalog↔my-products: listProducts query gains/drops mine=true when mine ref toggles', async () => {
+    const mine = ref(false)
+    const browse = useCatalogBrowse({ mine })
+    await browse.loadProducts()
+    expect(listProducts).toHaveBeenCalledTimes(1)
+    expect(listProducts.mock.calls[0]![0]).not.toHaveProperty('mine')
+
+    mine.value = true
+    await nextTick()
+    await vi.waitFor(() => expect(listProducts).toHaveBeenCalledTimes(2))
+    expect(listProducts.mock.calls[1]![0]).toMatchObject({ mine: true })
+
+    mine.value = false
+    await nextTick()
+    await vi.waitFor(() => expect(listProducts).toHaveBeenCalledTimes(3))
+    expect(listProducts.mock.calls[2]![0]).not.toHaveProperty('mine')
+  })
+
+  it('accepts computed mine (CatalogBrowsePage mode prop path)', async () => {
+    const mode = ref<'catalog' | 'mine'>('catalog')
+    const isMine = computed(() => mode.value === 'mine')
+    const browse = useCatalogBrowse({ mine: isMine })
+    await browse.init()
+    expect(listProducts.mock.calls.at(-1)![0]).not.toHaveProperty('mine')
+
+    mode.value = 'mine'
+    await nextTick()
+    await vi.waitFor(() =>
+      expect(listProducts.mock.calls.at(-1)![0]).toMatchObject({ mine: true }),
+    )
+
+    mode.value = 'catalog'
+    await nextTick()
+    await vi.waitFor(() =>
+      expect(listProducts.mock.calls.at(-1)![0]).not.toHaveProperty('mine'),
+    )
+  })
+
+  it('plain boolean mine=true still sends mine on load (compat)', async () => {
+    const browse = useCatalogBrowse({ mine: true })
+    await browse.loadProducts()
+    expect(listProducts.mock.calls[0]![0]).toMatchObject({ mine: true })
   })
 })

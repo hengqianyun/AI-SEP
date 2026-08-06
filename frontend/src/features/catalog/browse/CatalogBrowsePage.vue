@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
-import { useCanWrite } from '@/features/auth/composables/useCanWrite'
+import { canSeeMyProducts, useCanWrite } from '@/features/auth/composables/useCanWrite'
 import ImportDialog from '@/features/catalog/import/ImportDialog.vue'
+import CirculationSeatMap from './components/CirculationSeatMap.vue'
 import SensitiveId from './components/SensitiveId.vue'
 import {
   fillUntilScrollable,
@@ -13,23 +14,54 @@ import {
   useCatalogBrowse,
 } from './composables/useCatalogBrowse'
 import { useCatalogImportEntry } from './composables/useCatalogImportEntry'
+import { INDUSTRY_CATEGORY_OPTIONS } from '@/api/catalog'
 import {
   CATALOG_EMPTY_MESSAGE,
   DATA_SOURCE_OPTIONS,
   DELIVERY_OPTIONS,
+  MINE_EMPTY_MESSAGE,
   PRODUCT_TYPE_OPTIONS,
   PUBLIC_DATA_OPTIONS,
   productTypeLabel,
 } from './utils/labels'
 
+/**
+ * 双表面 + 座序图挂载约定（供 604 只读消费）：
+ * - mode: 'catalog' | 'mine'（路由 props）
+ * - showSeatMap: 显式布尔；未传时 catalog=true、mine=false
+ * - 挂载点：`<CirculationSeatMap v-if="seatMapVisible" />`（本任务不实现座序图内部）
+ */
+const props = withDefaults(
+  defineProps<{
+    mode?: 'catalog' | 'mine'
+    /** 预留：公共目录 true；我的产品 false。604 仅改 CirculationSeatMap.vue */
+    showSeatMap?: boolean
+  }>(),
+  { mode: 'catalog', showSeatMap: undefined },
+)
+
+const isMine = computed(() => props.mode === 'mine')
+const seatMapVisible = computed(() =>
+  props.showSeatMap !== undefined ? props.showSeatMap : !isMine.value,
+)
+const pageTitle = computed(() => (isMine.value ? '我的数据产品' : '数据目录'))
+const pageSubtitle = computed(() =>
+  isMine.value
+    ? '管理本人创建的数据产品（新增 / 编辑 / 导入）'
+    : '按空间 / 行业浏览、子类分组预览数据产品',
+)
+const emptyMessage = computed(() => (isMine.value ? MINE_EMPTY_MESSAGE : CATALOG_EMPTY_MESSAGE))
+
 const router = useRouter()
 const auth = useAuthStore()
 const { role } = storeToRefs(auth)
-const { productWriteVisible } = useCanWrite(role)
-const { importOpen, productImportVisible, openImport, onImportClosed } =
-  useCatalogImportEntry(role)
+const { productWriteVisible, productImportVisible } = useCanWrite(role)
+const writeVisible = computed(() => isMine.value && productWriteVisible.value)
+const importVisible = computed(() => isMine.value && productImportVisible.value)
+const { importOpen, openImport, onImportClosed } = useCatalogImportEntry(role)
 
-const browse = useCatalogBrowse()
+/** 传 computed，避免路由复用 /catalog↔/my-products 时 mine 快照陈旧（FIND-WSC-603-R1-001） */
+const browse = useCatalogBrowse({ mine: isMine })
 const {
   products,
   sections,
@@ -47,7 +79,6 @@ const {
   total,
   l1Categories,
   l2Categories,
-  industryFilterOptions,
   selectProduct,
   selectL1,
   selectL2,
@@ -91,6 +122,10 @@ async function ensureListFilled() {
 }
 
 onMounted(() => {
+  if (isMine.value && !canSeeMyProducts(role.value)) {
+    void router.replace('/catalog')
+    return
+  }
   void init().then(() => ensureListFilled())
   void nextTick(() => {
     const el = listScrollEl.value
@@ -122,9 +157,16 @@ function onListScroll(e: Event) {
   }
 }
 
+function mineQuery() {
+  return isMine.value ? { from: 'mine' as const } : undefined
+}
+
 function goDetail() {
   if (!selectedProductId.value) return
-  void router.push(`/catalog/products/${selectedProductId.value}`)
+  void router.push({
+    path: `/catalog/products/${selectedProductId.value}`,
+    query: mineQuery(),
+  })
 }
 
 function goChain() {
@@ -133,13 +175,16 @@ function goChain() {
 }
 
 function goEdit() {
-  if (!selectedProductId.value || !productWriteVisible.value) return
-  void router.push(`/catalog/products/${selectedProductId.value}/edit`)
+  if (!selectedProductId.value || !writeVisible.value) return
+  void router.push({
+    path: `/catalog/products/${selectedProductId.value}/edit`,
+    query: { from: 'mine' },
+  })
 }
 
 function goCreate() {
-  if (!productWriteVisible.value) return
-  void router.push('/catalog/products/new')
+  if (!writeVisible.value) return
+  void router.push({ path: '/catalog/products/new', query: { from: 'mine' } })
 }
 
 function rowIndex(sectionOffset: number, idx: number) {
@@ -155,12 +200,12 @@ function padNo(n: number) {
   <div class="catalog-browse" data-testid="catalog-browse">
     <header class="page-header wsc-surface">
       <div class="header-main">
-        <h1>数据目录</h1>
-        <p class="subtitle">按空间 / 行业浏览、子类分组预览数据产品</p>
+        <h1>{{ pageTitle }}</h1>
+        <p class="subtitle">{{ pageSubtitle }}</p>
       </div>
       <div class="header-actions">
         <button
-          v-if="productWriteVisible"
+          v-if="writeVisible"
           type="button"
           class="btn primary"
           data-testid="catalog-open-create"
@@ -169,7 +214,7 @@ function padNo(n: number) {
           新增产品
         </button>
         <button
-          v-if="productImportVisible"
+          v-if="importVisible"
           type="button"
           class="btn primary import-btn"
           data-testid="catalog-open-import"
@@ -180,7 +225,11 @@ function padNo(n: number) {
       </div>
     </header>
 
-    <ImportDialog v-model="importOpen" @closed="onImportClosed" />
+    <ImportDialog v-if="importVisible" v-model="importOpen" @closed="onImportClosed" />
+
+    <div v-if="seatMapVisible" class="seat-map-slot" data-testid="catalog-seat-map-slot">
+      <CirculationSeatMap />
+    </div>
 
     <div class="nav-card wsc-surface">
       <div class="tag-bar" data-testid="catalog-space-tags">
@@ -235,10 +284,14 @@ function padNo(n: number) {
     <div class="filter-bar wsc-surface" data-testid="catalog-filters">
       <div class="filter-group">
         <label class="filter-label" for="catalog-filter-industry">行业分类</label>
-        <select id="catalog-filter-industry" v-model="filters.industryFilterId" aria-label="行业分类（二级或三级）">
+        <select
+          id="catalog-filter-industry"
+          v-model="filters.industryCategory"
+          aria-label="行业分类（GB/T 门类）"
+        >
           <option value="">全部</option>
-          <option v-for="o in industryFilterOptions" :key="o.id" :value="o.id">
-            {{ o.label }}
+          <option v-for="c in INDUSTRY_CATEGORY_OPTIONS" :key="c" :value="c">
+            {{ c }}
           </option>
         </select>
       </div>
@@ -335,7 +388,7 @@ function padNo(n: number) {
           class="state empty"
           data-testid="catalog-empty"
         >
-          {{ CATALOG_EMPTY_MESSAGE }}
+          {{ emptyMessage }}
         </div>
         <template v-else-if="listState === 'ready'">
           <div
@@ -448,7 +501,7 @@ function padNo(n: number) {
               上链
             </button>
             <button
-              v-if="productWriteVisible"
+              v-if="writeVisible"
               type="button"
               class="btn"
               data-testid="catalog-go-edit"
@@ -465,14 +518,17 @@ function padNo(n: number) {
 
 <style scoped>
 .catalog-browse {
-  /* 约束页面高度，使 .pane.list 自身滚动（REQ-UX-004 触底分页）；高分辨率填满主区 */
+  /*
+   * 页面可自然增高并由主区滚动（FIX-WSC-606：座序图+筛栏超出视口时不再被 overflow:hidden 锁死）。
+   * 列表触底分页仍由 .bi-pane / .pane.list 的固定高度 + overflow:auto 承担。
+   */
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: calc(100vh - 2 * var(--main-padding, 24px));
-  max-height: calc(100vh - 2 * var(--main-padding, 24px));
   min-height: 0;
-  overflow: hidden;
+  height: auto;
+  max-height: none;
+  overflow: visible;
   padding: 0;
   box-sizing: border-box;
   color: var(--text-primary);
@@ -483,7 +539,8 @@ function padNo(n: number) {
 .page-header,
 .nav-card,
 .filter-bar,
-.banner {
+.banner,
+.seat-map-slot {
   flex-shrink: 0;
 }
 
@@ -682,11 +739,12 @@ function padNo(n: number) {
 
 .bi-pane {
   display: grid;
-  /* 宽屏下列表 + 预览按比例吃满视口，预览不低于原 380px */
+  /* 宽屏下列表 + 预览按比例；固定视口预算保证列表 pane 可滚 + 触底分页 */
   grid-template-columns: minmax(0, 1.55fr) minmax(380px, 1fr);
   grid-template-rows: minmax(0, 1fr);
   gap: 16px;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  height: min(560px, max(280px, calc(100vh - 300px)));
   min-height: 280px;
   overflow: hidden;
 }

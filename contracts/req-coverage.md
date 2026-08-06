@@ -1,6 +1,6 @@
-# wsc-contracts@2.0.0 — 17 REQ 覆盖映射
+# wsc-contracts — REQ 覆盖映射
 
-> TASK-WSC-101 冻结契约与骨架迁移底座；主实现归属见 PLAN-WSC-2.2 §5 / §8。
+> 基线 TASK-WSC-101；V1.4 增量见 SNAP-WSC-005 / PLAN-WSC-5.2（contracts@2.2.0 / TASK-WSC-601）。
 
 | REQ | 契约/模型/路由 | 测试约束（后续任务） |
 |---|---|---|
@@ -20,18 +20,23 @@
 | REQ-CAT-007 | `/catalog/maintenance/**`；条目≡产品；分页字段同 Browse | 管理员维护；提供方/用户 403 |
 | REQ-CAT-008 | `/catalog/products/import*`；模板列最小集；请求级 vs 行级错误；报告 TTL | ≤10MB；四态；报告鉴权 |
 | REQ-CHAIN-001 | versions/snapshot；快照含三级路径字段；ChainAttestationPort | 按 versionId 读快照 |
+| REQ-SHELL-001 (V1.4) | 侧栏：`/my-products`、`/admin/users`；`POST /auth/session/role`→410+`ERR_ROLE_SWITCH_DISABLED`；`LoginRequest` 无 role；state-matrix 角色只读 | PROVIDER/ADMIN 菜单可见性；三角色切角色均禁用 |
+| REQ-RBAC-001 (V1.4) | `matrix.yaml` 2.2.0；产品写/导入仅 PROVIDER（ADMIN hidden+403）；`userManage*` 仅 ADMIN | ADMIN 写产品 403；隐藏≠授权 |
+| REQ-CAT-009 | `GET /catalog/l2-distribution`（`L2Distribution`：totalProducts+items）；前端 CirculationSeatMap | L2 Top5 + hover/leave；真实总数 |
+| REQ-USER-001 | `/admin/users` 命名 schema `AdminUser`/`AdminUserCreate`/`AdminUserUpdate`；软删 PUT `deleted`；`ERR_USER_USERNAME_CONFLICT`/`ERR_USER_NOT_FOUND`；响应禁 password/hash | ADMIN CRUD；非 ADMIN 403 |
+| REQ-CAT-010 | `/my-products`；`GET /catalog/products?mine=true`；`Product.createBy`；公共目录无增改导；导入宿主=我的产品 | 仅本人；空归属 403 |
 
-## 工程底座（TASK-WSC-101）
+## 工程底座（TASK-WSC-101 / 升版至 2.2.0）
 
 | 制品 | 路径 |
 |---|---|
-| OpenAPI | `contracts/openapi/openapi.yaml`（2.0.0） |
+| OpenAPI | `contracts/openapi/openapi.yaml`（**2.2.0**） |
 | 错误码 | `contracts/errors/codes.yaml` |
 | RBAC | `contracts/rbac/matrix.yaml` |
 | 存证端口 | `contracts/chain/ChainAttestationPort.md` |
 | OVW 流 | `contracts/overview/stream-events.yaml` |
-| UI 状态 | `contracts/ui/state-matrix.md` |
+| UI 状态 | `contracts/ui/state-matrix.md`（版本头 2.2.0） |
 | 敏感字段 | `contracts/security/sensitive-fields.md` |
-| Flyway | `backend/app/wsc-service/.../sql/init` + `sql/migration` |
-| API client | `frontend/src/api/**`（对齐 2.0.0） |
+| Flyway | `backend/app/data-chain-service/.../sql/init` + `sql/migration` |
+| API client | `frontend/src/api/**`（对齐 **2.2.0**；TASK-WSC-601 唯一写） |
 | V1.0→V1.1 schema | `ops/runbooks/wsc-v11-schema-migration.md` |

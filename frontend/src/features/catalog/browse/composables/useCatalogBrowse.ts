@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toValue, watch, type MaybeRefOrGetter } from 'vue'
 import {
   getProduct,
   listCategories,
@@ -14,8 +14,8 @@ export type LoadState = 'idle' | 'loading' | 'empty' | 'ready' | 'error'
 export type CatalogFilters = {
   l1CategoryId: string
   l2CategoryId: string
-  /** 行业筛：可为 L2 或 L3 id（REQ-CAT-002） */
-  industryFilterId: string
+  /** GB/T 4754 门类中文原文（产品字段 industryCategory；DEC-WSC-006 / TASK-WSC-606） */
+  industryCategory: string
   dataSource: string
   productType: string
   involvesPublicData: string
@@ -34,7 +34,7 @@ export function createDefaultFilters(): CatalogFilters {
   return {
     l1CategoryId: '',
     l2CategoryId: '',
-    industryFilterId: '',
+    industryCategory: '',
     dataSource: '',
     productType: '',
     involvesPublicData: '',
@@ -91,15 +91,6 @@ export function groupProductsByL3(
     sections.push({ l3CategoryId: id, title, count: list.length, products: list })
   }
   return sections
-}
-
-export function resolveIndustryQuery(industryFilterId: string, categories: Category[]) {
-  if (!industryFilterId) return { l2CategoryId: undefined as string | undefined, l3CategoryId: undefined as string | undefined }
-  const cat = categories.find((c) => c.id === industryFilterId)
-  if (!cat) return { l2CategoryId: undefined, l3CategoryId: undefined }
-  if (cat.level === 'L3') return { l2CategoryId: undefined, l3CategoryId: cat.id }
-  if (cat.level === 'L2') return { l2CategoryId: cat.id, l3CategoryId: undefined }
-  return { l2CategoryId: undefined, l3CategoryId: undefined }
 }
 
 /** 列表 pane 近底 / 未溢出判定阈值（px）。 */
@@ -178,7 +169,7 @@ export async function fillUntilScrollable(opts: {
   return pages
 }
 
-export function useCatalogBrowse() {
+export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } = {}) {
   const categories = ref<Category[]>([])
   const products = ref<Product[]>([])
   const selectedProductId = ref<string | null>(null)
@@ -197,6 +188,11 @@ export function useCatalogBrowse() {
   const pageSize = ref(10)
   const total = ref(0)
 
+  /** 响应 mine（catalog↔my-products 路由复用时不得快照布尔） */
+  function isMineList(): boolean {
+    return toValue(options.mine) === true
+  }
+
   const l1Categories = computed(() => categories.value.filter((c) => c.level === 'L1'))
   const l2Categories = computed(() => {
     const l1 = filters.value.l1CategoryId
@@ -207,38 +203,25 @@ export function useCatalogBrowse() {
     return categories.value.filter((c) => c.level === 'L3' && l2Ids.has(c.parentId ?? ''))
   })
 
-  /** 行业筛选项：当前可见 L2 + 其下 L3 */
-  const industryFilterOptions = computed(() => {
-    const opts: { id: string; label: string; level: 'L2' | 'L3' }[] = []
-    for (const l2 of l2Categories.value) {
-      opts.push({ id: l2.id, label: l2.name, level: 'L2' })
-      for (const l3 of categories.value.filter((c) => c.level === 'L3' && c.parentId === l2.id)) {
-        opts.push({ id: l3.id, label: `　${l3.name}`, level: 'L3' })
-      }
-    }
-    return opts
-  })
-
   const sections = computed(() => groupProductsByL3(products.value, categories.value))
   const hasMore = computed(() => products.value.length < total.value)
 
   function buildQuery(pageNo: number) {
     const f = filters.value
-    const industry = resolveIndustryQuery(f.industryFilterId, categories.value)
     const query: Record<string, string | number | boolean | undefined> = {
       page: pageNo,
       pageSize: pageSize.value,
     }
     if (f.l1CategoryId) query.l1CategoryId = f.l1CategoryId
     if (f.l2CategoryId) query.l2CategoryId = f.l2CategoryId
-    if (industry.l2CategoryId) query.l2CategoryId = industry.l2CategoryId
-    if (industry.l3CategoryId) query.l3CategoryId = industry.l3CategoryId
+    if (f.industryCategory.trim()) query.industryCategory = f.industryCategory.trim()
     if (f.dataSource) query.dataSource = f.dataSource
     if (f.productType) query.productType = f.productType
     if (f.deliveryMethod) query.deliveryMethod = f.deliveryMethod
     if (f.involvesPublicData === 'true') query.involvesPublicData = true
     if (f.involvesPublicData === 'false') query.involvesPublicData = false
     if (f.q.trim()) query.q = f.q.trim()
+    if (isMineList()) query.mine = true
     return query
   }
 
@@ -329,18 +312,11 @@ export function useCatalogBrowse() {
   function selectL1(l1Id: string) {
     filters.value.l1CategoryId = l1Id
     filters.value.l2CategoryId = ''
-    filters.value.industryFilterId = ''
     void loadProducts()
   }
 
   function selectL2(l2Id: string) {
     filters.value.l2CategoryId = l2Id
-    // 行业标签与顶栏行业标签对齐时清空冲突的筛选项
-    if (filters.value.industryFilterId) {
-      const ind = categories.value.find((c) => c.id === filters.value.industryFilterId)
-      if (ind?.level === 'L2' && ind.id !== l2Id) filters.value.industryFilterId = ''
-      if (ind?.level === 'L3' && ind.parentId !== l2Id) filters.value.industryFilterId = ''
-    }
     void loadProducts()
   }
 
@@ -371,12 +347,13 @@ export function useCatalogBrowse() {
       if (l2 && !l2Categories.value.some((c) => c.id === l2)) {
         filters.value.l2CategoryId = ''
       }
-      const ind = filters.value.industryFilterId
-      if (ind && !industryFilterOptions.value.some((o) => o.id === ind)) {
-        filters.value.industryFilterId = ''
-      }
     },
   )
+
+  /** 路由复用时 mode/mine 变化须重拉列表（FIND-WSC-603-R1-001） */
+  watch(isMineList, () => {
+    void loadProducts()
+  })
 
   return {
     categories,
@@ -399,7 +376,6 @@ export function useCatalogBrowse() {
     l1Categories,
     l2Categories,
     l3Categories,
-    industryFilterOptions,
     loadCategories,
     loadProducts,
     loadMore,

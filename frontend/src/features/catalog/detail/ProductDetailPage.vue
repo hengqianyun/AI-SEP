@@ -12,7 +12,11 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const { role } = storeToRefs(auth)
-const editEntryVisible = computed(() => isDetailEditEntryVisible(role.value))
+/** 公共目录结构不可达增改导：仅 from=mine 时显示编辑入口 */
+const fromMine = computed(() => route.query.from === 'mine')
+const editEntryVisible = computed(
+  () => fromMine.value && isDetailEditEntryVisible(role.value),
+)
 const { product, state, error, load } = useProductDetail()
 
 const productId = computed(() => String(route.params.productId || ''))
@@ -23,7 +27,10 @@ onMounted(() => {
 
 function goEdit() {
   if (!editEntryVisible.value || !productId.value) return
-  void router.push(`/catalog/products/${productId.value}/edit`)
+  void router.push({
+    path: `/catalog/products/${productId.value}/edit`,
+    query: { from: 'mine' },
+  })
 }
 
 function goChain() {
@@ -32,7 +39,7 @@ function goChain() {
 }
 
 function goBack() {
-  void router.push('/catalog')
+  void router.push(fromMine.value ? '/my-products' : '/catalog')
 }
 </script>
 

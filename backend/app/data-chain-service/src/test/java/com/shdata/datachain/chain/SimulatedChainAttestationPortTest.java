@@ -1,10 +1,12 @@
-package com.shdata.datachain.chain;
+package com.shdata.datachain.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.shdata.datachain.common.port.ChainAttestationPort;
+import com.shdata.datachain.common.port.SimulatedChainAttestationPort;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;

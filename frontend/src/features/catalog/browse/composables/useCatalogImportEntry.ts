@@ -31,7 +31,8 @@ export function useCatalogImportEntry(role: Ref<Role | null | undefined>) {
     importOpen.value = false
     const q = { ...route.query }
     delete q.import
-    void router.replace({ path: '/catalog', query: q })
+    // 导入宿主=我的数据产品 → 关闭回 /my-products（state-matrix 2.2.0）
+    void router.replace({ path: '/my-products', query: q })
   }
 
   return {

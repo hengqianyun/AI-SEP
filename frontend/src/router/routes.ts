@@ -16,7 +16,21 @@ export const routes: RouteRecordRaw[] = [
     path: '/catalog',
     name: 'catalog',
     component: () => import('@/features/catalog/browse/CatalogBrowsePage.vue'),
+    props: { mode: 'catalog', showSeatMap: true },
     meta: { title: '数据目录' },
+  },
+  {
+    path: '/my-products',
+    name: 'my-products',
+    component: () => import('@/features/catalog/browse/CatalogBrowsePage.vue'),
+    props: { mode: 'mine', showSeatMap: false },
+    meta: { title: '我的数据产品', requiresProvider: true },
+  },
+  {
+    path: '/admin/users',
+    name: 'admin-users',
+    component: () => import('@/features/users/UsersAdminPage.vue'),
+    meta: { title: '用户管理' },
   },
   {
     path: '/catalog/products/:productId',
@@ -28,13 +42,13 @@ export const routes: RouteRecordRaw[] = [
     path: '/catalog/products/:productId/edit',
     name: 'catalog-edit',
     component: () => import('@/features/catalog/editor/ProductEditorPage.vue'),
-    meta: { title: '编辑产品' },
+    meta: { title: '编辑产品', fromMine: true },
   },
   {
     path: '/catalog/products/new',
     name: 'catalog-create',
     component: () => import('@/features/catalog/editor/ProductEditorPage.vue'),
-    meta: { title: '新增产品' },
+    meta: { title: '新增产品', fromMine: true },
   },
   {
     path: '/catalog/admin/categories',

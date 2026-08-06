@@ -1,0 +1,58 @@
+=== Regression evidence: contracts grep (05) ===
+Generated: 2026-08-05T15:58:09.1707232+08:00
+Repo-root contracts paths used:
+  - contracts\errors\codes.yaml
+  - contracts\openapi\openapi.yaml
+NOTE: ai\contracts\ does not exist; assert-601-p0.mjs expected ai\contracts\VERSION
+
+--- ERR_IMPORT_TEMPLATE_UNSUPPORTED in codes.yaml ---
+PATTERN: ERR_IMPORT_TEMPLATE_UNSUPPORTED
+FILE: contracts\errors\codes.yaml
+C:\WorkSpace\AI-SEP\contracts\errors\codes.yaml:3: # 继承 V1.1；V1.3 新增 ERR_IMPORT_TEMPLATE_UNSUPPORTED（旧模板/非 v0729 表头整文件拒绝）
+C:\WorkSpace\AI-SEP\contracts\errors\codes.yaml:56: ERR_IMPORT_TEMPLATE_UNSUPPORTED:
+C:\WorkSpace\AI-SEP\contracts\errors\codes.yaml:58: code: ERR_IMPORT_TEMPLATE_UNSUPPORTED
+C:\WorkSpace\AI-SEP\contracts\errors\codes.yaml:108: - ERR_IMPORT_TEMPLATE_UNSUPPORTED
+RESULT: FOUND (4 hit(s))
+
+--- ERR_IMPORT_TEMPLATE_UNSUPPORTED in openapi.yaml ---
+PATTERN: ERR_IMPORT_TEMPLATE_UNSUPPORTED
+FILE: contracts\openapi\openapi.yaml
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:808: 可解析但列名行集合 ≠ v0729 权威 ImportTemplateColumns → ERR_IMPORT_TEMPLATE_UNSUPPORTED。
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:890: code: ERR_IMPORT_TEMPLATE_UNSUPPORTED
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1051: - ERR_IMPORT_TEMPLATE_UNSUPPORTED
+RESULT: FOUND (3 hit(s))
+
+--- TypeSpecificApi or typeSpecific in openapi.yaml ---
+PATTERN: TypeSpecificApi|typeSpecific
+FILE: contracts\openapi\openapi.yaml
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:514: typeSpecific:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:524: typeSpecific:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:536: typeSpecific:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1072: OTHER：允许 typeSpecific.other（含 contentDescription 及共用时间/地域）；
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1432: TypeSpecificApi:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1449: TypeSpecificDataset:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1459: TypeSpecificReportOrOther:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1467: TypeSpecificFields:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1475: $ref: "#/components/schemas/TypeSpecificDataset"
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1477: $ref: "#/components/schemas/TypeSpecificReportOrOther"
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1479: $ref: "#/components/schemas/TypeSpecificApi"
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1481: $ref: "#/components/schemas/TypeSpecificReportOrOther"
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1544: typeSpecific:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1545: $ref: "#/components/schemas/TypeSpecificFields"
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1654: typeSpecific:
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1655: $ref: "#/components/schemas/TypeSpecificFields"
+RESULT: FOUND (16 hit(s))
+
+--- reportFieldsWhitelist in codes.yaml ---
+PATTERN: reportFieldsWhitelist
+FILE: contracts\errors\codes.yaml
+C:\WorkSpace\AI-SEP\contracts\errors\codes.yaml:111: reportFieldsWhitelist: [rowNumber, productCode, reasonCode, reasonMessage]
+RESULT: FOUND (1 hit(s))
+
+--- NO_UPDATE in openapi.yaml ---
+PATTERN: NO_UPDATE
+FILE: contracts\openapi\openapi.yaml
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1085: enum: [REALTIME, DAILY, WEEKLY, MONTHLY, YEARLY, ON_DEMAND, NO_UPDATE]
+C:\WorkSpace\AI-SEP\contracts\openapi\openapi.yaml:1088: ON_DEMAND=按需, NO_UPDATE=不更新（V1.3 / OQ-V13-008）。
+RESULT: FOUND (2 hit(s))
+

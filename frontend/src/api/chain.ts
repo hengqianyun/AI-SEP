@@ -1,5 +1,5 @@
 /**
- * Chain API — 对齐 contracts/openapi + ChainAttestationPort (2.1.0；快照含三级路径)
+ * Chain API — 对齐 contracts/openapi + ChainAttestationPort (wsc-contracts@2.2.0)
  */
 import { apiRequest } from './client'
 

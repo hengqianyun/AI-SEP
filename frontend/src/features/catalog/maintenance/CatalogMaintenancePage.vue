@@ -75,7 +75,6 @@ function goCategoryAdmin() {
   <div class="maintenance" data-testid="catalog-maintenance">
     <header class="page-header wsc-surface">
       <div class="header-main">
-        <button type="button" class="link" @click="router.push('/catalog')">← 返回目录</button>
         <h1>目录维护</h1>
         <p class="subtitle">全部 / 已维护 / 待关联 · 单条与批量关联三级分类</p>
       </div>
@@ -339,7 +338,7 @@ function goCategoryAdmin() {
 }
 
 .header-main h1 {
-  margin: 8px 0 4px;
+  margin: 0 0 4px;
   font-size: 22px;
   font-weight: 700;
   color: var(--text-primary);
@@ -348,16 +347,6 @@ function goCategoryAdmin() {
 .subtitle {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 13px;
-}
-
-.link {
-  border: none;
-  background: none;
-  color: var(--blue);
-  cursor: pointer;
-  padding: 0;
-  font: inherit;
   font-size: 13px;
 }
 

@@ -386,13 +386,13 @@ describe('useProductImport', () => {
     expect(payload?.content).toContain('BAD')
   })
 
-  it('权限隐藏：USER 结构不可达；ADMIN/PROVIDER 可挂载弹层', () => {
+  it('权限隐藏：仅 PROVIDER 可挂载弹层；ADMIN/USER 结构不可达（V1.4）', () => {
     expect(canImportProduct('USER')).toBe(false)
-    expect(canImportProduct('ADMIN')).toBe(true)
+    expect(canImportProduct('ADMIN')).toBe(false)
     expect(canImportProduct('PROVIDER')).toBe(true)
     // 对齐 ImportDialog `v-if="open && productImportVisible"`
     expect(shouldRenderImportOverlay(true, canImportProduct('USER'))).toBe(false)
-    expect(shouldRenderImportOverlay(true, canImportProduct('ADMIN'))).toBe(true)
+    expect(shouldRenderImportOverlay(true, canImportProduct('ADMIN'))).toBe(false)
     expect(shouldRenderImportOverlay(true, canImportProduct('PROVIDER'))).toBe(true)
     expect(shouldRenderImportOverlay(false, true)).toBe(false)
   })

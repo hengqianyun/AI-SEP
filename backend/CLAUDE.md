@@ -50,6 +50,49 @@
 
 ---
 
+## 包结构规则（硬约束）
+
+项目采用**按类型分层**的扁平顶层结构，禁止按业务域划分顶层包。顶层包按代码职责分类，当前包含以下包（后续根据实际需要可扩展）：
+
+```
+com.shdata.datachain/
+├── controller/          ← @RestController，只做编排（参编/校验/调用/组合）
+├── service/             ← @Service，所有业务逻辑
+├── repository/          ← JPA Repository 接口 + 数据访问 Store（如 CatalogBrowseSeedStore）
+├── entity/              ← @Entity，JPA 实体（继承 BaseEntity）
+├── model/               ← record / DTO / 枚举（纯数据，不含逻辑）
+├── config/              ← @Configuration（全局配置、CORS、安全配置等）
+├── common/              ← 跨模块共享的基础设施
+│   ├── entity/          ← BaseEntity（抽象基类）
+│   ├── exception/       ← 全局异常类 + GlobalExceptionHandler
+│   ├── response/        ← ApiResponse、ServiceResult
+│   ├── constant/        ← 静态常量（WscConstants、IndustryCategories、SessionKeys 等）
+│   ├── support/         ← 通用工具（ApiEnvelope、CorrelationIdSupport、SessionViews）
+│   ├── security/        ← 安全组件（AuthAuditLogger、RbacMatrix、WriteAuthorizationInterceptor）
+│   ├── port/            ← 端口接口 + 适配器实现（如 ChainAttestationPort）
+│   ├── codec/           ← 编解码/解析器（ImportFileCodec、ImportFieldMapper 等）
+│   └── mapper/          ← Entity ↔ Model 映射工具
+└── DataChainApplication.java
+```
+
+### 包结构铁律
+
+1. **禁止**创建 `catalog/`、`chain/`、`overview/`、`security/`、`rbac/`、`demo/` 等业务域顶层包。
+2. 子包以域名为前缀区分，如 `controller/catalog/admin/`、`service/chain/`。
+3. 新增 Controller 必须放在 `controller/{域}/{子域}/` 下；新增 Service 放在 `service/{域}/{子域}/` 下。
+4. 纯数据类（record、DTO、枚举）一律放 `model/`，不放业务包内。
+5. Repository 接口和 Store 类统一放 `repository/`，不随域拆分子包。
+6. `common/` 只放**至少两个模块共享**的代码；仅单模块使用的工具放对应 `service/` 或 `repository/` 包内。
+7. 包名全小写，多级用 `.` 分隔（如 `controller.catalog.admin`）。
+
+### 施工约束
+
+- **新建 Java 文件前**，必须对照上述结构确定目标包路径，禁止随手创建新的业务域顶层包。
+- **移动已有文件时**，必须同步更新 package 声明、所有 import 引用、以及所有测试文件中的引用。
+- 移动后必须 `mvn compile` + `mvn test-compile` 双重验证通过。
+
+---
+
 ## 数据库变更规则（Flyway 是唯一入口）
 
 ### 1. 核心原则（硬约束）

@@ -353,14 +353,15 @@ test.describe('WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13)', () => {
     await switchRoleInline(page, 'PROVIDER')
     await expectWriteButtons(page, {
       category: false,
-      maintenance: false,
+      maintenance: true,
       productWrite: true,
       importEntry: true,
     })
     await page.goto('/catalog')
     await expect(page.getByTestId('catalog-open-import')).toBeVisible()
     await expectRouteStructurallyBlocked(page, '/catalog/admin/categories')
-    await expectRouteStructurallyBlocked(page, '/catalog/maintenance')
+    await page.goto('/catalog/maintenance')
+    await expect(page.getByTestId('catalog-maintenance')).toBeVisible({ timeout: 15_000 })
 
     await page.goto('/overview')
     await switchRoleInline(page, 'USER')
@@ -381,7 +382,7 @@ test.describe('WSC V1.3 E2E (PLAN-WSC-4.1 §6.1 / TESTRUN-WSC-E2E-V13)', () => {
     [
       'provider',
       'PROVIDER',
-      { category: false, maintenance: false, productWrite: true, importEntry: true },
+      { category: false, maintenance: true, productWrite: true, importEntry: true },
     ],
     [
       'user',

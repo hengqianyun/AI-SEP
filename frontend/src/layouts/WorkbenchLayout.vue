@@ -3,8 +3,7 @@ import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
-import { canMaintainCatalog } from '@/features/auth/composables/useCanWrite'
-import RoleSwitcher from '@/features/shell/components/RoleSwitcher.vue'
+import { canMaintainCatalog, canSeeMyProducts } from '@/features/auth/composables/useCanWrite'
 
 const auth = useAuthStore()
 const { enterpriseName, session, role } = storeToRefs(auth)
@@ -12,6 +11,10 @@ const route = useRoute()
 const router = useRouter()
 
 const catalogMaintenanceVisible = computed(() => canMaintainCatalog(role.value))
+/** 602：用户管理仅 ADMIN（内联门禁；603 不得回退） */
+const userManageVisible = computed(() => role.value === 'ADMIN')
+/** 603：我的数据产品仅 PROVIDER */
+const myProductsVisible = computed(() => canSeeMyProducts(role.value))
 
 const navOpen = [
   { to: '/overview', label: '总览', icon: 'overview' },
@@ -26,10 +29,23 @@ const navClosed = [
 
 const activePath = computed(() => route.path)
 
+/** 双表面：写路径带 from=mine 或 meta.fromMine 时归属「我的产品」active（UX-002） */
+const onMineSurface = computed(
+  () =>
+    activePath.value === '/my-products' ||
+    activePath.value.startsWith('/my-products/') ||
+    route.query.from === 'mine' ||
+    route.meta.fromMine === true,
+)
+
 function isActive(path: string) {
-  // 目录维护有独立菜单项，避免 /catalog/maintenance 同时高亮「数据目录」
-  if (path === '/catalog' && activePath.value.startsWith('/catalog/maintenance')) {
-    return false
+  if (path === '/catalog') {
+    if (activePath.value.startsWith('/catalog/maintenance')) return false
+    if (onMineSurface.value) return false
+    return activePath.value === '/catalog' || activePath.value.startsWith('/catalog/')
+  }
+  if (path === '/my-products') {
+    return onMineSurface.value
   }
   return activePath.value === path || activePath.value.startsWith(path + '/')
 }
@@ -42,6 +58,19 @@ async function onLogout() {
   await auth.logout()
   await router.replace({ name: 'login' })
 }
+
+const roleLabel = computed(() => {
+  switch (role.value) {
+    case 'ADMIN':
+      return '管理员'
+    case 'PROVIDER':
+      return '数据提供方'
+    case 'USER':
+      return '普通用户'
+    default:
+      return '—'
+  }
+})
 </script>
 
 <template>
@@ -84,10 +113,25 @@ async function onLogout() {
         </RouterLink>
 
         <RouterLink
+          v-if="myProductsVisible"
+          to="/my-products"
+          class="menu-item"
+          :class="{ active: isActive('/my-products') }"
+          data-testid="nav-my-products"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+          </svg>
+          <span>我的数据产品</span>
+        </RouterLink>
+
+        <RouterLink
           v-if="catalogMaintenanceVisible"
           to="/catalog/maintenance"
           class="menu-item"
           :class="{ active: isActive('/catalog/maintenance') }"
+          data-testid="nav-catalog-maintenance"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -96,6 +140,22 @@ async function onLogout() {
             <path d="M8 15l4-3 4 3" />
           </svg>
           <span>目录维护</span>
+        </RouterLink>
+
+        <RouterLink
+          v-if="userManageVisible"
+          to="/admin/users"
+          class="menu-item"
+          :class="{ active: isActive('/admin/users') }"
+          data-testid="nav-users"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <span>用户管理</span>
         </RouterLink>
 
         <button
@@ -130,7 +190,7 @@ async function onLogout() {
         <div class="company-card">
           <h3>{{ enterpriseName || '—' }}</h3>
           <p v-if="session" class="user-line">{{ session.displayName }}</p>
-          <RoleSwitcher class="role" />
+          <p class="role-line" data-testid="session-role-label">角色：{{ roleLabel }}</p>
           <button type="button" class="logout" @click="onLogout">退出登录</button>
         </div>
       </div>
@@ -287,6 +347,12 @@ async function onLogout() {
 }
 
 .user-line {
+  margin: 0;
+  font-size: 12px;
+  color: var(--sidebar-text-muted);
+}
+
+.role-line {
   margin: 0;
   font-size: 12px;
   color: var(--sidebar-text-muted);

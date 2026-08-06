@@ -3,14 +3,15 @@ info:
   title: WSC Access Workbench API
   version: 2.2.0
   description: |
-    wsc-contracts@2.2.0 — 接入端工作台 V1.3（OpenAPI 结构 + v0729 导入；DEC-WSC-006）。
+    wsc-contracts@2.2.0 — 接入端工作台 V1.4（座序图 L2 Top5、持久化用户、我的数据产品；SNAP-WSC-005）。
     统一响应包装：{ code, message, data, correlationId }；成功时 code="0"。
-    产品编码格式（DEC-WSC-001）：`{DOMAIN}-{FEATURE}-{NNNN}`，DOMAIN/FEATURE 为大写字母与数字，NNNN 至少 4 位数字。
-    产品字段 industryCategory：GB/T 4754 门类中文原文（非目录树节点）；l3CategoryId 可空（方案 A）。
-    typeSpecific：按 productType 填充 api/dataset/report/other；OTHER 允许 contentDescription 及共用时间/地域（修订 OQ-004）。
-    typeSpecific.api：swaggerFileContent（原文归档）+ endpoints[]（派生存贮）；兼容旧 endpoint。
-    导入模板：v0729 列名行（无产品编码列；编码由服务端生成）。旧模板 → ERR_IMPORT_TEMPLATE_UNSUPPORTED。
-    认证：V1 采用服务端会话（Cookie）为主；亦声明 Bearer 以便网关/文档等价说明——Bearer 须对应可吊销的服务端会话，写 API 以服务端会话角色为准。
+    RBAC：产品增/改/导入仅 PROVIDER；ADMIN 保留分类维护与用户管理；目录维护 ADMIN+PROVIDER（PROVIDER 仅 create_by=本人）。
+    GET /catalog/products?mine=true 仅返回 create_by=当前用户的产品。
+    GET /catalog/l2-distribution 返回二级目录产品计数（座序图）。
+    ADMIN /admin/users CRUD 持久化 sys_user。
+    产品编码格式（DEC-WSC-001）：`{DOMAIN}-{FEATURE}-{NNNN}`。
+    认证：服务端会话（Cookie）；写 API 以服务端会话角色为准。
+    （HOTFIX TASK-WSC-607：目录维护对 PROVIDER 开放本人产品；契约版本号未 bump，仍为 2.2.0。）
 
 servers:
   - url: /api/v1
@@ -21,6 +22,7 @@ tags:
   - name: overview
   - name: catalog
   - name: chain
+  - name: admin
 
 security:
   - SessionCookie: []
@@ -82,6 +84,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseEmpty"
+
+  /auth/session/role:
+    post:
+      tags: [auth]
+      summary: 会话角色切换（始终禁用）
+      description: |
+        V1.4 起角色仅由 sys_user 账号绑定；任意会话角色切换一律禁用。
+        三角色（ADMIN/PROVIDER/USER）调用均返回 HTTP 410 + ERR_ROLE_SWITCH_DISABLED。
+        本操作无成功路径。
+      operationId: switchSessionRole
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SwitchRoleRequest"
+      responses:
+        "410":
+          description: 角色切换已永久禁用
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                disabled:
+                  summary: 任意角色均禁用
+                  value:
+                    code: ERR_ROLE_SWITCH_DISABLED
+                    message: 角色由账号绑定，禁止会话切换
+                    data: null
+                    correlationId: "corr-role-switch-410"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /overview/metrics:
     get:
@@ -254,6 +289,157 @@ paths:
                       productCount: 3
                     correlationId: "corr-cat-del-1"
 
+  /catalog/l2-distribution:
+    get:
+      tags: [catalog]
+      summary: 二级目录产品分布（座序图；REQ-CAT-009）
+      description: |
+        返回全部产品真实总数 totalProducts，以及按产品数降序的 L2 条目 items[]
+        （code/name/count）。消费方可截取 Top5。totalProducts 不得用 Top5 之和冒充。
+      operationId: getL2Distribution
+      responses:
+        "200":
+          description: 按产品数降序的 L2 计数与产品总数
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseL2Distribution"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /admin/users:
+    get:
+      tags: [admin]
+      summary: 用户列表（仅 ADMIN；REQ-USER-001）
+      description: |
+        响应为命名 schema AdminUser[]；禁止回显 password / passwordHash。
+        非 ADMIN → ERR_FORBIDDEN（403）。
+      operationId: listUsers
+      responses:
+        "200":
+          description: 用户列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseAdminUserPage"
+              examples:
+                ok:
+                  value:
+                    code: "0"
+                    message: OK
+                    data:
+                      items:
+                        - userId: "u-1"
+                          username: "admin"
+                          displayName: "管理员"
+                          role: ADMIN
+                          enterpriseName: "演示企业"
+                          deleted: false
+                    correlationId: "corr-users-list"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags: [admin]
+      summary: 创建用户（仅 ADMIN；REQ-USER-001）
+      description: |
+        必填 username + password + role；可选 displayName / enterpriseName。
+        username 冲突 → ERR_USER_USERNAME_CONFLICT（409）。
+        响应 AdminUser 禁止含 password / passwordHash。
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserCreate"
+      responses:
+        "200":
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseAdminUser"
+              examples:
+                ok:
+                  value:
+                    code: "0"
+                    message: OK
+                    data:
+                      userId: "u-2"
+                      username: "provider1"
+                      displayName: "提供方一"
+                      role: PROVIDER
+                      enterpriseName: "演示企业"
+                      deleted: false
+                    correlationId: "corr-users-create"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: username 冲突
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                conflict:
+                  value:
+                    code: ERR_USER_USERNAME_CONFLICT
+                    message: 用户名已存在
+                    data: null
+                    correlationId: "corr-users-dup"
+
+  /admin/users/{userId}:
+    put:
+      tags: [admin]
+      summary: 更新用户角色/资料或软删（仅 ADMIN；REQ-USER-001）
+      description: |
+        可改角色、资料、密码；软删权威形状为 PUT deleted: true（本版不采用 DELETE）。
+        用户不存在 → ERR_USER_NOT_FOUND（404）。
+        响应 AdminUser 禁止含 password / passwordHash。
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserUpdate"
+            examples:
+              softDelete:
+                summary: 软删
+                value:
+                  deleted: true
+              changeRole:
+                summary: 改角色
+                value:
+                  role: USER
+      responses:
+        "200":
+          description: 已更新
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseAdminUser"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: 用户不存在
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+              examples:
+                notFound:
+                  value:
+                    code: ERR_USER_NOT_FOUND
+                    message: 用户不存在
+                    data: null
+                    correlationId: "corr-users-404"
+
   /catalog/products:
     get:
       tags: [catalog]
@@ -271,6 +457,10 @@ paths:
           in: query
           schema: { type: string }
           description: 子类（三级）；可选
+        - name: industryCategory
+          in: query
+          schema: { type: string }
+          description: GB/T 4754 门类中文原文（产品字段 industryCategory）；可选；与 L2/L3 树筛选独立
         - name: dataSource
           in: query
           schema: { $ref: "#/components/schemas/DataSource" }
@@ -287,6 +477,10 @@ paths:
           in: query
           description: 产品名/编码包含匹配（大小写不敏感）
           schema: { type: string }
+        - name: mine
+          in: query
+          description: true 时仅返回 create_by=当前用户的产品（我的数据产品）
+          schema: { type: boolean, default: false }
         - name: page
           in: query
           schema: { type: integer, default: 1, minimum: 1 }
@@ -302,7 +496,10 @@ paths:
                 $ref: "#/components/schemas/ApiResponseProductPage"
     post:
       tags: [catalog]
-      summary: 新增数据产品（管理员/提供方）
+      summary: 新增数据产品（仅 PROVIDER；ADMIN/USER → 403）
+      description: |
+        产品写仅 PROVIDER；ADMIN 与 USER 调用返回 ERR_FORBIDDEN（403）。
+        归属 create_by 绑定当前会话 userId。
       operationId: createProduct
       requestBody:
         required: true
@@ -403,7 +600,9 @@ paths:
           $ref: "#/components/responses/NotFound"
     put:
       tags: [catalog]
-      summary: 编辑数据产品
+      summary: 编辑数据产品（仅 PROVIDER 本人；ADMIN/USER/异主 → 403）
+      description: |
+        产品写仅 PROVIDER 且 create_by=当前用户；空归属/异主/ADMIN/USER → ERR_FORBIDDEN（403）。
       operationId: updateProduct
       parameters:
         - $ref: "#/components/parameters/ProductId"
@@ -487,7 +686,9 @@ paths:
   /catalog/maintenance/entries:
     get:
       tags: [catalog]
-      summary: 目录维护列表（条目≡数据产品；REQ-CAT-007）
+      summary: 目录维护列表（条目≡数据产品；REQ-CAT-007 / TASK-WSC-607）
+      description: |
+        ADMIN 返回全量；PROVIDER 仅 create_by=当前会话用户；USER → 403 ERR_MAINTENANCE_FORBIDDEN。
       operationId: listMaintenanceEntries
       parameters:
         - name: status
@@ -525,6 +726,9 @@ paths:
     put:
       tags: [catalog]
       summary: 单条目录维护关联（挂三级）
+      description: |
+        ADMIN 可维护任意产品；PROVIDER 仅本人 create_by（空/异主 → 403 ERR_FORBIDDEN；不存在 → 404）。
+        无角色权限（USER）→ 403 ERR_MAINTENANCE_FORBIDDEN。
       operationId: updateMaintenanceEntry
       parameters:
         - $ref: "#/components/parameters/ProductId"
@@ -556,11 +760,16 @@ paths:
                     correlationId: "corr-maint-leaf-1"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /catalog/maintenance/entries/batch:
     post:
       tags: [catalog]
       summary: 批量目录维护关联
+      description: |
+        ADMIN 可批量维护任意产品；PROVIDER 逐条校验 create_by=本人，越权条目进入 failures（ERR_FORBIDDEN）。
+        无角色权限（USER）→ 403 ERR_MAINTENANCE_FORBIDDEN。
       operationId: batchUpdateMaintenanceEntries
       requestBody:
         required: true
@@ -606,8 +815,9 @@ paths:
   /catalog/products/import:
     post:
       tags: [catalog]
-      summary: 同步批量导入产品（REQ-CAT-008；V1.1 无异步 job）
+      summary: 同步批量导入产品（仅 PROVIDER；REQ-CAT-008；无异步 job）
       description: |
+        导入仅 PROVIDER；ADMIN/USER → ERR_FORBIDDEN（403）。UI 宿主为「我的数据产品」。
         请求级失败（整单拒绝）：文件 >10MB → ERR_IMPORT_FILE_TOO_LARGE；
         无法解析/非 xlsx|csv → ERR_IMPORT_FORMAT_INVALID；
         可解析但列名行集合 ≠ v0729 权威 ImportTemplateColumns → ERR_IMPORT_TEMPLATE_UNSUPPORTED。
@@ -856,6 +1066,9 @@ components:
                 - ERR_IMPORT_TEMPLATE_UNSUPPORTED
                 - ERR_IMPORT_REPORT_NOT_FOUND
                 - ERR_FORBIDDEN
+                - ERR_ROLE_SWITCH_DISABLED
+                - ERR_USER_USERNAME_CONFLICT
+                - ERR_USER_NOT_FOUND
                 - "401"
                 - "404"
             data:
@@ -892,9 +1105,18 @@ components:
     LoginRequest:
       type: object
       required: [username, password]
+      description: |
+        登录仅接受 username + password。角色不得由客户端选择；
+        会话角色仅来自 sys_user 账号绑定（V1.4 废止 LoginRequest.role）。
       properties:
         username: { type: string }
         password: { type: string, format: password }
+
+    SwitchRoleRequest:
+      type: object
+      required: [role]
+      description: 会话切角色请求体（端点始终 410；无成功路径）
+      properties:
         role:
           $ref: "#/components/schemas/Role"
 
@@ -906,6 +1128,97 @@ components:
         displayName: { type: string }
         role: { $ref: "#/components/schemas/Role" }
         enterpriseName: { type: string }
+
+    AdminUser:
+      type: object
+      required: [userId, username, displayName, role, enterpriseName, deleted]
+      description: |
+        用户管理响应模型。list/get/create/update 响应禁止出现 password / passwordHash。
+      properties:
+        userId: { type: string }
+        username: { type: string }
+        displayName: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        enterpriseName: { type: string }
+        deleted: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    AdminUserCreate:
+      type: object
+      required: [username, password, role]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+        role: { $ref: "#/components/schemas/Role" }
+        displayName: { type: string }
+        enterpriseName: { type: string }
+
+    AdminUserUpdate:
+      type: object
+      description: |
+        更新用户；软删权威形状为 deleted: true（本版不采用 DELETE）。
+        password 仅作写输入，响应永不回显。
+      properties:
+        displayName: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        enterpriseName: { type: string }
+        password: { type: string, format: password }
+        deleted: { type: boolean }
+
+    AdminUserPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUser"
+
+    ApiResponseAdminUser:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/AdminUser"
+
+    ApiResponseAdminUserPage:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/AdminUserPage"
+
+    L2DistributionItem:
+      type: object
+      required: [code, name, count]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        count: { type: integer }
+
+    L2Distribution:
+      type: object
+      required: [totalProducts, items]
+      properties:
+        totalProducts:
+          type: integer
+          description: 真实产品总数（非 Top5 之和）
+        items:
+          type: array
+          description: 按 count 降序的 L2 条目；消费方可取 Top5
+          items:
+            $ref: "#/components/schemas/L2DistributionItem"
+
+    ApiResponseL2Distribution:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/L2Distribution"
 
     ApiResponseSession:
       allOf:
@@ -1256,6 +1569,11 @@ components:
             chainCount: { type: integer }
             categoryPath: { type: string }
             latestVersionNo: { type: integer }
+            createBy:
+              type: string
+              nullable: true
+              description: 创建者 userId；mine=true 过滤依据；空/缺失不可被 PROVIDER 冒领
+            updatedAt: { type: string, format: date-time }
 
     ProductPage:
       type: object

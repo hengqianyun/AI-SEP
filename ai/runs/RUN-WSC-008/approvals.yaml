@@ -1,0 +1,28 @@
+# RUN-WSC-008 批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
+
+approvals:
+  - id: APPR-WSC-RELEASE-008
+    runId: RUN-WSC-008
+    planId: PLAN-WSC-5.2
+    snapshotId: SNAP-WSC-005
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-08-06T17:36:00+08:00
+    source: chat
+    utterance: 批准发布
+    scope: feature-package
+    basedOn:
+      - product/requirements/SNAP-WSC-005.md
+      - planning/approved/PLAN-WSC-5.2.md
+      - planning/reviews/integration/REV-WSC-INTEGRATION-008.md
+      - planning/tasks/TESTRUN-TASK-WSC-605.md
+      - planning/tasks/TESTRUN-TASK-WSC-606.md
+      - planning/tasks/TESTRUN-TASK-WSC-607.md
+      - planning/tasks/REV-SEC-TASK-WSC-607.md
+      - TESTRUN-WSC-E2E-V14
+    notes: |
+      V1.4：座序图、持久化用户、我的数据产品与 RBAC（contracts@2.2.0）。
+      HOTFIX-606 UX（滚动/用户弹框/行业枚举筛选）；HOTFIX-607 PROVIDER 目录维护（仅本人 create_by）。
+      SNAP-WSC-005 协议修复后正式重批。非阻塞：BUG-WSC-606-TESTRUN-001（P2）。

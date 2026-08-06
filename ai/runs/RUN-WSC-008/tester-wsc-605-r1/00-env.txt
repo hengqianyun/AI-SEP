@@ -1,0 +1,13 @@
+﻿=== env-check 2026-08-06T14:33:25+08:00 (pre-run) ===
+FE http://127.0.0.1:5173 Status=200 (Listen pid~35456)
+BE http://127.0.0.1:8080 Listen (pid~55928); root 404 expected
+E2E_RUN=1
+E2E_BASE_URL=http://127.0.0.1:5173
+cwd=C:\WorkSpace\AI-SEP\tests\e2e
+command=pnpm run test:p0-v14
+actorInstance=tester-wsc-605-r1
+=== post-run ===
+exitCode=0
+15 passed (31.4s)
+junit tests=15 failures=0
+reportDir=tests/e2e/reports/p0-wsc-v1.4/

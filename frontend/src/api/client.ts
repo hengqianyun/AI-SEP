@@ -1,11 +1,11 @@
 /**
- * HTTP client 基座 — 对齐 wsc-contracts@2.1.0
- * 由契约 OpenAPI 对齐/生成；TASK-WSC-301 唯一写；后续任务只读消费。
+ * HTTP client 基座 — 对齐 wsc-contracts@2.2.0
+ * 由契约 OpenAPI 对齐/生成；TASK-WSC-601 唯一写；后续任务只读消费。
  */
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1'
 
-export const CONTRACT_VERSION = '2.1.0' as const
+export const CONTRACT_VERSION = '2.2.0' as const
 
 export type ApiEnvelope<T> = {
   code: string

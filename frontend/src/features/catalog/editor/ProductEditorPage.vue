@@ -25,6 +25,9 @@ const productId = computed(() =>
   mode.value === 'edit' ? String(route.params.productId || '') : undefined,
 )
 
+/** 增改导宿主=我的数据产品；关闭/成功回 /my-products */
+const returnTo = '/my-products'
+
 const editor = useProductEditor(mode.value === 'create' ? 'create' : 'edit')
 const {
   state,
@@ -56,16 +59,16 @@ watch(mode, () => {
 async function onSubmit() {
   const id = await submit(productId.value)
   if (id) {
-    void router.push(`/catalog/products/${id}`)
+    void router.push({ path: `/catalog/products/${id}`, query: { from: 'mine' } })
   }
 }
 
 function onCancel() {
-  void router.push('/catalog')
+  void router.push(returnTo)
 }
 
 function goBack() {
-  void router.push('/catalog')
+  void router.push(returnTo)
 }
 </script>
 

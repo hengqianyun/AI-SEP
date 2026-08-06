@@ -16,14 +16,14 @@ vi.mock('vue-router', () => ({
 
 import { useCatalogImportEntry } from './useCatalogImportEntry'
 
-describe('useCatalogImportEntry (FIND-001 / INTEGRATION.md)', () => {
+describe('useCatalogImportEntry (TASK-WSC-603 import host)', () => {
   beforeEach(() => {
     routeState.query = {}
     replace.mockClear()
   })
 
-  it('opens ImportDialog when route.query.import === "1" and role can import', async () => {
-    const role = ref<Role | null>('ADMIN')
+  it('opens ImportDialog when route.query.import === "1" and PROVIDER can import', async () => {
+    const role = ref<Role | null>('PROVIDER')
     routeState.query = { import: '1' }
     const api = useCatalogImportEntry(role)
     await nextTick()
@@ -31,7 +31,16 @@ describe('useCatalogImportEntry (FIND-001 / INTEGRATION.md)', () => {
     expect(api.importOpen.value).toBe(true)
   })
 
-  it('does not open when import=1 but role cannot import', async () => {
+  it('does not open when import=1 but ADMIN cannot import (2.2.0)', async () => {
+    const role = ref<Role | null>('ADMIN')
+    routeState.query = { import: '1' }
+    const api = useCatalogImportEntry(role)
+    await nextTick()
+    expect(api.productImportVisible.value).toBe(false)
+    expect(api.importOpen.value).toBe(false)
+  })
+
+  it('does not open when import=1 but USER cannot import', async () => {
     const role = ref<Role | null>('USER')
     routeState.query = { import: '1' }
     const api = useCatalogImportEntry(role)
@@ -40,15 +49,15 @@ describe('useCatalogImportEntry (FIND-001 / INTEGRATION.md)', () => {
     expect(api.importOpen.value).toBe(false)
   })
 
-  it('openImport sets importOpen for ADMIN/PROVIDER', () => {
+  it('openImport sets importOpen for PROVIDER', () => {
     const role = ref<Role | null>('PROVIDER')
     const api = useCatalogImportEntry(role)
     api.openImport()
     expect(api.importOpen.value).toBe(true)
   })
 
-  it('onImportClosed clears import query and returns to catalog surface', async () => {
-    const role = ref<Role | null>('ADMIN')
+  it('onImportClosed clears import query and returns to /my-products', async () => {
+    const role = ref<Role | null>('PROVIDER')
     routeState.query = { import: '1', q: 'med' }
     const api = useCatalogImportEntry(role)
     await nextTick()
@@ -57,7 +66,7 @@ describe('useCatalogImportEntry (FIND-001 / INTEGRATION.md)', () => {
     api.onImportClosed()
     expect(api.importOpen.value).toBe(false)
     expect(replace).toHaveBeenCalledWith({
-      path: '/catalog',
+      path: '/my-products',
       query: { q: 'med' },
     })
   })

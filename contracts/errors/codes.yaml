@@ -2,6 +2,7 @@
 # 与 contracts/openapi/openapi.yaml 示例及统一响应包装一致
 # 继承 V1.1；V1.3 新增 ERR_IMPORT_TEMPLATE_UNSUPPORTED（旧模板/非 v0729 表头整文件拒绝）
 # V2.2：行业分类改为 industryCategory 门类枚举；ERR_CATEGORY_LEAF_REQUIRED 仅用于显式非法 L3 / 维护关联
+# V2.2.0（SNAP-WSC-005）：切角色禁用、用户管理冲突/404
 
 version: "2.2.0"
 package: wsc-contracts
@@ -76,7 +77,25 @@ codes:
     httpStatus: 403
     code: ERR_FORBIDDEN
     message: "当前角色无权执行该写操作"
-    refs: [REQ-RBAC-001]
+    refs: [REQ-RBAC-001, REQ-USER-001]
+
+  ERR_ROLE_SWITCH_DISABLED:
+    httpStatus: 410
+    code: ERR_ROLE_SWITCH_DISABLED
+    message: "角色由账号绑定，禁止会话切换"
+    refs: [REQ-SHELL-001, SNAP-WSC-005, PLAN-WSC-5.2 §3.1]
+
+  ERR_USER_USERNAME_CONFLICT:
+    httpStatus: 409
+    code: ERR_USER_USERNAME_CONFLICT
+    message: "用户名已存在"
+    refs: [REQ-USER-001, PLAN-WSC-5.2 §3.1]
+
+  ERR_USER_NOT_FOUND:
+    httpStatus: 404
+    code: ERR_USER_NOT_FOUND
+    message: "用户不存在"
+    refs: [REQ-USER-001, PLAN-WSC-5.2 §3.1]
 
 envelope:
   fields: [code, message, data, correlationId]

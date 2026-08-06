@@ -1,0 +1,11 @@
+﻿executedAt: 2026-08-06T17:11:31+08:00
+actorInstance: tester-wsc-607-r1
+
+probe:
+  5173: FAIL — 无法连接到远程服务器（frontend Vite 未监听）
+  8080: /actuator/health → {"status":"UP"}
+
+note: |
+  可选 E2E 抽样依赖 E2E_BASE_URL=http://127.0.0.1:5173。
+  5173 不可用 → E2E 未执行；不记 PASS、不伪造。
+  必需层（Maven + Vitest）不依赖 5173，已真实执行。

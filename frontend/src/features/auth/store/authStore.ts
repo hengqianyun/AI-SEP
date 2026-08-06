@@ -1,10 +1,15 @@
 import type { Role, Session } from '@/api/auth'
-import { createSession, deleteSession, getSession } from '@/api/auth'
+import {
+  createSession,
+  deleteSession,
+  getSession,
+  switchSessionRole,
+} from '@/api/auth'
+import { ApiError } from '@/api/client'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { switchSessionRole } from '../api/switchRole'
 
-/** Pinia auth store — REQ-RBAC-001 / REQ-SHELL-001 */
+/** Pinia auth store — REQ-RBAC-001 / REQ-SHELL-001（V1.4 角色绑定账号） */
 export const useAuthStore = defineStore('auth', () => {
   const session = ref<Session | null>(null)
   const loading = ref(false)
@@ -29,14 +34,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function login(username: string, password: string, roleHint?: Role) {
+  async function login(username: string, password: string) {
     loading.value = true
     error.value = null
     try {
       const res = await createSession({
         username,
         password,
-        ...(roleHint ? { role: roleHint } : {}),
       })
       session.value = res.data
       return session.value
@@ -62,19 +66,20 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  /** 切换角色：旧会话服务端失效，写入口立即按新角色更新。 */
+  /**
+   * 会话切角色已下线：调用契约端点，预期 410 + ERR_ROLE_SWITCH_DISABLED。
+   * 无成功路径；会话角色不变。
+   */
   async function switchRole(next: Role) {
-    loading.value = true
-    error.value = null
     try {
-      const res = await switchSessionRole(next)
-      session.value = res.data
-      return session.value
+      await switchSessionRole({ role: next })
+      throw new Error('角色切换不应成功')
     } catch (e) {
-      error.value = e instanceof Error ? e.message : '角色切换失败'
+      if (e instanceof ApiError && e.code === 'ERR_ROLE_SWITCH_DISABLED') {
+        error.value = e.message
+        throw e
+      }
       throw e
-    } finally {
-      loading.value = false
     }
   }
 

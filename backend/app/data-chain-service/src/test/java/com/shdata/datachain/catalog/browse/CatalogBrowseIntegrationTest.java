@@ -1,4 +1,4 @@
-package com.shdata.datachain.catalog.browse;
+package com.shdata.datachain.model;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -215,6 +215,47 @@ class CatalogBrowseIntegrationTest {
             jsonPath(
                 "$.data.items[*].categoryPath",
                 Matchers.everyItem(Matchers.containsString("脱敏病历"))));
+  }
+
+  @Test
+  void listProducts_filterByIndustryCategory_gbtMenlei() throws Exception {
+    MockHttpSession session = login("provider", "demo");
+    String code = "TST-IND-" + String.format("%04d", System.currentTimeMillis() % 10000);
+    mockMvc
+        .perform(
+            post("/api/v1/catalog/products")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"productCode\":\""
+                        + code
+                        + "\",\"productName\":\"行业门类筛选样例\",\"productType\":\"OTHER\","
+                        + "\"industryCategory\":\"建筑业\","
+                        + "\"typeSpecific\":{\"other\":{\"contentDescription\":\"606\"}}}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.industryCategory").value("建筑业"));
+
+    mockMvc
+        .perform(
+            get("/api/v1/catalog/products")
+                .session(session)
+                .param("industryCategory", "建筑业")
+                .param("q", code))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("0"))
+        .andExpect(jsonPath("$.data.total").value(1))
+        .andExpect(jsonPath("$.data.items[0].productCode").value(code))
+        .andExpect(jsonPath("$.data.items[0].industryCategory").value("建筑业"));
+
+    mockMvc
+        .perform(
+            get("/api/v1/catalog/products")
+                .session(session)
+                .param("industryCategory", "金融业")
+                .param("q", code))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.total").value(0))
+        .andExpect(jsonPath("$.data.items").isEmpty());
   }
 
   @Test

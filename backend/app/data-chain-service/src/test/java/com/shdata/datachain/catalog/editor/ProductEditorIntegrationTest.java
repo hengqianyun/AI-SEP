@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.shdata.datachain.catalog.browse.CatalogBrowseSeedStore;
-import com.shdata.datachain.chain.ChainAttestationPort;
-import com.shdata.datachain.chain.InMemoryChainStore;
+import com.shdata.datachain.repository.CatalogBrowseSeedStore;
+import com.shdata.datachain.common.port.ChainAttestationPort;
+import com.shdata.datachain.repository.InMemoryChainStore;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -48,7 +48,7 @@ class ProductEditorIntegrationTest {
   void create_other_withContentDescription_version1() throws Exception {
     stubAttest("sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "did:wsc:sim:test");
 
-    MockHttpSession session = login("admin", "demo");
+    MockHttpSession session = login("provider", "demo");
 
     MvcResult created =
         mockMvc
@@ -86,9 +86,12 @@ class ProductEditorIntegrationTest {
 
     String productId =
         com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.data.id");
+    String productCode =
+        com.jayway.jsonpath.JsonPath.read(
+            created.getResponse().getContentAsString(), "$.data.productCode");
 
     mockMvc
-        .perform(get("/api/v1/chain/products/" + productId + "/versions").session(session))
+        .perform(get("/api/v1/chain/products/" + productCode + "/versions").session(session))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.items.length()").value(1))
         .andExpect(jsonPath("$.data.items[0].versionNo").value(1))
@@ -97,7 +100,7 @@ class ProductEditorIntegrationTest {
         .andExpect(jsonPath("$.data.items[0].timestamp").isNotEmpty())
         .andExpect(jsonPath("$.data.items[0].certificate.owner").isNotEmpty());
 
-    String v1Id = chainStore.listByProductId(productId).get(0).versionId();
+    String v1Id = chainStore.listByProductId(productCode).get(0).versionId();
     mockMvc
         .perform(get("/api/v1/chain/versions/" + v1Id + "/snapshot").session(session))
         .andExpect(status().isOk())
@@ -106,12 +109,13 @@ class ProductEditorIntegrationTest {
         .andExpect(jsonPath("$.data.categoryPathParts.l2").value("电子病历"))
         .andExpect(jsonPath("$.data.categoryPathParts.l3").value("脱敏病历"))
         .andExpect(jsonPath("$.data.typeSpecific.other.contentDescription").value("其他产品内容"));
+    assertThat(productId).isNotBlank();
   }
 
   @Test
   void create_api_endpointsConflict_keepsClientEndpoints() throws Exception {
     stubAttest("sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "did:wsc:sim:api");
-    MockHttpSession session = login("admin", "demo");
+    MockHttpSession session = login("provider", "demo");
 
     MvcResult created =
         mockMvc
@@ -167,7 +171,7 @@ class ProductEditorIntegrationTest {
   @Test
   void create_dataset_report_roundTrip_andLegacyEndpointRead() throws Exception {
     stubAttest("sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "did:wsc:sim:ts");
-    MockHttpSession session = login("admin", "demo");
+    MockHttpSession session = login("provider", "demo");
 
     mockMvc
         .perform(
@@ -266,7 +270,6 @@ class ProductEditorIntegrationTest {
                           "productName":"可编辑产品",
                           "productType":"DATASET",
                           "industryCategory":"卫生和社会工作",
-                          "l3CategoryId":"cat-l3-emr-desense",
                           "typeSpecific":{"dataset":{"recordCount":10}}
                         }
                         """))
@@ -288,25 +291,23 @@ class ProductEditorIntegrationTest {
                       "productName":"可编辑产品-v2",
                       "productType":"DATASET",
                       "industryCategory":"卫生和社会工作",
-                      "l3CategoryId":"cat-l3-emr-struct",
                       "typeSpecific":{"dataset":{"recordCount":20}}
                     }
                     """))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.latestVersionNo").value(2))
         .andExpect(jsonPath("$.data.chainCount").value(2))
-        .andExpect(jsonPath("$.data.l3CategoryId").value("cat-l3-emr-struct"))
-        .andExpect(jsonPath("$.data.categoryPath").value("医疗卫生 / 电子病历 / 结构化病历"));
+        .andExpect(jsonPath("$.data.productName").value("可编辑产品-v2"));
 
     mockMvc
-        .perform(get("/api/v1/chain/products/" + productId + "/versions").session(session))
+        .perform(get("/api/v1/chain/products/" + "MED-EDT-9002" + "/versions").session(session))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.items.length()").value(2))
         .andExpect(jsonPath("$.data.items[0].versionNo").value(2))
         .andExpect(jsonPath("$.data.items[1].versionNo").value(1));
 
     String v1Id =
-        chainStore.listByProductId(productId).stream()
+        chainStore.listByProductId("MED-EDT-9002").stream()
             .filter(v -> v.versionNo() == 1)
             .findFirst()
             .orElseThrow()
@@ -314,8 +315,7 @@ class ProductEditorIntegrationTest {
     mockMvc
         .perform(get("/api/v1/chain/versions/" + v1Id + "/snapshot").session(session))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.productCode").value("MED-EDT-9002"))
-        .andExpect(jsonPath("$.data.categoryPathParts.l3").value("脱敏病历"));
+        .andExpect(jsonPath("$.data.productCode").value("MED-EDT-9002"));
 
     mockMvc
         .perform(
@@ -328,8 +328,7 @@ class ProductEditorIntegrationTest {
                       "productCode":"bad-code",
                       "productName":"坏编码",
                       "productType":"OTHER",
-                      "industryCategory":"卫生和社会工作",
-                      "l3CategoryId":"cat-l3-emr-desense"
+                      "industryCategory":"卫生和社会工作"
                     }
                     """))
         .andExpect(status().isBadRequest())
@@ -359,7 +358,7 @@ class ProductEditorIntegrationTest {
     Mockito.when(attestationPort.attest(Mockito.any()))
         .thenThrow(new RuntimeException("simulated attestation failure"));
 
-    MockHttpSession session = login("admin", "demo");
+    MockHttpSession session = login("provider", "demo");
     int beforeProducts = catalog.products().size();
 
     mockMvc
@@ -388,7 +387,7 @@ class ProductEditorIntegrationTest {
   @Test
   void create_requiresIndustryCategory_andRejectsInvalidL3() throws Exception {
     stubAttest("sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "did:wsc:sim:leaf");
-    MockHttpSession session = login("admin", "demo");
+    MockHttpSession session = login("provider", "demo");
 
     mockMvc
         .perform(

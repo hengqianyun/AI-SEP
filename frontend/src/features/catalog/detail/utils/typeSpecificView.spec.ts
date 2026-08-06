@@ -94,9 +94,9 @@ describe('buildApiDetailView — OpenAPI / 旧 endpoint 兼容', () => {
 })
 
 describe('isDetailEditEntryVisible — 编辑入口角色', () => {
-  it('ADMIN / PROVIDER 可见，USER 不可见', () => {
-    expect(isDetailEditEntryVisible('ADMIN')).toBe(true)
+  it('PROVIDER 可见，ADMIN / USER 不可见', () => {
     expect(isDetailEditEntryVisible('PROVIDER')).toBe(true)
+    expect(isDetailEditEntryVisible('ADMIN')).toBe(false)
     expect(isDetailEditEntryVisible('USER')).toBe(false)
     expect(isDetailEditEntryVisible(null)).toBe(false)
   })

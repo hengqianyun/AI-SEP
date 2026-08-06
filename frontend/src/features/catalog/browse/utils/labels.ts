@@ -38,6 +38,9 @@ export const PUBLIC_DATA_OPTIONS = [
 ] as const
 
 export const CATALOG_EMPTY_MESSAGE = '未找到符合条件的数据产品，请调整筛选或搜索关键词'
+
+/** 我的数据产品空态（与公共目录可区分，UX-002） */
+export const MINE_EMPTY_MESSAGE = '暂无本人创建的数据产品，可通过新增或批量导入添加'
 export const CATALOG_ERROR_MESSAGE = '加载目录失败，请重试'
 
 export function productTypeLabel(type: string | undefined): string {

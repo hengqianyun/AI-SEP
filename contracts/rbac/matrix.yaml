@@ -1,12 +1,11 @@
-# wsc-contracts@2.0.0 — RBAC 可测矩阵
-# 对齐 PLAN-WSC-2.2 §4 / REQ-RBAC-001 / REQ-SHELL-001
+# wsc-contracts@2.2.0 — RBAC 可测矩阵（SNAP-WSC-005 / PLAN-WSC-5.2 §4）
 
-version: "2.0.0"
+version: "2.2.0"
 package: wsc-contracts
 
 roles:
   - ADMIN      # 管理员
-  - PROVIDER   # 提供方
+  - PROVIDER   # 提供方（数据提供方）
   - USER       # 普通用户
 
 matrix:
@@ -15,22 +14,30 @@ matrix:
     categoryWriteApi: { expect: 200, on: valid }
     catalogMaintenanceUI: visible
     catalogMaintenanceApi: { expect: 200, on: valid }
-    productWriteUI: visible
-    productWriteApi: { expect: 200, on: valid }
-    productImportUI: visible
-    productImportApi: { expect: 200, on: valid }
+    productWriteUI: hidden
+    productWriteApi: { expect: 403, code: ERR_FORBIDDEN }
+    productImportUI: hidden
+    productImportApi: { expect: 403, code: ERR_FORBIDDEN }
     importReportGet: { expect: 200, on: ownOrAdmin }
+    userManageUI: visible
+    userManageApi: { expect: 200, on: valid }
+    myProductsUI: hidden
+    sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
 
   - role: PROVIDER
     categoryMaintainUI: hidden
     categoryWriteApi: { expect: 403, code: ERR_FORBIDDEN }
-    catalogMaintenanceUI: hidden
-    catalogMaintenanceApi: { expect: 403, code: ERR_MAINTENANCE_FORBIDDEN }
+    catalogMaintenanceUI: visible
+    catalogMaintenanceApi: { expect: 200, on: ownCreateBy }
     productWriteUI: visible
-    productWriteApi: { expect: 200, on: valid }
+    productWriteApi: { expect: 200, on: ownCreateBy }
     productImportUI: visible
     productImportApi: { expect: 200, on: valid }
     importReportGet: { expect: 200, on: importer }
+    userManageUI: hidden
+    userManageApi: { expect: 403, code: ERR_FORBIDDEN }
+    myProductsUI: visible
+    sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
 
   - role: USER
     categoryMaintainUI: hidden
@@ -42,9 +49,16 @@ matrix:
     productImportUI: hidden
     productImportApi: { expect: 403, code: ERR_FORBIDDEN }
     importReportGet: { expect: 403, code: ERR_FORBIDDEN }
+    userManageUI: hidden
+    userManageApi: { expect: 403, code: ERR_FORBIDDEN }
+    myProductsUI: hidden
+    sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
 
 notes:
-  - 写 API 以服务端会话角色为准，禁止仅信前端隐藏
-  - 会话模型继承 PLAN-WSC-1.1 §3.2 / PLAN-WSC-2.2 §3.3（SessionCookie / 可吊销 Bearer）
-  - 角色/权限变更后旧会话写 API 必须拒绝
-  - 导入错误报告：仅管理员或具备导入权限的提供方可 GET
+  - 写 API 以服务端会话角色为准，禁止仅信前端隐藏（隐藏 ≠ 授权）
+  - 登录身份绑定角色；禁止任意会话角色切换（POST /auth/session/role → 410）
+  - 产品增/改/导入仅 PROVIDER；ADMIN 产品写/导入 hidden + API 403；公共数据目录无写入口
+  - 我的数据产品列表仅 create_by = 当前 userId；空/缺失/异主不可被 PROVIDER 冒领
+  - 目录维护：ADMIN+PROVIDER UI 可见；ADMIN API 全量；PROVIDER list/update/batch 仅 create_by=本人（越权 403/404）；USER → ERR_MAINTENANCE_FORBIDDEN；分类树维护仍仅 ADMIN
+  - userManage* 仅 ADMIN
+  - 导入错误报告：管理员或具备导入权限的提供方可 GET；报告字段白名单不扩大

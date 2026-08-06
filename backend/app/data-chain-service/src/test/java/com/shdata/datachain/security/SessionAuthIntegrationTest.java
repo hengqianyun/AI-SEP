@@ -1,4 +1,4 @@
-package com.shdata.datachain.security;
+package com.shdata.datachain.model;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
- * PLAN-WSC-2.2 §4 三角色矩阵 + §3.3 登出拒绝 + 角色变更后旧凭证拒绝。
+ * PLAN-WSC-2.2 §4 三角色矩阵（含 TASK-WSC-607：PROVIDER 允许目录维护）+ §3.3 登出拒绝 + 角色切换禁用。
  */
 @SpringBootTest(
     properties = {
@@ -43,7 +43,7 @@ class SessionAuthIntegrationTest {
   @Autowired private MockMvc mockMvc;
 
   @Test
-  void rbacMatrix_admin_canWriteCategoryProductMaintenanceImport() throws Exception {
+  void rbacMatrix_admin_categoryMaintenanceOk_productImportForbidden() throws Exception {
     MockHttpSession session = login("admin", "demo", null);
     mockMvc
         .perform(
@@ -60,29 +60,24 @@ class SessionAuthIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     "{\"productCode\":\"TST-ADM-0001\",\"productName\":\"矩阵管理员产品\",\"productType\":\"OTHER\",\"industryCategory\":\"卫生和社会工作\"}"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.code").value("0"));
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("ERR_FORBIDDEN"));
     mockMvc
         .perform(get("/api/v1/catalog/maintenance/entries").session(session))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
     mockMvc
-        .perform(
-            put("/api/v1/catalog/maintenance/entries/prod-pending-001")
-                .session(session)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"l3CategoryId\":\"cat-l3-txn-retail\"}"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.code").value("0"));
-    String reportId = importWithErrors(session);
-    mockMvc
-        .perform(get("/api/v1/catalog/products/import/reports/" + reportId).session(session))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.code").value("0"));
+        .perform(post("/api/v1/catalog/products/import").session(session))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("ERR_FORBIDDEN"));
   }
 
+  /**
+   * TASK-WSC-607：PROVIDER 允许目录维护（GET/PUT，仅 create_by 隔离由业务层保证）；分类树写仍拒绝。
+   */
   @Test
-  void rbacMatrix_provider_maintenanceForbidden_productAndImportOk() throws Exception {
+  void rbacMatrix_provider_maintenanceAllowed_categoryForbidden_productAndImportOk()
+      throws Exception {
     MockHttpSession session = login("provider", "demo", null);
     mockMvc
         .perform(
@@ -95,23 +90,27 @@ class SessionAuthIntegrationTest {
         .andExpect(jsonPath("$.correlationId").isNotEmpty());
     mockMvc
         .perform(get("/api/v1/catalog/maintenance/entries").session(session))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code").value("ERR_MAINTENANCE_FORBIDDEN"));
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("0"));
+    MvcResult createProduct =
+        mockMvc
+            .perform(
+                post("/api/v1/catalog/products")
+                    .session(session)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{\"productCode\":\"TST-PRV-0001\",\"productName\":\"矩阵提供方产品\",\"productType\":\"OTHER\",\"industryCategory\":\"卫生和社会工作\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("0"))
+            .andReturn();
+    String ownProductId =
+        JsonPath.read(createProduct.getResponse().getContentAsString(), "$.data.id");
     mockMvc
         .perform(
-            put("/api/v1/catalog/maintenance/entries/p-1")
+            put("/api/v1/catalog/maintenance/entries/" + ownProductId)
                 .session(session)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code").value("ERR_MAINTENANCE_FORBIDDEN"));
-    mockMvc
-        .perform(
-            post("/api/v1/catalog/products")
-                .session(session)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    "{\"productCode\":\"TST-PRV-0001\",\"productName\":\"矩阵提供方产品\",\"productType\":\"OTHER\",\"industryCategory\":\"卫生和社会工作\"}"))
+                .content("{\"l3CategoryId\":\"cat-l3-emr-desense\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.code").value("0"));
     String reportId = importWithErrors(session);
@@ -165,32 +164,16 @@ class SessionAuthIntegrationTest {
   }
 
   @Test
-  void roleSwitch_oldSessionImportRejected() throws Exception {
-    MockHttpSession oldSession = login("admin", "demo", null);
-
-    MvcResult switchResult =
-        mockMvc
-            .perform(
-                post("/api/v1/auth/session/role")
-                    .session(oldSession)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"role\":\"USER\"}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.role").value("USER"))
-            .andReturn();
-
-    MockHttpSession newSession = (MockHttpSession) switchResult.getRequest().getSession(false);
-
-    // 旧会话写 API 必须拒绝（ISSUE-SEC-R1-001 / §3.3）
+  void roleSwitch_disabledReturnsGone() throws Exception {
+    MockHttpSession session = login("admin", "demo", null);
     mockMvc
-        .perform(post("/api/v1/catalog/products/import").session(oldSession))
-        .andExpect(status().isUnauthorized());
-
-    // 新会话以 USER 角色，导入亦拒绝
-    mockMvc
-        .perform(post("/api/v1/catalog/products/import").session(newSession))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code").value("ERR_FORBIDDEN"));
+        .perform(
+            post("/api/v1/auth/session/role")
+                .session(session)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"role\":\"USER\"}"))
+        .andExpect(status().isGone())
+        .andExpect(jsonPath("$.code").value("ERR_ROLE_SWITCH_DISABLED"));
   }
 
   @Test

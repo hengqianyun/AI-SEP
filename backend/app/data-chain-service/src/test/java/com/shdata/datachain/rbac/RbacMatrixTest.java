@@ -1,10 +1,10 @@
-package com.shdata.datachain.rbac;
+package com.shdata.datachain.common.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.shdata.datachain.security.Role;
+import com.shdata.datachain.model.Role;
 import org.junit.jupiter.api.Test;
 
 class RbacMatrixTest {
@@ -17,24 +17,31 @@ class RbacMatrixTest {
   }
 
   @Test
-  void catalogMaintenance_onlyAdmin() {
+  void catalogMaintenance_adminAndProvider() {
     assertTrue(RbacMatrix.canMaintainCatalog(Role.ADMIN));
-    assertFalse(RbacMatrix.canMaintainCatalog(Role.PROVIDER));
+    assertTrue(RbacMatrix.canMaintainCatalog(Role.PROVIDER));
     assertFalse(RbacMatrix.canMaintainCatalog(Role.USER));
   }
 
   @Test
-  void productWrite_adminAndProvider() {
-    assertTrue(RbacMatrix.canWriteProduct(Role.ADMIN));
+  void productWrite_providerOnly_v14() {
+    assertFalse(RbacMatrix.canWriteProduct(Role.ADMIN));
     assertTrue(RbacMatrix.canWriteProduct(Role.PROVIDER));
     assertFalse(RbacMatrix.canWriteProduct(Role.USER));
   }
 
   @Test
-  void productImport_adminAndProvider() {
-    assertTrue(RbacMatrix.canImportProduct(Role.ADMIN));
+  void productImport_providerOnly_v14() {
+    assertFalse(RbacMatrix.canImportProduct(Role.ADMIN));
     assertTrue(RbacMatrix.canImportProduct(Role.PROVIDER));
     assertFalse(RbacMatrix.canImportProduct(Role.USER));
+  }
+
+  @Test
+  void userManage_onlyAdmin() {
+    assertTrue(RbacMatrix.canManageUsers(Role.ADMIN));
+    assertFalse(RbacMatrix.canManageUsers(Role.PROVIDER));
+    assertFalse(RbacMatrix.canManageUsers(Role.USER));
   }
 
   @Test

@@ -20,7 +20,7 @@ repositories:
     localPath: backend
     artifact: app/data-chain-service
     layoutAlias: backend/**
-    notes: "唯一服务模块 app/data-chain-service；业务包统一 com.shdata.datachain.*；CORS 见 WSC_CORS_ALLOWED_ORIGINS"
+    notes: "唯一服务模块 app/data-chain-service；包按类型分层（controller/service/repository/entity/model/config/common）；编码权威 backend/CLAUDE.md；控制面副本 RULE-ORG-CODING / LAYOUT / ARCHITECTURE + skill.backend-developer / migration-review；CORS 见 WSC_CORS_ALLOWED_ORIGINS"
 
 contracts:
   source: controlPlane

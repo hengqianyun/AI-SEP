@@ -375,19 +375,20 @@ test.describe('WSC V1.1/V1.2-UX E2E (PLAN-WSC-3.1 §3.2)', () => {
     await page.goto('/catalog/products/new')
     await expect(page.getByTestId('product-editor')).toBeVisible({ timeout: 15_000 })
 
-    // PROVIDER：产品写、导入可见；分类维护、目录维护结构不可达
+    // PROVIDER：产品写/导入/目录维护可见；分类维护结构不可达
     await page.goto('/overview')
     await switchRole(page, 'PROVIDER')
     await expectWriteButtons(page, {
       category: false,
-      maintenance: false,
+      maintenance: true,
       productWrite: true,
       importEntry: true,
     })
     await page.goto('/catalog')
     await expect(page.getByTestId('catalog-open-import')).toBeVisible()
     await expectRouteStructurallyBlocked(page, '/catalog/admin/categories')
-    await expectRouteStructurallyBlocked(page, '/catalog/maintenance')
+    await page.goto('/catalog/maintenance')
+    await expect(page.getByTestId('catalog-maintenance')).toBeVisible({ timeout: 15_000 })
     await page.goto('/catalog/products/new')
     await expect(page.getByTestId('product-editor')).toBeVisible({ timeout: 15_000 })
 
@@ -413,7 +414,7 @@ test.describe('WSC V1.1/V1.2-UX E2E (PLAN-WSC-3.1 §3.2)', () => {
     [
       'provider',
       'PROVIDER',
-      { category: false, maintenance: false, productWrite: true, importEntry: true },
+      { category: false, maintenance: true, productWrite: true, importEntry: true },
     ],
     [
       'user',
