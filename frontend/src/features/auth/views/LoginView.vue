@@ -49,6 +49,7 @@ async function onSubmit() {
           v-model="username"
           name="username"
           autocomplete="username"
+          placeholder="请输入用户名"
           data-testid="login-username"
           required
         />
@@ -60,6 +61,7 @@ async function onSubmit() {
           type="password"
           name="password"
           autocomplete="current-password"
+          placeholder="请输入密码"
           data-testid="login-password"
           required
         />
@@ -150,6 +152,10 @@ input {
   color: var(--text-primary);
   font: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input::placeholder {
+  color: var(--text-tertiary, #9ca3af);
 }
 
 input:focus {
