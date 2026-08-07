@@ -704,6 +704,26 @@ paths:
                     message: 产品编码已存在
                     data: null
                     correlationId: "corr-prod-dup-2"
+    delete:
+      tags: [catalog]
+      summary: 删除数据产品（仅 PROVIDER 本人；ADMIN/USER/异主 → 403）
+      description: |
+        产品删仅 PROVIDER 且 create_by=当前用户；空归属/异主/ADMIN/USER → ERR_FORBIDDEN（403）。
+        不存在 → 404。逻辑删除。
+      operationId: deleteProduct
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: 已删除
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEmpty"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /chain/products/{productId}/versions:
     get:

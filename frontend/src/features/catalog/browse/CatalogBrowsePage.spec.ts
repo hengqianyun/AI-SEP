@@ -27,6 +27,18 @@ describe('CatalogBrowsePage (TASK-WSC-603)', () => {
     expect(pageSrc).toContain('data-testid="catalog-open-import"')
   })
 
+  it('preview delete: writeVisible gate + inline confirm strip testids', () => {
+    expect(pageSrc).toMatch(/v-if="writeVisible"[\s\S]*?data-testid="catalog-go-delete"/)
+    expect(pageSrc).toContain('data-testid="catalog-delete-confirm-strip"')
+    expect(pageSrc).toContain('data-testid="catalog-delete-cancel"')
+    expect(pageSrc).toContain('data-testid="catalog-delete-confirm"')
+    expect(pageSrc).toContain('确定删除该产品？删除后不可恢复')
+    expect(pageSrc).toContain('deleteProduct')
+    expect(pageSrc).toContain('deleteConfirmVisible')
+    // 公共目录无删除：删除按钮挂在 writeVisible（mine ∩ PROVIDER）下
+    expect(pageSrc).toContain("isMine.value && productWriteVisible")
+  })
+
   it('showSeatMap mount: prop override; mine defaults off; slot testid', () => {
     expect(pageSrc).toContain('showSeatMap?: boolean')
     expect(pageSrc).toContain('seatMapVisible')

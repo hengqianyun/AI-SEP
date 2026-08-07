@@ -14,7 +14,8 @@ import {
   useCatalogBrowse,
 } from './composables/useCatalogBrowse'
 import { useCatalogImportEntry } from './composables/useCatalogImportEntry'
-import { INDUSTRY_CATEGORY_OPTIONS } from '@/api/catalog'
+import { INDUSTRY_CATEGORY_OPTIONS, deleteProduct } from '@/api/catalog'
+import { ApiError } from '@/api/client'
 import {
   CATALOG_EMPTY_MESSAGE,
   DATA_SOURCE_OPTIONS,
@@ -60,6 +61,11 @@ const writeVisible = computed(() => isMine.value && productWriteVisible.value)
 const importVisible = computed(() => isMine.value && productImportVisible.value)
 const { importOpen, openImport, onImportClosed } = useCatalogImportEntry(role)
 
+/** 预览卡内联删除二次确认（非全页 modal） */
+const deleteConfirmVisible = ref(false)
+const deleteBusy = ref(false)
+const deleteError = ref<string | null>(null)
+
 /** 传 computed，避免路由复用 /catalog↔/my-products 时 mine 快照陈旧（FIND-WSC-603-R1-001） */
 const browse = useCatalogBrowse({ mine: isMine })
 const {
@@ -89,6 +95,12 @@ const {
   loadMore,
   init,
 } = browse
+
+watch(selectedProductId, () => {
+  deleteConfirmVisible.value = false
+  deleteError.value = null
+  deleteBusy.value = false
+})
 
 /** 列表 pane：滚动触底 + 未溢出自动续载度量（FIND-WSC-305-R1-001） */
 const listScrollEl = ref<HTMLElement | null>(null)
@@ -320,6 +332,36 @@ function goEdit() {
 function goCreate() {
   if (!writeVisible.value) return
   void router.push({ path: '/catalog/products/new', query: { from: 'mine' } })
+}
+
+function askDelete() {
+  if (!selectedProductId.value || !writeVisible.value) return
+  deleteError.value = null
+  deleteConfirmVisible.value = true
+}
+
+function cancelDelete() {
+  deleteConfirmVisible.value = false
+  deleteError.value = null
+}
+
+async function confirmDelete() {
+  const id = selectedProductId.value
+  if (!id || !writeVisible.value || deleteBusy.value) return
+  deleteBusy.value = true
+  deleteError.value = null
+  try {
+    await deleteProduct(id)
+    deleteConfirmVisible.value = false
+    selectedProductId.value = null
+    preview.value = null
+    previewState.value = 'idle'
+    await loadProducts()
+  } catch (e) {
+    deleteError.value = e instanceof ApiError ? e.message : '删除失败，请稍后重试'
+  } finally {
+    deleteBusy.value = false
+  }
 }
 
 function rowIndex(sectionOffset: number, idx: number) {
@@ -637,32 +679,71 @@ function padNo(n: number) {
               />
             </dd>
           </div>
+          <div v-if="deleteError" class="state error preview-delete-error" data-testid="catalog-delete-error">
+            {{ deleteError }}
+          </div>
           <div class="preview-actions">
-            <button
-              type="button"
-              class="btn primary"
-              data-testid="catalog-go-detail"
-              @click="goDetail"
-            >
-              详情
-            </button>
-            <button
-              type="button"
-              class="btn"
-              data-testid="catalog-go-chain"
-              @click="goChain"
-            >
-              上链
-            </button>
-            <button
-              v-if="writeVisible"
-              type="button"
-              class="btn"
-              data-testid="catalog-go-edit"
-              @click="goEdit"
-            >
-              编辑
-            </button>
+            <template v-if="deleteConfirmVisible">
+              <div class="preview-delete-confirm" data-testid="catalog-delete-confirm-strip">
+                <p class="preview-delete-msg">确定删除该产品？删除后不可恢复</p>
+                <div class="preview-delete-btns">
+                  <button
+                    type="button"
+                    class="btn"
+                    data-testid="catalog-delete-cancel"
+                    :disabled="deleteBusy"
+                    @click="cancelDelete"
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="button"
+                    class="btn danger"
+                    data-testid="catalog-delete-confirm"
+                    :disabled="deleteBusy"
+                    @click="confirmDelete"
+                  >
+                    {{ deleteBusy ? '删除中…' : '确认删除' }}
+                  </button>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <button
+                type="button"
+                class="btn primary"
+                data-testid="catalog-go-detail"
+                @click="goDetail"
+              >
+                详情
+              </button>
+              <button
+                type="button"
+                class="btn"
+                data-testid="catalog-go-chain"
+                @click="goChain"
+              >
+                上链
+              </button>
+              <button
+                v-if="writeVisible"
+                type="button"
+                class="btn"
+                data-testid="catalog-go-edit"
+                @click="goEdit"
+              >
+                编辑
+              </button>
+              <button
+                v-if="writeVisible"
+                type="button"
+                class="btn danger"
+                data-testid="catalog-go-delete"
+                @click="askDelete"
+              >
+                删除
+              </button>
+            </template>
           </div>
         </template>
       </aside>
@@ -975,6 +1056,22 @@ function padNo(n: number) {
   background: #2563eb;
   color: #fff;
   border-color: #2563eb;
+}
+
+.btn.danger {
+  color: #a33;
+  border-color: #fecaca;
+}
+
+.btn.danger:hover {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .import-btn {
@@ -1321,6 +1418,40 @@ function padNo(n: number) {
   flex: 1;
   min-width: 72px;
   border-radius: var(--radius-menu);
+}
+
+.preview-delete-error {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.preview-delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-menu);
+  background: #fef2f2;
+}
+
+.preview-delete-msg {
+  margin: 0;
+  font-size: 13px;
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+.preview-delete-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preview-delete-btns .btn {
+  flex: 1;
+  min-width: 72px;
 }
 
 @media (max-width: 1100px) {

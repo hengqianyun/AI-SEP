@@ -135,6 +135,32 @@ public class ProductEditorService {
         }
     }
 
+    /**
+     * 删除已有数据产品（逻辑删除）。
+     * <p>404 若不存在；403 若非本人 create_by（与 update 同权）。</p>
+     *
+     * @param productId     产品 ID
+     * @param actorUserId   操作人用户 ID
+     * @param correlationId 请求追踪 ID
+     * @return 删除结果（{@code deleted: true}）
+     */
+    public ServiceResult delete(String productId, String actorUserId, String correlationId) {
+        Optional<CatalogProduct> existingOpt = catalog.findProduct(productId);
+        if (existingOpt.isEmpty()) {
+            return ServiceResult.fail(404, "404", "产品不存在", null);
+        }
+        if (!catalog.isOwnedBy(productId, actorUserId)) {
+            return ServiceResult.fail(403, "ERR_FORBIDDEN", "只能删除本人创建的产品", null);
+        }
+        CatalogProduct existing = existingOpt.get();
+        boolean removed = catalog.removeProduct(productId);
+        if (!removed) {
+            return ServiceResult.fail(404, "404", "产品不存在", null);
+        }
+        auditLogger.productSubmit(actorUserId, existing.productCode(), "SUCCESS", null, correlationId);
+        return ServiceResult.ok(Map.of("deleted", true));
+    }
+
     private static int nullSafe(Integer v) {
         return v == null ? 0 : v;
     }

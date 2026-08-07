@@ -307,6 +307,23 @@ public class CatalogBrowseSeedStore implements ApplicationRunner {
     }
 
     /**
+     * 逻辑删除产品（按 DB id 或 product_code 解析）。
+     *
+     * @param productId 产品 ID（数字主键）或历史 product_code
+     * @return true 已删除；false 产品不存在
+     */
+    @Transactional
+    public synchronized boolean removeProduct(String productId) {
+        DataProductEntity entity = resolveEntity(productId);
+        if (entity == null) {
+            return false;
+        }
+        entity.setDelFlag(true);
+        productRepo.save(entity);
+        return true;
+    }
+
+    /**
      * 测试/维护用：强制写入 create_by（含空串模拟无归属）。
      */
     @Transactional

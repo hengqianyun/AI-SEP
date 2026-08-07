@@ -279,6 +279,12 @@ export function updateProduct(productId: string, body: ProductWrite) {
   })
 }
 
+export function deleteProduct(productId: string) {
+  return apiRequest<{ deleted?: boolean } | null>(`/catalog/products/${productId}`, {
+    method: 'DELETE',
+  })
+}
+
 export function listMaintenanceEntries(
   query: Record<string, string | number | undefined> = {},
 ) {

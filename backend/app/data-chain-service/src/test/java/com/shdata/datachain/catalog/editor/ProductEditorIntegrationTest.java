@@ -1,6 +1,7 @@
 package com.shdata.datachain.catalog.editor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -462,6 +463,72 @@ class ProductEditorIntegrationTest {
                     """))
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.code").value("ERR_FORBIDDEN"));
+  }
+
+  @Test
+  void delete_own_200_foreign_403_missing_404() throws Exception {
+    stubAttest("sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "did:wsc:sim:del");
+    MockHttpSession session = login("provider", "demo");
+
+    MvcResult created =
+        mockMvc
+            .perform(
+                post("/api/v1/catalog/products")
+                    .session(session)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                          "productCode":"GEN-DEL-9010",
+                          "productName":"可删本人",
+                          "productType":"OTHER",
+                          "industryCategory":"卫生和社会工作"
+                        }
+                        """))
+            .andExpect(status().isOk())
+            .andReturn();
+    String ownId =
+        com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.data.id");
+
+    String foreignId =
+        com.jayway.jsonpath.JsonPath.read(
+            mockMvc
+                .perform(
+                    post("/api/v1/catalog/products")
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                            """
+                            {
+                              "productCode":"GEN-DEL-9011",
+                              "productName":"将改为异主",
+                              "productType":"OTHER",
+                              "industryCategory":"卫生和社会工作"
+                            }
+                            """))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(),
+            "$.data.id");
+    catalog.forceSetCreateBy(foreignId, "someone-else");
+
+    mockMvc
+        .perform(delete("/api/v1/catalog/products/" + foreignId).session(session))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("ERR_FORBIDDEN"));
+    assertThat(catalog.findProduct(foreignId)).isPresent();
+
+    mockMvc
+        .perform(delete("/api/v1/catalog/products/" + ownId).session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("0"))
+        .andExpect(jsonPath("$.data.deleted").value(true));
+    assertThat(catalog.findProduct(ownId)).isEmpty();
+
+    mockMvc
+        .perform(delete("/api/v1/catalog/products/" + ownId).session(session))
+        .andExpect(status().isNotFound());
   }
 
   private void stubAttest(String hash, String did) {
