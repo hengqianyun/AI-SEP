@@ -7,8 +7,8 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-const username = ref('admin')
-const password = ref('demo')
+const username = ref('')
+const password = ref('')
 const submitting = ref(false)
 const localError = ref<string | null>(null)
 
