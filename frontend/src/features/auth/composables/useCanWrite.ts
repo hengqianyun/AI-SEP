@@ -1,7 +1,7 @@
-import type { Role } from '@/api/auth'
+﻿import type { Role } from '@/api/auth'
 import { computed, type Ref } from 'vue'
 
-/** 对齐 contracts/rbac/matrix.yaml（2.2.0 / TASK-WSC-607）UI 可见性。 */
+/** 对齐 contracts/rbac/matrix.yaml（2.3.2）UI 可见性。 */
 export function canMaintainCategory(role: Role | null | undefined): boolean {
   return role === 'ADMIN'
 }
@@ -25,8 +25,9 @@ export function canManageUsers(role: Role | null | undefined): boolean {
   return role === 'ADMIN'
 }
 
+/** 我的数据产品 — ADMIN + PROVIDER（REQ-SHELL-008：管理员可查看我的数据产品目录）。 */
 export function canSeeMyProducts(role: Role | null | undefined): boolean {
-  return role === 'PROVIDER'
+  return role === 'PROVIDER' || role === 'ADMIN'
 }
 
 export function useCanWrite(role: Ref<Role | null | undefined>) {

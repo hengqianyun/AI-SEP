@@ -1,9 +1,11 @@
-<script setup lang="ts">
-import { computed } from 'vue'
+﻿<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { canMaintainCatalog, canSeeMyProducts } from '@/features/auth/composables/useCanWrite'
+
+const CATALOG_GROUP_OPEN_KEY = 'wsc.nav.catalogGroupOpen'
 
 const auth = useAuthStore()
 const { enterpriseName, session, role } = storeToRefs(auth)
@@ -16,9 +18,35 @@ const userManageVisible = computed(() => role.value === 'ADMIN')
 /** 603：我的数据产品仅 PROVIDER */
 const myProductsVisible = computed(() => canSeeMyProducts(role.value))
 
+/** 一级「数据目录」展开态；sessionStorage 轻量记忆（REQ-SHELL-001 / HOTFIX-SHELL-002） */
+function readCatalogGroupOpen(): boolean {
+  try {
+    const stored = sessionStorage.getItem(CATALOG_GROUP_OPEN_KEY)
+    if (stored === '0') return false
+    if (stored === '1') return true
+  } catch {
+    /* ignore */
+  }
+  return true
+}
+
+const catalogGroupOpen = ref(readCatalogGroupOpen())
+
+function persistCatalogGroupOpen(open: boolean) {
+  try {
+    sessionStorage.setItem(CATALOG_GROUP_OPEN_KEY, open ? '1' : '0')
+  } catch {
+    /* ignore */
+  }
+}
+
+function toggleCatalogGroup() {
+  catalogGroupOpen.value = !catalogGroupOpen.value
+  persistCatalogGroupOpen(catalogGroupOpen.value)
+}
+
 const navOpen = [
   { to: '/overview', label: '总览', icon: 'overview' },
-  { to: '/catalog', label: '数据目录', icon: 'catalog' },
 ] as const
 
 const navClosed = [
@@ -38,17 +66,47 @@ const onMineSurface = computed(
     route.meta.fromMine === true,
 )
 
+const onMaintenanceSurface = computed(() =>
+  activePath.value.startsWith('/catalog/maintenance'),
+)
+
+/** 一级「数据目录」在任一子表面激活时高亮 */
+const catalogGroupActive = computed(
+  () =>
+    onMineSurface.value ||
+    onMaintenanceSurface.value ||
+    activePath.value === '/catalog' ||
+    activePath.value.startsWith('/catalog/'),
+)
+
 function isActive(path: string) {
   if (path === '/catalog') {
-    if (activePath.value.startsWith('/catalog/maintenance')) return false
+    if (onMaintenanceSurface.value) return false
     if (onMineSurface.value) return false
     return activePath.value === '/catalog' || activePath.value.startsWith('/catalog/')
+  }
+  if (path === '/catalog/maintenance') {
+    return onMaintenanceSurface.value
   }
   if (path === '/my-products') {
     return onMineSurface.value
   }
   return activePath.value === path || activePath.value.startsWith(path + '/')
 }
+
+/**
+ * REQ-RBAC-001 / HOTFIX-SHELL-002：USER（及无权角色）深链目录维护须结构不可达。
+ * ADMIN/PROVIDER 允许；与维护页 onMounted 门控双保险。
+ */
+watch(
+  [() => route.path, role],
+  () => {
+    if (!onMaintenanceSurface.value) return
+    if (canMaintainCatalog(role.value)) return
+    void router.replace('/catalog')
+  },
+  { immediate: true },
+)
 
 function goUnavailable(feature: string) {
   void router.push(`/unavailable/${feature}`)
@@ -104,43 +162,82 @@ const roleLabel = computed(() => {
             <rect x="14" y="14" width="7" height="7" />
             <rect x="3" y="14" width="7" height="7" />
           </svg>
-          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 6h18" />
-            <path d="M7 12h10" />
-            <path d="M10 18h4" />
-          </svg>
           <span>{{ item.label }}</span>
         </RouterLink>
 
-        <RouterLink
-          v-if="myProductsVisible"
-          to="/my-products"
-          class="menu-item"
-          :class="{ active: isActive('/my-products') }"
-          data-testid="nav-my-products"
+        <!-- REQ-SHELL-001：一级「数据目录」可收起/展开 -->
+        <div
+          class="menu-group"
+          data-testid="nav-catalog-group"
+          :class="{ active: catalogGroupActive }"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-          </svg>
-          <span>我的数据产品</span>
-        </RouterLink>
+          <button
+            type="button"
+            class="menu-group-label"
+            :class="{ active: catalogGroupActive }"
+            :aria-expanded="catalogGroupOpen"
+            aria-controls="nav-catalog-submenu"
+            data-testid="nav-catalog-group-toggle"
+            @click="toggleCatalogGroup"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18" />
+              <path d="M7 12h10" />
+              <path d="M10 18h4" />
+            </svg>
+            <span class="menu-group-title">数据目录</span>
+            <svg
+              class="menu-group-chevron"
+              :class="{ open: catalogGroupOpen }"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
 
-        <RouterLink
-          v-if="catalogMaintenanceVisible"
-          to="/catalog/maintenance"
-          class="menu-item"
-          :class="{ active: isActive('/catalog/maintenance') }"
-          data-testid="nav-catalog-maintenance"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <path d="M12 18v-6" />
-            <path d="M8 15l4-3 4 3" />
-          </svg>
-          <span>目录维护</span>
-        </RouterLink>
+          <div
+            v-show="catalogGroupOpen"
+            id="nav-catalog-submenu"
+            class="menu-sub"
+            role="group"
+            aria-label="数据目录子菜单"
+          >
+            <RouterLink
+              to="/catalog"
+              class="menu-item menu-item--sub"
+              :class="{ active: isActive('/catalog') }"
+              data-testid="nav-catalog-browse"
+            >
+              <span>全链数据目录</span>
+            </RouterLink>
+
+            <RouterLink
+              v-if="catalogMaintenanceVisible"
+              to="/catalog/maintenance"
+              class="menu-item menu-item--sub"
+              :class="{ active: isActive('/catalog/maintenance') }"
+              data-testid="nav-catalog-maintenance"
+            >
+              <span>目录维护</span>
+            </RouterLink>
+
+            <RouterLink
+              v-if="myProductsVisible"
+              to="/my-products"
+              class="menu-item menu-item--sub"
+              :class="{ active: isActive('/my-products') }"
+              data-testid="nav-my-products"
+            >
+              <span>我的数据产品</span>
+            </RouterLink>
+          </div>
+        </div>
 
         <RouterLink
           v-if="userManageVisible"
@@ -269,7 +366,72 @@ const roleLabel = computed(() => {
 .sidebar-menu {
   flex: 1;
   padding: 0 12px;
-  overflow-y: auto;
+  overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; } .sidebar-menu::-webkit-scrollbar { display: none; }
+
+.menu-group {
+  margin-bottom: 4px;
+}
+
+.menu-group-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-menu);
+  color: var(--sidebar-text);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.menu-group-label:hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-text-hover);
+}
+
+.menu-group-label:focus-visible {
+  outline: 2px solid var(--sidebar-accent, #4da3ff);
+  outline-offset: 2px;
+}
+
+.menu-group-label svg:first-of-type {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.menu-group-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-group-chevron {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: transform 0.2s ease;
+  transform: rotate(-90deg);
+}
+
+.menu-group-chevron.open {
+  transform: rotate(0deg);
+}
+
+.menu-group-label.active {
+  color: #fff;
+}
+
+.menu-sub {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 4px 14px;
 }
 
 .menu-item {
@@ -289,6 +451,12 @@ const roleLabel = computed(() => {
   background: transparent;
   text-align: left;
   font: inherit;
+}
+
+.menu-item--sub {
+  padding: 10px 14px 10px 28px;
+  font-size: 13px;
+  margin-bottom: 2px;
 }
 
 .menu-item svg {
@@ -405,3 +573,10 @@ const roleLabel = computed(() => {
   }
 }
 </style>
+
+
+
+
+
+
+

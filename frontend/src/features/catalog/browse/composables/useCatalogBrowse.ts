@@ -1,4 +1,4 @@
-import { computed, ref, toValue, watch, type MaybeRefOrGetter } from 'vue'
+﻿import { computed, ref, toValue, watch, type MaybeRefOrGetter } from 'vue'
 import {
   getProduct,
   listCategories,
@@ -20,7 +20,13 @@ export type CatalogFilters = {
   productType: string
   involvesPublicData: string
   deliveryMethod: string
+  /** 产品名/编码检索（与 supplierName 语义分离；REQ-CAT-012） */
   q: string
+  /**
+   * 企业名称 → 产品字段 supplierName 模糊匹配。
+   * query 键必须为 supplierName，禁止 enterpriseName（REQ-CAT-012 / TASK-WSC-705）。
+   */
+  supplierName: string
 }
 
 export type ProductSection = {
@@ -40,6 +46,7 @@ export function createDefaultFilters(): CatalogFilters {
     involvesPublicData: '',
     deliveryMethod: '',
     q: '',
+    supplierName: '',
   }
 }
 
@@ -51,8 +58,12 @@ export function isRetryableListState(state: LoadState): boolean {
   return state === 'error'
 }
 
+/** 视觉分区：无 l3 挂载产品的分节 key（钉在已加载列表末段）。 */
+export const UNCATEGORIZED_SECTION_KEY = '__uncategorized__'
+
 /**
- * 将扁平产品列表分节：有 l3 按三级子类；无挂载一律归入单一「未分类数据」分节。
+ * 将扁平产品列表分节：有 l3 按三级子类；无挂载一律归入单一「未分类数据」分节并钉在末段。
+ * 桶内顺序保持 API/追加顺序，**不对**产品做跨页破坏性 sort（REQ-CAT-012 / TASK-WSC-705）。
  * industryCategory 仅为产品字段，不作分节 key（DEC-WSC-006 / TASK-WSC-502）。
  */
 export function groupProductsByL3(
@@ -62,10 +73,10 @@ export function groupProductsByL3(
   const l3Order = categories.filter((c) => c.level === 'L3').map((c) => c.id)
   const l3Name = new Map(categories.filter((c) => c.level === 'L3').map((c) => [c.id, c.name]))
   const buckets = new Map<string, Product[]>()
-  const UNCATEGORIZED_KEY = '__uncategorized__'
 
+  // 按 API 出现顺序入桶，桶内不重排
   for (const p of products) {
-    const key = p.l3CategoryId || UNCATEGORIZED_KEY
+    const key = p.l3CategoryId || UNCATEGORIZED_SECTION_KEY
     const list = buckets.get(key) ?? []
     list.push(p)
     buckets.set(key, list)
@@ -83,12 +94,24 @@ export function groupProductsByL3(
     })
     buckets.delete(id)
   }
+
+  // 其余已知路径外的 L3 桶先输出；「未分类」强制殿后（视觉分区，非跨页 sort）
+  let uncategorized: Product[] | undefined
   for (const [id, list] of buckets) {
-    const title =
-      id === UNCATEGORIZED_KEY || id === '__unknown__'
-        ? '未分类数据'
-        : (list[0]?.categoryPath?.split('/').pop()?.trim() ?? id)
+    if (id === UNCATEGORIZED_SECTION_KEY || id === '__unknown__') {
+      uncategorized = uncategorized ? uncategorized.concat(list) : list
+      continue
+    }
+    const title = list[0]?.categoryPath?.split('/').pop()?.trim() ?? id
     sections.push({ l3CategoryId: id, title, count: list.length, products: list })
+  }
+  if (uncategorized && uncategorized.length > 0) {
+    sections.push({
+      l3CategoryId: UNCATEGORIZED_SECTION_KEY,
+      title: '未分类数据',
+      count: uncategorized.length,
+      products: uncategorized,
+    })
   }
   return sections
 }
@@ -214,13 +237,17 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
     }
     if (f.l1CategoryId) query.l1CategoryId = f.l1CategoryId
     if (f.l2CategoryId) query.l2CategoryId = f.l2CategoryId
+    // REQ-CAT-011：UI 文案为「行业类别」，query 键仍为 industryCategory
     if (f.industryCategory.trim()) query.industryCategory = f.industryCategory.trim()
     if (f.dataSource) query.dataSource = f.dataSource
     if (f.productType) query.productType = f.productType
     if (f.deliveryMethod) query.deliveryMethod = f.deliveryMethod
     if (f.involvesPublicData === 'true') query.involvesPublicData = true
     if (f.involvesPublicData === 'false') query.involvesPublicData = false
+    // q：产品名/编码；supplierName：企业名称（产品字段）；二者并存、语义分离
     if (f.q.trim()) query.q = f.q.trim()
+    if (f.supplierName.trim()) query.supplierName = f.supplierName.trim()
+    // 禁止发送 enterpriseName（会话/主体名 ≠ 产品检索字段）
     if (isMineList()) query.mine = true
     return query
   }
@@ -387,3 +414,6 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
     init,
   }
 }
+
+
+
