@@ -1,4 +1,4 @@
-import type { RouteRecordRaw } from 'vue-router'
+﻿import type { RouteRecordRaw } from 'vue-router'
 import PlaceholderView from '@/views/PlaceholderView.vue'
 
 /**
@@ -25,6 +25,12 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/features/catalog/browse/CatalogBrowsePage.vue'),
     props: { mode: 'mine', showSeatMap: false },
     meta: { title: '我的数据产品', requiresProvider: true },
+  },
+  {
+    path: '/my-maintenance',
+    name: 'my-maintenance',
+    component: () => import('@/features/catalog/maintenance/CatalogMaintenancePage.vue'),
+    meta: { title: '我的目录' },
   },
   {
     path: '/admin/users',
@@ -79,3 +85,5 @@ export const routes: RouteRecordRaw[] = [
     },
   },
 ]
+
+

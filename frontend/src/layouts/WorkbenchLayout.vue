@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
-import { canMaintainCatalog, canSeeMyProducts } from '@/features/auth/composables/useCanWrite'
+import { canMaintainCatalog, canSeeMyProducts, canSeeMyMaintenance, canSeeMyMaintenance } from '@/features/auth/composables/useCanWrite'
 
 const CATALOG_GROUP_OPEN_KEY = 'wsc.nav.catalogGroupOpen'
 
@@ -13,12 +13,15 @@ const route = useRoute()
 const router = useRouter()
 
 const catalogMaintenanceVisible = computed(() => canMaintainCatalog(role.value))
-/** 602：用户管理仅 ADMIN（内联门禁；603 不得回退） */
+/** 602���û������ ADMIN�������Ž���603 ���û��ˣ� */
 const userManageVisible = computed(() => role.value === 'ADMIN')
-/** 603：我的数据产品仅 PROVIDER */
+/** 603���ҵ����ݲ�Ʒ�� PROVIDER */
 const myProductsVisible = computed(() => canSeeMyProducts(role.value))
+const myMaintenanceVisible = computed(() => canSeeMyMaintenance(role.value))
+const myMaintenanceVisible = computed(() => canSeeMyMaintenance(role.value))
+const myMaintenanceVisible = computed(() => canSeeMyMaintenance(role.value))
 
-/** 一级「数据目录」展开态；sessionStorage 轻量记忆（REQ-SHELL-001 / HOTFIX-SHELL-002） */
+/** һ��������Ŀ¼��չ��̬��sessionStorage �������䣨REQ-SHELL-001 / HOTFIX-SHELL-002�� */
 function readCatalogGroupOpen(): boolean {
   try {
     const stored = sessionStorage.getItem(CATALOG_GROUP_OPEN_KEY)
@@ -46,18 +49,18 @@ function toggleCatalogGroup() {
 }
 
 const navOpen = [
-  { to: '/overview', label: '总览', icon: 'overview' },
+  { to: '/overview', label: '����', icon: 'overview' },
 ] as const
 
 const navClosed = [
-  { feature: 'registration', label: '数据登记', icon: 'registration' },
-  { feature: 'orders', label: '交易订单', icon: 'orders' },
-  { feature: 'connectors', label: '连接器管理', icon: 'connectors' },
+  { feature: 'registration', label: '���ݵǼ�', icon: 'registration' },
+  { feature: 'orders', label: '���׶���', icon: 'orders' },
+  { feature: 'connectors', label: '����������', icon: 'connectors' },
 ] as const
 
 const activePath = computed(() => route.path)
 
-/** 双表面：写路径带 from=mine 或 meta.fromMine 时归属「我的产品」active（UX-002） */
+/** ˫���棺д·���� from=mine �� meta.fromMine ʱ������ҵĲ�Ʒ��active��UX-002�� */
 const onMineSurface = computed(
   () =>
     activePath.value === '/my-products' ||
@@ -70,7 +73,7 @@ const onMaintenanceSurface = computed(() =>
   activePath.value.startsWith('/catalog/maintenance'),
 )
 
-/** 一级「数据目录」在任一子表面激活时高亮 */
+/** һ��������Ŀ¼������һ�ӱ��漤��ʱ���� */
 const catalogGroupActive = computed(
   () =>
     onMineSurface.value ||
@@ -95,8 +98,8 @@ function isActive(path: string) {
 }
 
 /**
- * REQ-RBAC-001 / HOTFIX-SHELL-002：USER（及无权角色）深链目录维护须结构不可达。
- * ADMIN/PROVIDER 允许；与维护页 onMounted 门控双保险。
+ * REQ-RBAC-001 / HOTFIX-SHELL-002��USER������Ȩ��ɫ������Ŀ¼ά����ṹ���ɴ
+ * ADMIN/PROVIDER �������ά��ҳ onMounted �ſ�˫���ա�
  */
 watch(
   [() => route.path, role],
@@ -120,13 +123,13 @@ async function onLogout() {
 const roleLabel = computed(() => {
   switch (role.value) {
     case 'ADMIN':
-      return '管理员'
+      return '����Ա'
     case 'PROVIDER':
-      return '数据提供方'
+      return '�����ṩ��'
     case 'USER':
-      return '普通用户'
+      return '��ͨ�û�'
     default:
-      return '—'
+      return '��'
   }
 })
 </script>
@@ -144,11 +147,11 @@ const roleLabel = computed(() => {
         </div>
         <div class="sidebar-brand">
           <p class="brand-eyebrow">WORKSPACE CONSOLE</p>
-          <h1 class="brand-title">接入端工作台</h1>
+          <h1 class="brand-title">����˹���̨</h1>
         </div>
       </div>
 
-      <nav class="sidebar-menu" aria-label="主导航">
+      <nav class="sidebar-menu" aria-label="������">
         <RouterLink
           v-for="item in navOpen"
           :key="item.to"
@@ -165,7 +168,17 @@ const roleLabel = computed(() => {
           <span>{{ item.label }}</span>
         </RouterLink>
 
-        <!-- REQ-SHELL-001：一级「数据目录」可收起/展开 -->
+              <RouterLink
+                v-if="myMaintenanceVisible"
+                to="/my-maintenance"
+                class="menu-item menu-item--sub"
+                :class="{ active: isActive('/my-maintenance') }"
+                data-testid="nav-my-maintenance"
+              >
+                <span>我的目录</span>
+              </RouterLink>
+
+        <!-- REQ-SHELL-001��һ��������Ŀ¼��������/չ�� -->
         <div
           class="menu-group"
           data-testid="nav-catalog-group"
@@ -185,7 +198,7 @@ const roleLabel = computed(() => {
               <path d="M7 12h10" />
               <path d="M10 18h4" />
             </svg>
-            <span class="menu-group-title">数据目录</span>
+            <span class="menu-group-title">����Ŀ¼</span>
             <svg
               class="menu-group-chevron"
               :class="{ open: catalogGroupOpen }"
@@ -206,7 +219,7 @@ const roleLabel = computed(() => {
             id="nav-catalog-submenu"
             class="menu-sub"
             role="group"
-            aria-label="数据目录子菜单"
+            aria-label="����Ŀ¼�Ӳ˵�"
           >
             <RouterLink
               to="/catalog"
@@ -214,7 +227,7 @@ const roleLabel = computed(() => {
               :class="{ active: isActive('/catalog') }"
               data-testid="nav-catalog-browse"
             >
-              <span>全链数据目录</span>
+              <span>ȫ������Ŀ¼</span>
             </RouterLink>
 
             <RouterLink
@@ -224,7 +237,7 @@ const roleLabel = computed(() => {
               :class="{ active: isActive('/catalog/maintenance') }"
               data-testid="nav-catalog-maintenance"
             >
-              <span>目录维护</span>
+              <span>Ŀ¼ά��</span>
             </RouterLink>
 
             <RouterLink
@@ -234,7 +247,7 @@ const roleLabel = computed(() => {
               :class="{ active: isActive('/my-products') }"
               data-testid="nav-my-products"
             >
-              <span>我的数据产品</span>
+              <span>�ҵ����ݲ�Ʒ</span>
             </RouterLink>
           </div>
         </div>
@@ -252,7 +265,7 @@ const roleLabel = computed(() => {
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
-          <span>用户管理</span>
+          <span>�û�����</span>
         </RouterLink>
 
         <button
@@ -279,16 +292,16 @@ const roleLabel = computed(() => {
             <line x1="12" y1="17" x2="12" y2="21" />
           </svg>
           <span class="menu-label">{{ item.label }}</span>
-          <span class="badge">未开放</span>
+          <span class="badge">δ����</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
         <div class="company-card">
-          <h3>{{ enterpriseName || '—' }}</h3>
+          <h3>{{ enterpriseName || '��' }}</h3>
           <p v-if="session" class="user-line">{{ session.displayName }}</p>
-          <p class="role-line" data-testid="session-role-label">角色：{{ roleLabel }}</p>
-          <button type="button" class="logout" @click="onLogout">退出登录</button>
+          <p class="role-line" data-testid="session-role-label">��ɫ��{{ roleLabel }}</p>
+          <button type="button" class="logout" @click="onLogout">�˳���¼</button>
         </div>
       </div>
     </aside>
@@ -573,6 +586,7 @@ const roleLabel = computed(() => {
   }
 }
 </style>
+
 
 
 

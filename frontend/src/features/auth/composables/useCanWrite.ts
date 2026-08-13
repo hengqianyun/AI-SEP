@@ -1,22 +1,22 @@
-ï»¿import type { Role } from '@/api/auth'
+import type { Role } from '@/api/auth'
 import { computed, type Ref } from 'vue'
 
-/** å¯¹é½ contracts/rbac/matrix.yamlï¼ˆ2.3.2ï¼‰UI å¯è§æ€§ã€‚ */
+/** ¶ÔÆë contracts/rbac/matrix.yaml£¨2.3.2£©UI ¿É¼ûĞÔ¡£ */
 export function canMaintainCategory(role: Role | null | undefined): boolean {
   return role === 'ADMIN'
 }
 
-/** ç›®å½•ç»´æŠ¤ â€” ADMIN + PROVIDERï¼ˆPROVIDER ä»…æœ¬äººäº§å“ï¼Œç”±æœåŠ¡ç«¯éš”ç¦»ï¼‰ã€‚ */
+/** Ä¿Â¼Î¬»¤ ¡ª ½ö ADMIN£¨TASK-WSC-901£©¡£ */
 export function canMaintainCatalog(role: Role | null | undefined): boolean {
-  return role === 'ADMIN' || role === 'PROVIDER'
+  return role === 'ADMIN'
 }
 
-/** äº§å“å¢æ”¹ â€” ä»…æä¾›æ–¹ï¼ˆæˆ‘çš„æ•°æ®äº§å“ï¼‰ã€‚ */
+/** ²úÆ·Ôö¸Ä ¡ª ½öÌá¹©·½£¨ÎÒµÄÊı¾İ²úÆ·£©¡£ */
 export function canWriteProduct(role: Role | null | undefined): boolean {
   return role === 'PROVIDER'
 }
 
-/** æ‰¹é‡å¯¼å…¥ â€” ä»…æä¾›æ–¹ã€‚ */
+/** ÅúÁ¿µ¼Èë ¡ª ½öÌá¹©·½¡£ */
 export function canImportProduct(role: Role | null | undefined): boolean {
   return role === 'PROVIDER'
 }
@@ -25,9 +25,14 @@ export function canManageUsers(role: Role | null | undefined): boolean {
   return role === 'ADMIN'
 }
 
-/** æˆ‘çš„æ•°æ®äº§å“ â€” ADMIN + PROVIDERï¼ˆREQ-SHELL-008ï¼šç®¡ç†å‘˜å¯æŸ¥çœ‹æˆ‘çš„æ•°æ®äº§å“ç›®å½•ï¼‰ã€‚ */
+/** ÎÒµÄÊı¾İ²úÆ· ¡ª ADMIN + PROVIDER£¨REQ-SHELL-008£º¹ÜÀíÔ±¿É²é¿´ÎÒµÄÊı¾İ²úÆ·Ä¿Â¼£©¡£ */
 export function canSeeMyProducts(role: Role | null | undefined): boolean {
   return role === 'PROVIDER' || role === 'ADMIN'
+}
+
+/** ÎÒµÄÄ¿Â¼ ¡ª ADMIN + PROVIDER£¨TASK-WSC-901£©¡£ */
+export function canSeeMyMaintenance(role: Role | null | undefined): boolean {
+  return role === 'ADMIN' || role === 'PROVIDER'
 }
 
 export function useCanWrite(role: Ref<Role | null | undefined>) {
@@ -37,6 +42,7 @@ export function useCanWrite(role: Ref<Role | null | undefined>) {
   const productImportVisible = computed(() => canImportProduct(role.value))
   const userManageVisible = computed(() => canManageUsers(role.value))
   const myProductsVisible = computed(() => canSeeMyProducts(role.value))
+  const myMaintenanceVisible = computed(() => canSeeMyMaintenance(role.value))
   return {
     categoryMaintainVisible,
     catalogMaintenanceVisible,
@@ -44,5 +50,6 @@ export function useCanWrite(role: Ref<Role | null | undefined>) {
     productImportVisible,
     userManageVisible,
     myProductsVisible,
+    myMaintenanceVisible,
   }
 }
