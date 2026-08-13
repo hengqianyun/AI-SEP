@@ -1,0 +1,10 @@
+﻿# RUN-WSC-011 Manifest
+runId: RUN-WSC-011
+projectId: WSC
+prd: product/prd/wsc-v1.6-catalog-filter-ux.md
+prdVersion: V1.6
+basedOnRun: RUN-WSC-010
+createdAt: 2026-08-14
+status: ACTIVE
+currentNode: PRD_ANALYSIS
+notes: "V1.6 目录筛选优化 / 座序图联动 / 我的目录 / 多企业管理"
