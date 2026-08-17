@@ -1,0 +1,8 @@
+﻿node : CONTRACT CHECK FAILED
+所在位置 C:\Users\water\AppData\Local\Temp\ps-script-ec4cb051-87f8-479b-8595-dc68c985c384.ps1:111 字符: 1
++ node tests/contracts/check-contracts.mjs 2>&1 | Out-File -FilePath ai ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (CONTRACT CHECK FAILED:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ - VERSION expected 1.1.0, got 2.3.3

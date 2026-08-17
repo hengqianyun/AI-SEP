@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { canSeeMyProducts, useCanWrite } from '@/features/auth/composables/useCanWrite'
 import ImportDialog from '@/features/catalog/import/ImportDialog.vue'
+import BrowseFilterBar from './components/BrowseFilterBar.vue'
 import CirculationSeatMap from './components/CirculationSeatMap.vue'
 import SensitiveId from './components/SensitiveId.vue'
 import {
@@ -14,17 +15,9 @@ import {
   useCatalogBrowse,
 } from './composables/useCatalogBrowse'
 import { useCatalogImportEntry } from './composables/useCatalogImportEntry'
-import { INDUSTRY_CATEGORY_OPTIONS, deleteProduct } from '@/api/catalog'
+import { deleteProduct } from '@/api/catalog'
 import { ApiError } from '@/api/client'
-import {
-  CATALOG_EMPTY_MESSAGE,
-  DATA_SOURCE_OPTIONS,
-  DELIVERY_OPTIONS,
-  MINE_EMPTY_MESSAGE,
-  PRODUCT_TYPE_OPTIONS,
-  PUBLIC_DATA_OPTIONS,
-  productTypeLabel,
-} from './utils/labels'
+import { CATALOG_EMPTY_MESSAGE, MINE_EMPTY_MESSAGE, productTypeLabel } from './utils/labels'
 
 /**
  * 双表面 + 座序图挂载约定（供 604 只读消费）：
@@ -84,10 +77,9 @@ const {
   filters,
   total,
   l1Categories,
-  l2Categories,
+  allL2Categories,
   selectProduct,
-  selectL1,
-  selectL2,
+  applyCategoryPath,
   applyFilters,
   resetFilters,
   loadProducts,
@@ -371,6 +363,12 @@ function rowIndex(sectionOffset: number, idx: number) {
 function padNo(n: number) {
   return String(n).padStart(2, '0')
 }
+
+/** 审计展示：显示名优先，回退 userId；只读。 */
+function auditActorLabel(name?: string | null, userId?: string | null): string {
+  const shown = (name && name.trim()) || (userId && userId.trim()) || ''
+  return shown || '—'
+}
 </script>
 
 <template>
@@ -426,122 +424,16 @@ function padNo(n: number) {
     <!-- 筛栏与列表同壳：不用 sticky 盖住列表；折叠后 pinned flex 分区 -->
     <div class="workspace-shell">
     <div ref="stickyChromeEl" class="sticky-chrome">
-      <div class="nav-card wsc-surface">
-        <div class="tag-bar" data-testid="catalog-space-tags">
-          <span class="tag-label">空间</span>
-          <button
-            type="button"
-            class="tag"
-            :class="{ active: !filters.l1CategoryId }"
-            data-testid="catalog-space-all"
-            @click="selectL1('')"
-          >
-            全部空间
-          </button>
-          <button
-            v-for="c in l1Categories"
-            :key="c.id"
-            type="button"
-            class="tag"
-            :class="{ active: filters.l1CategoryId === c.id }"
-            data-testid="catalog-space-tag"
-            @click="selectL1(c.id)"
-          >
-            {{ c.name }}
-          </button>
-        </div>
-
-        <div class="tag-bar industry" data-testid="catalog-industry-tags">
-          <span class="tag-label">行业</span>
-          <button
-            type="button"
-            class="tag"
-            :class="{ active: !filters.l2CategoryId }"
-            data-testid="catalog-industry-all"
-            @click="selectL2('')"
-          >
-            全部行业
-          </button>
-          <button
-            v-for="c in l2Categories"
-            :key="c.id"
-            type="button"
-            class="tag"
-            :class="{ active: filters.l2CategoryId === c.id }"
-            data-testid="catalog-industry-tag"
-            @click="selectL2(c.id)"
-          >
-            {{ c.name }}
-          </button>
-        </div>
-      </div>
-
-      <div class="filter-bar wsc-surface" data-testid="catalog-filters">
-        <div class="filter-group">
-          <label class="filter-label" for="catalog-filter-industry">行业分类</label>
-          <select
-            id="catalog-filter-industry"
-            v-model="filters.industryCategory"
-            aria-label="行业分类（GB/T 门类）"
-          >
-            <option value="">全部</option>
-            <option v-for="c in INDUSTRY_CATEGORY_OPTIONS" :key="c" :value="c">
-              {{ c }}
-            </option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label class="filter-label" for="catalog-filter-source">数据来源</label>
-          <select id="catalog-filter-source" v-model="filters.dataSource" aria-label="数据来源">
-            <option v-for="o in DATA_SOURCE_OPTIONS" :key="o.value" :value="o.value">
-              {{ o.label }}
-            </option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label class="filter-label" for="catalog-filter-type">产品类型</label>
-          <select id="catalog-filter-type" v-model="filters.productType" aria-label="产品类型">
-            <option v-for="o in PRODUCT_TYPE_OPTIONS" :key="o.value" :value="o.value">
-              {{ o.label }}
-            </option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label class="filter-label" for="catalog-filter-public">是否涉及公共数据</label>
-          <select id="catalog-filter-public" v-model="filters.involvesPublicData" aria-label="是否涉及公共数据">
-            <option v-for="o in PUBLIC_DATA_OPTIONS" :key="o.value" :value="o.value">
-              {{ o.label }}
-            </option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label class="filter-label" for="catalog-filter-delivery">交付方式</label>
-          <select id="catalog-filter-delivery" v-model="filters.deliveryMethod" aria-label="交付方式">
-            <option v-for="o in DELIVERY_OPTIONS" :key="o.value" :value="o.value">
-              {{ o.label }}
-            </option>
-          </select>
-        </div>
-        <div class="filter-group search-group">
-          <label class="filter-label" for="catalog-search">搜索</label>
-          <input
-            id="catalog-search"
-            v-model="filters.q"
-            type="search"
-            class="search"
-            placeholder="产品名、产品编码"
-            aria-label="搜索产品名或编码"
-            data-testid="catalog-search"
-            @keyup.enter="applyFilters"
-          />
-        </div>
-        <div class="filter-actions">
-          <button type="button" class="btn primary" data-testid="catalog-search-btn" @click="applyFilters">
-            搜索
-          </button>
-          <button type="button" class="btn" @click="resetFilters">重置</button>
-        </div>
-      </div>
+      <BrowseFilterBar
+        v-model:filters="filters"
+        :l1-categories="l1Categories"
+        :all-l2-categories="allL2Categories"
+        :categories-state="categoriesState"
+        :categories-error="categoriesError"
+        @apply="applyFilters"
+        @reset="resetFilters"
+        @category-change="applyCategoryPath"
+      />
     </div>
 
     <div
@@ -664,6 +556,14 @@ function padNo(n: number) {
             <div class="preview-meta-item">
               <dt>产品类型</dt>
               <dd>{{ productTypeLabel(preview.productType) }}</dd>
+            </div>
+            <div class="preview-meta-item">
+              <dt>创建人</dt>
+              <dd data-testid="catalog-preview-create-by">{{ auditActorLabel(preview.createByName, preview.createBy) }}</dd>
+            </div>
+            <div class="preview-meta-item">
+              <dt>操作人</dt>
+              <dd data-testid="catalog-preview-update-by">{{ auditActorLabel(preview.updateByName, preview.updateBy) }}</dd>
             </div>
           </dl>
           <div class="preview-description">
@@ -912,118 +812,6 @@ function padNo(n: number) {
   flex: 1 1 auto;
   min-height: 0;
   height: auto;
-}
-
-.nav-card,
-.filter-bar {
-  /* 实底，避免透出 */
-  background: var(--card-bg);
-}
-
-.nav-card {
-  padding: 12px 20px;
-}
-
-.tag-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.tag-bar.industry {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border-color);
-}
-
-.tag-label {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  margin-right: 4px;
-  white-space: nowrap;
-  min-width: 2.5em;
-}
-
-.tag {
-  padding: 6px 14px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: #f9fafb;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.tag:hover {
-  background: #f3f4f6;
-  color: var(--text-primary);
-}
-
-.tag.active {
-  background: var(--blue-light);
-  color: var(--blue);
-  border-color: #bfdbfe;
-  font-weight: 600;
-}
-
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
-  padding: 14px 20px;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 140px;
-}
-
-.filter-group.search-group {
-  flex: 1;
-  min-width: 180px;
-}
-
-.filter-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.filter-bar select,
-.filter-bar .search {
-  height: 34px;
-  padding: 0 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--card-bg);
-  font: inherit;
-  font-size: 13px;
-  color: var(--text-primary);
-  outline: none;
-}
-
-.filter-bar select:focus,
-.filter-bar .search:focus {
-  border-color: var(--blue);
-}
-
-.filter-bar .search {
-  width: 100%;
-}
-
-.filter-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding-bottom: 1px;
 }
 
 .btn {

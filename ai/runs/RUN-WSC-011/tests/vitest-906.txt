@@ -1,0 +1,32 @@
+RUN  v2.1.9 C:/WorkSpace/AI-SEP/frontend
+
+ ✓ src/features/shell/navSurfaces.spec.ts > navSurfaces four-surface active (TASK-WSC-906) > resolves four catalog surfaces without overlap
+ ✓ src/features/shell/navSurfaces.spec.ts > navSurfaces four-surface active (TASK-WSC-906) > sidebar active is exclusive across /catalog /my-catalog /my-products /catalog/maintenance
+ ✓ src/features/shell/navSurfaces.spec.ts > navSurfaces four-surface active (TASK-WSC-906) > catalog group stays active when collapsed child route is current
+ ✓ src/features/shell/navSurfaces.spec.ts > navSurfaces four-surface active (TASK-WSC-906) > from=mine does not light 全链 or 目录维护
+ ✓ src/features/shell/deepLinkAccess.spec.ts > deepLinkAccess §4.1 (TASK-WSC-906) > ADMIN can enter dual catalog entries, my-products, and users
+ ✓ src/features/shell/deepLinkAccess.spec.ts > deepLinkAccess §4.1 (TASK-WSC-906) > PROVIDER can enter my-catalog and my-products; maintenance and users denied
+ ✓ src/features/shell/deepLinkAccess.spec.ts > deepLinkAccess §4.1 (TASK-WSC-906) > USER: 菜单外深链结构不可达 — maintenance / my-catalog / my-products / admin/users
+ ✓ src/features/auth/composables/useCanWrite.spec.ts > useCanWrite / RBAC UI visibility (2.3.3 / PLAN-WSC-8.3 §3.1) > ADMIN: category/maintenance/users + myCatalog/myProducts + product write/import true
+ ✓ src/features/auth/composables/useCanWrite.spec.ts > useCanWrite / RBAC UI visibility (2.3.3 / PLAN-WSC-8.3 §3.1) > PROVIDER: my-catalog/my-products write/import; no catalog maintenance/category/users
+ ✓ src/features/auth/composables/useCanWrite.spec.ts > useCanWrite / RBAC UI visibility (2.3.3 / PLAN-WSC-8.3 §3.1) > USER hides all write entries and my-catalog/my-products
+ ✓ src/features/auth/composables/useCanWrite.spec.ts > useCanWrite / RBAC UI visibility (2.3.3 / PLAN-WSC-8.3 §3.1) > useCanWrite computed mirrors §3.1 matrix cells for all roles
+ ✓ src/features/auth/composables/useCanWrite.spec.ts > useCanWrite / RBAC UI visibility (2.3.3 / PLAN-WSC-8.3 §3.1) > null/undefined role hides gated surfaces
+ ✓ src/layouts/WorkbenchLayout.spec.ts > WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010) > 906-nav-my-catalog-submenu: 我的目录在 nav-catalog-submenu 内且序为全链→我的目录→我的数据产品→目录维护
+ ✓ src/layouts/WorkbenchLayout.spec.ts > WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010) > 906-provider-no-maintenance-menu: PROVIDER 无目录维护菜单；有我的目录
+ ✓ src/layouts/WorkbenchLayout.spec.ts > WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010) > §4.1 三角色菜单正例+负例：ADMIN 双入口；PROVIDER 无维护；USER 仅全链
+ ✓ src/layouts/WorkbenchLayout.spec.ts > WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010) > USER 负例：菜单不可见 + 深链结构不可达（含 /my-catalog）
+ ✓ src/layouts/WorkbenchLayout.spec.ts > WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010) > 四 surface：侧栏 active 与 meta.title / 页头可区分
+ ✓ src/layouts/WorkbenchLayout.spec.ts > WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010) > 统一路由 /my-catalog；void 前 /my-maintenance 重定向且非权威路径
+ ✓ src/layouts/WorkbenchLayout.spec.ts > WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010) > 可收起组非回归：aria-expanded / aria-controls / sessionStorage / chevron
+ ✓ src/layouts/WorkbenchLayout.spec.ts > WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010) > 侧栏企业信息区只读（P1）：名称/标识；无切换/编辑；无企业管理页
+
+ Test Files  4 passed (4)
+      Tests  20 passed (20)
+   Start at  13:48:44
+   Duration  1.14s
+
+exitCode: 0
+command: pnpm --dir frontend exec vitest run src/features/auth/composables/useCanWrite.spec.ts src/layouts/WorkbenchLayout.spec.ts src/features/shell/navSurfaces.spec.ts src/features/shell/deepLinkAccess.spec.ts
+cwd: repo root
+json: ai/runs/RUN-WSC-011/tests/vitest-906.json (numTotalTests=20, numPassedTests=20, numFailedTests=0, success=true)

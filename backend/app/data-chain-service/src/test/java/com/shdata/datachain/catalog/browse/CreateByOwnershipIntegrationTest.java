@@ -126,7 +126,8 @@ class CreateByOwnershipIntegrationTest {
   }
 
   @Test
-  void admin_productWriteForbidden_user_productWriteForbidden() throws Exception {
+  void admin_productWriteAllowed_user_productWriteForbidden() throws Exception {
+    stubAttest();
     MockHttpSession admin = login("admin", "demo");
     mockMvc
         .perform(
@@ -136,14 +137,14 @@ class CreateByOwnershipIntegrationTest {
                 .content(
                     """
                     {
-                      "productCode":"ADM-WRT-6036",
-                      "productName":"管理员不可写",
+                      "productCode":"ADM-WRT-9051",
+                      "productName":"管理员本企业可写",
                       "productType":"OTHER",
                       "industryCategory":"卫生和社会工作"
                     }
                     """))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code").value("ERR_FORBIDDEN"));
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("0"));
 
     MockHttpSession user = login("user", "demo");
     mockMvc

@@ -1,17 +1,20 @@
 openapi: 3.0.3
 info:
   title: WSC Access Workbench API
-  version: 2.2.0
+  version: 2.3.3
   description: |
-    wsc-contracts@2.2.0 — 接入端工作台 V1.4（座序图 L2 Top5、持久化用户、我的数据产品；SNAP-WSC-005）。
+    wsc-contracts@2.3.3 — 接入端工作台 V1.6（SNAP-WSC-008 / PLAN-WSC-8.3 Wave B）。
     统一响应包装：{ code, message, data, correlationId }；成功时 code="0"。
-    RBAC：产品增/改/导入仅 PROVIDER；ADMIN 保留分类维护与用户管理；目录维护 ADMIN+PROVIDER（PROVIDER 仅 create_by=本人）。
-    GET /catalog/products?mine=true 仅返回 create_by=当前用户的产品。
-    GET /catalog/l2-distribution 返回二级目录产品计数（座序图）。
-    ADMIN /admin/users CRUD 持久化 sys_user。
+    会话 SessionPrincipal 必填 enterpriseId + enterpriseName（REQ-USER-002）；scope 单一真源。
+    GET /catalog/products 全链默认全平台（REQ-CAT-018）；mine=true → **本企业**产品（非 create_by-only）。
+    GET /catalog/maintenance/entries 硬冻结 query scope=full|myCatalog：full=ADMIN 全量；myCatalog=ADMIN 本企业 / PROVIDER ownCreateBy；PROVIDER 调 full → 403。
+    我的目录路由 `/my-catalog`；目录维护全量 `/catalog/maintenance`（仅 ADMIN）。
+    RBAC：ADMIN 产品写/导入本企业 200；PROVIDER ownCreateBy；USER 403；PROVIDER 无目录维护 UI/API（scope=full）。
+    GET /catalog/l2-distribution 可选 l1CategoryId；**不按**登录用户企业过滤。
+    mine/myCatalog/写/维护 scope **仅**信服务端 SessionPrincipal；**拒绝/忽略**客户端 enterpriseId query/body 作授权依据。
+    浏览 query 支持 l1CategoryId/l2CategoryId/l3CategoryId；浏览**不传** industryCategory（编辑/导入/详情仍用 INDUSTRY_CATEGORY_OPTIONS）。
     产品编码格式（DEC-WSC-001）：`{DOMAIN}-{FEATURE}-{NNNN}`。
     认证：服务端会话（Cookie）；写 API 以服务端会话角色为准。
-    （HOTFIX TASK-WSC-607：目录维护对 PROVIDER 开放本人产品；契约版本号未 bump，仍为 2.2.0。）
 
 servers:
   - url: /api/v1
@@ -49,6 +52,7 @@ paths:
                       userId: "u-1"
                       displayName: "演示用户"
                       role: ADMIN
+                      enterpriseId: "ent-demo-1"
                       enterpriseName: "演示企业"
                     correlationId: "corr-auth-1"
         "401":
@@ -292,11 +296,18 @@ paths:
   /catalog/l2-distribution:
     get:
       tags: [catalog]
-      summary: 二级目录产品分布（座序图；REQ-CAT-009）
+      summary: 二级目录产品分布（座序图；REQ-CAT-009 / REQ-CAT-015）
       description: |
         返回全部产品真实总数 totalProducts，以及按产品数降序的 L2 条目 items[]
         （code/name/count）。消费方可截取 Top5。totalProducts 不得用 Top5 之和冒充。
+        可选 l1CategoryId 将分布与 totalProducts 限定于该 L1 子树；**不按**登录用户企业过滤（REQ-CAT-018）。
       operationId: getL2Distribution
+      parameters:
+        - name: l1CategoryId
+          in: query
+          required: false
+          schema: { type: string }
+          description: 可选一级分类 id；空则全平台分布
       responses:
         "200":
           description: 按产品数降序的 L2 计数与产品总数
@@ -333,6 +344,7 @@ paths:
                           username: "admin"
                           displayName: "管理员"
                           role: ADMIN
+                          enterpriseId: "ent-demo-1"
                           enterpriseName: "演示企业"
                           deleted: false
                     correlationId: "corr-users-list"
@@ -340,10 +352,10 @@ paths:
           $ref: "#/components/responses/Forbidden"
     post:
       tags: [admin]
-      summary: 创建用户（仅 ADMIN；REQ-USER-001）
+      summary: 创建用户（仅 ADMIN；REQ-USER-001 / REQ-USER-002）
       description: |
-        必填 username + password + role；可选 displayName / enterpriseName。
-        username 冲突 → ERR_USER_USERNAME_CONFLICT（409）。
+        必填 username + password + role；可选 displayName / enterpriseName / enterpriseId。
+        enterpriseId 可默认继承操作者企业。username 冲突 → ERR_USER_USERNAME_CONFLICT（409）。
         响应 AdminUser 禁止含 password / passwordHash。
       operationId: createUser
       requestBody:
@@ -369,6 +381,7 @@ paths:
                       username: "provider1"
                       displayName: "提供方一"
                       role: PROVIDER
+                      enterpriseId: "ent-demo-1"
                       enterpriseName: "演示企业"
                       deleted: false
                     correlationId: "corr-users-create"
@@ -501,6 +514,14 @@ paths:
     get:
       tags: [catalog]
       summary: 产品列表（筛选/搜索）
+      description: |
+        全链默认返回**全平台**产品（REQ-CAT-018）；**无**登录用户企业 filter。
+        mine=true 时返回**本企业**产品（create_by 关联 sys_user.enterprise_id 与会话 enterpriseId 比较；非 create_by-only）。
+        浏览筛选支持 l1CategoryId/l2CategoryId/l3CategoryId；**浏览不传** industryCategory（REQ-CAT-019；schema 保留供 editor/import）。
+        supplierName：产品字段模糊匹配（与 q 语义分离；REQ-CAT-012）。
+        排序：有 L3 在前、未分类殿后、updatedAt desc（跨页全局；V1.5 不回退）。
+        `l3Counts`：当前筛选条件下各 L3（含 `__uncategorized__`）全集条数；分页只截断 `items`，不改变 count。
+        scope 授权**仅**信 SessionPrincipal；客户端 enterpriseId/enterpriseName query **不得**作授权依据。
       operationId: listProducts
       parameters:
         - name: l1CategoryId
@@ -517,7 +538,11 @@ paths:
         - name: industryCategory
           in: query
           schema: { type: string }
-          description: GB/T 4754 门类中文原文（产品字段 industryCategory）；可选；与 L2/L3 树筛选独立
+          description: GB/T 4754 门类中文原文（产品字段）；**浏览场景弃用**（REQ-CAT-019）；编辑/导入仍用
+        - name: supplierName
+          in: query
+          schema: { type: string }
+          description: 产品字段 supplierName 模糊匹配（大小写不敏感 contains）；与 q 语义分离（REQ-CAT-012）
         - name: dataSource
           in: query
           schema: { $ref: "#/components/schemas/DataSource" }
@@ -536,7 +561,7 @@ paths:
           schema: { type: string }
         - name: mine
           in: query
-          description: true 时仅返回 create_by=当前用户的产品（我的数据产品）
+          description: true 时仅返回**本企业**产品（同 enterpriseId；REQ-CAT-016）
           schema: { type: boolean, default: false }
         - name: page
           in: query
@@ -553,10 +578,11 @@ paths:
                 $ref: "#/components/schemas/ApiResponseProductPage"
     post:
       tags: [catalog]
-      summary: 新增数据产品（仅 PROVIDER；ADMIN/USER → 403）
+      summary: 新增数据产品（ADMIN 本企业 / PROVIDER ownCreateBy；USER → 403）
       description: |
-        产品写仅 PROVIDER；ADMIN 与 USER 调用返回 ERR_FORBIDDEN（403）。
-        归属 create_by 绑定当前会话 userId。
+        ADMIN 与 PROVIDER 可写：ADMIN 限本企业（ownEnterprise）；PROVIDER 限 create_by=当前用户。
+        USER → ERR_FORBIDDEN（403）。归属 create_by 绑定当前会话 userId。
+        授权 scope **仅**信 SessionPrincipal；客户端 enterpriseId **不得**扩大可见面。
       operationId: createProduct
       requestBody:
         required: true
@@ -657,9 +683,10 @@ paths:
           $ref: "#/components/responses/NotFound"
     put:
       tags: [catalog]
-      summary: 编辑数据产品（仅 PROVIDER 本人；ADMIN/USER/异主 → 403）
+      summary: 编辑数据产品（ADMIN 本企业 / PROVIDER 本人；跨企/USER → 403）
       description: |
-        产品写仅 PROVIDER 且 create_by=当前用户；空归属/异主/ADMIN/USER → ERR_FORBIDDEN（403）。
+        ADMIN 可写本企业产品；PROVIDER 仅 create_by=当前用户；跨企业 / 空归属 / USER → ERR_FORBIDDEN（403）。
+        授权 scope **仅**信 SessionPrincipal。
       operationId: updateProduct
       parameters:
         - $ref: "#/components/parameters/ProductId"
@@ -706,9 +733,9 @@ paths:
                     correlationId: "corr-prod-dup-2"
     delete:
       tags: [catalog]
-      summary: 删除数据产品（仅 PROVIDER 本人；ADMIN/USER/异主 → 403）
+      summary: 删除数据产品（ADMIN 本企业 / PROVIDER 本人；跨企/USER → 403）
       description: |
-        产品删仅 PROVIDER 且 create_by=当前用户；空归属/异主/ADMIN/USER → ERR_FORBIDDEN（403）。
+        ADMIN 可删本企业产品；PROVIDER 仅 create_by=当前用户；跨企业 / USER → ERR_FORBIDDEN（403）。
         不存在 → 404。逻辑删除。
       operationId: deleteProduct
       parameters:
@@ -763,11 +790,21 @@ paths:
   /catalog/maintenance/entries:
     get:
       tags: [catalog]
-      summary: 目录维护列表（条目≡数据产品；REQ-CAT-007 / TASK-WSC-607）
+      summary: 目录维护列表（条目≡数据产品；REQ-CAT-007 / REQ-CAT-017）
       description: |
-        ADMIN 返回全量；PROVIDER 仅 create_by=当前会话用户；USER → 403 ERR_MAINTENANCE_FORBIDDEN。
+        硬冻结 query **scope=full|myCatalog**（OpenAPI enum）：
+        - scope=full：ADMIN **全平台**目录维护（/catalog/maintenance）；PROVIDER → 403
+        - scope=myCatalog：ADMIN **本企业** / PROVIDER **ownCreateBy**（/my-catalog）；USER → 403
+        授权 scope **仅**信 SessionPrincipal；客户端 enterpriseId **不得**作授权依据。
       operationId: listMaintenanceEntries
       parameters:
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [full, myCatalog]
+          description: full=全量目录维护；myCatalog=我的目录（ADMIN 本企业 / PROVIDER 本人 create_by）
         - name: status
           in: query
           schema:
@@ -804,8 +841,9 @@ paths:
       tags: [catalog]
       summary: 单条目录维护关联（挂三级）
       description: |
-        ADMIN 可维护任意产品；PROVIDER 仅本人 create_by（空/异主 → 403 ERR_FORBIDDEN；不存在 → 404）。
-        无角色权限（USER）→ 403 ERR_MAINTENANCE_FORBIDDEN。
+        scope 规则同 listMaintenanceEntries（full vs myCatalog）。
+        ADMIN scope=full 可维护任意产品；ADMIN scope=myCatalog 限本企业；PROVIDER 仅 myCatalog + ownCreateBy。
+        空/异主 → 403 ERR_FORBIDDEN；无角色权限（USER）→ 403 ERR_MAINTENANCE_FORBIDDEN。
       operationId: updateMaintenanceEntry
       parameters:
         - $ref: "#/components/parameters/ProductId"
@@ -845,7 +883,8 @@ paths:
       tags: [catalog]
       summary: 批量目录维护关联
       description: |
-        ADMIN 可批量维护任意产品；PROVIDER 逐条校验 create_by=本人，越权条目进入 failures（ERR_FORBIDDEN）。
+        scope 规则同 listMaintenanceEntries（full vs myCatalog）。
+        ADMIN scope=full 可批量维护任意产品；myCatalog / PROVIDER 逐条校验 create_by 与本企业 scope，越权条目进入 failures。
         无角色权限（USER）→ 403 ERR_MAINTENANCE_FORBIDDEN。
       operationId: batchUpdateMaintenanceEntries
       requestBody:
@@ -892,9 +931,10 @@ paths:
   /catalog/products/import:
     post:
       tags: [catalog]
-      summary: 同步批量导入产品（仅 PROVIDER；REQ-CAT-008；无异步 job）
+      summary: 同步批量导入产品（ADMIN 本企业 / PROVIDER；REQ-CAT-008）
       description: |
-        导入仅 PROVIDER；ADMIN/USER → ERR_FORBIDDEN（403）。UI 宿主为「我的数据产品」。
+        ADMIN 与 PROVIDER 可导入：ADMIN 限本企业；PROVIDER ownCreateBy。USER → ERR_FORBIDDEN（403）。
+        UI 宿主为「我的数据产品」。授权 scope **仅**信 SessionPrincipal。
         请求级失败（整单拒绝）：文件 >10MB → ERR_IMPORT_FILE_TOO_LARGE；
         无法解析/非 xlsx|csv → ERR_IMPORT_FORMAT_INVALID；
         可解析但列名行集合 ≠ v0729 权威 ImportTemplateColumns → ERR_IMPORT_TEMPLATE_UNSUPPORTED。
@@ -1199,16 +1239,19 @@ components:
 
     Session:
       type: object
-      required: [userId, displayName, role]
+      required: [userId, displayName, role, enterpriseId, enterpriseName]
       properties:
         userId: { type: string }
         displayName: { type: string }
         role: { $ref: "#/components/schemas/Role" }
+        enterpriseId:
+          type: string
+          description: 企业 ID；mine/myCatalog/写 scope 单一真源（REQ-USER-002）
         enterpriseName: { type: string }
 
     AdminUser:
       type: object
-      required: [userId, username, displayName, role, enterpriseName, deleted]
+      required: [userId, username, displayName, role, enterpriseId, enterpriseName, deleted]
       description: |
         用户管理响应模型。list/get/create/update 响应禁止出现 password / passwordHash。
       properties:
@@ -1216,6 +1259,9 @@ components:
         username: { type: string }
         displayName: { type: string }
         role: { $ref: "#/components/schemas/Role" }
+        enterpriseId:
+          type: string
+          description: 用户归属企业 ID（REQ-USER-002）
         enterpriseName: { type: string }
         deleted: { type: boolean }
         createdAt: { type: string, format: date-time }
@@ -1229,6 +1275,9 @@ components:
         password: { type: string, format: password }
         role: { $ref: "#/components/schemas/Role" }
         displayName: { type: string }
+        enterpriseId:
+          type: string
+          description: 可选；默认继承操作者企业
         enterpriseName: { type: string }
 
     AdminUserUpdate:
@@ -1239,6 +1288,9 @@ components:
       properties:
         displayName: { type: string }
         role: { $ref: "#/components/schemas/Role" }
+        enterpriseId:
+          type: string
+          description: 用户归属企业 ID
         enterpriseName: { type: string }
         password: { type: string, format: password }
         deleted: { type: boolean }
@@ -1649,7 +1701,19 @@ components:
             createBy:
               type: string
               nullable: true
-              description: 创建者 userId；mine=true 过滤依据；空/缺失不可被 PROVIDER 冒领
+              description: 创建者 userId（审计/归属字段，非本企业 scope 判定依据）。本企业产品范围见 `GET /catalog/products` 的 `mine` 参数（enterpriseId 比较，非 create_by-only；REQ-CAT-016）。空/缺失不可被 PROVIDER 冒领
+            updateBy:
+              type: string
+              nullable: true
+              description: 最近操作人 userId（服务端审计字段；客户端 body 不得覆盖）
+            createByName:
+              type: string
+              nullable: true
+              description: 创建人显示名（优先于 createBy；找不到用户时回退 userId）
+            updateByName:
+              type: string
+              nullable: true
+              description: 操作人显示名（优先于 updateBy；找不到用户时回退 userId）
             updatedAt: { type: string, format: date-time }
 
     ProductPage:
@@ -1663,6 +1727,12 @@ components:
         page: { type: integer }
         pageSize: { type: integer }
         total: { type: integer, format: int64 }
+        l3Counts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+          description: 当前筛选条件下各 L3 全集条数。键为 l3CategoryId，未分类为 `__uncategorized__`。分页不影响。
 
     ApiResponseProduct:
       allOf:

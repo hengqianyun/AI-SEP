@@ -1,38 +1,51 @@
 import type { Role } from '@/api/auth'
 import { computed, type Ref } from 'vue'
 
-/** 对齐 contracts/rbac/matrix.yaml（2.3.2）UI 可见性。 */
+/**
+ * Frontend RBAC UI visibility aligned to contracts/rbac/matrix.yaml 2.3.3
+ * and PLAN-WSC-8.3 section 3.1. Hide is not authorize; deep-link and API still need server checks.
+ */
+
+/** categoryMaintainUI: ADMIN only */
 export function canMaintainCategory(role: Role | null | undefined): boolean {
   return role === 'ADMIN'
 }
 
-/** 目录维护 — 仅 ADMIN（TASK-WSC-901）。 */
+/** catalogMaintenanceUI: ADMIN only (full /catalog/maintenance); PROVIDER hidden */
 export function canMaintainCatalog(role: Role | null | undefined): boolean {
   return role === 'ADMIN'
 }
 
-/** 产品增改 — 仅提供方（我的数据产品）。 */
+/** productWriteUI: ADMIN + PROVIDER (ownEnterprise / ownCreateBy enforced server-side) */
 export function canWriteProduct(role: Role | null | undefined): boolean {
-  return role === 'PROVIDER'
+  return role === 'ADMIN' || role === 'PROVIDER'
 }
 
-/** 批量导入 — 仅提供方。 */
+/** productImportUI: ADMIN + PROVIDER */
 export function canImportProduct(role: Role | null | undefined): boolean {
-  return role === 'PROVIDER'
+  return role === 'ADMIN' || role === 'PROVIDER'
 }
 
+/** userManageUI: ADMIN only */
 export function canManageUsers(role: Role | null | undefined): boolean {
   return role === 'ADMIN'
 }
 
-/** 我的数据产品 — ADMIN + PROVIDER（REQ-SHELL-008：管理员可查看我的数据产品目录）。 */
+/** myProductsUI: ADMIN + PROVIDER */
 export function canSeeMyProducts(role: Role | null | undefined): boolean {
-  return role === 'PROVIDER' || role === 'ADMIN'
+  return role === 'ADMIN' || role === 'PROVIDER'
 }
 
-/** 我的目录 — ADMIN + PROVIDER（TASK-WSC-901）。 */
-export function canSeeMyMaintenance(role: Role | null | undefined): boolean {
+/** myCatalogUI: ADMIN + PROVIDER (/my-catalog) */
+export function canSeeMyCatalog(role: Role | null | undefined): boolean {
   return role === 'ADMIN' || role === 'PROVIDER'
+}
+
+/**
+ * Pre-void my-maintenance alias. Same as canSeeMyCatalog so leftover imports keep working.
+ */
+export function canSeeMyMaintenance(role: Role | null | undefined): boolean {
+  return canSeeMyCatalog(role)
 }
 
 export function useCanWrite(role: Ref<Role | null | undefined>) {
@@ -42,6 +55,7 @@ export function useCanWrite(role: Ref<Role | null | undefined>) {
   const productImportVisible = computed(() => canImportProduct(role.value))
   const userManageVisible = computed(() => canManageUsers(role.value))
   const myProductsVisible = computed(() => canSeeMyProducts(role.value))
+  const myCatalogVisible = computed(() => canSeeMyCatalog(role.value))
   const myMaintenanceVisible = computed(() => canSeeMyMaintenance(role.value))
   return {
     categoryMaintainVisible,
@@ -50,6 +64,7 @@ export function useCanWrite(role: Ref<Role | null | undefined>) {
     productImportVisible,
     userManageVisible,
     myProductsVisible,
+    myCatalogVisible,
     myMaintenanceVisible,
   }
 }

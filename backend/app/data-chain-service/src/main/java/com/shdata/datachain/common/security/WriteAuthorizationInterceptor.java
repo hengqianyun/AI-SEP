@@ -14,8 +14,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * 分类写 / 目录维护 / 产品写 / 批量导入 / 导入报告 GET 按 matrix.yaml 拦截；
- * 无权限返回 ERR_FORBIDDEN 或 ERR_MAINTENANCE_FORBIDDEN + correlationId。
+ * 分类写 / 目录维护 / 产品写 / 批量导入 / 导入报告 GET 按 matrix.yaml 拦截。
+ *
+ * <p>V1.6：维护 API 按 query {@code scope=full|myCatalog} 分流（PROVIDER {@code full}→403）；
+ * 产品写/导入允许 ADMIN（本企业校验在 Service）。授权仅信 {@link SessionPrincipal}，
+ * 忽略客户端 {@code enterpriseId} query/body。
  */
 @Component
 public class WriteAuthorizationInterceptor implements HandlerInterceptor {
@@ -47,7 +50,7 @@ public class WriteAuthorizationInterceptor implements HandlerInterceptor {
       return false;
     }
 
-    boolean allowed = isAllowed(resource, principal);
+    boolean allowed = isAllowed(resource, principal, request);
     if (!allowed) {
       auditLogger.forbidden(
           principal.userId(),
@@ -96,18 +99,51 @@ public class WriteAuthorizationInterceptor implements HandlerInterceptor {
         || "OPTIONS".equalsIgnoreCase(method);
   }
 
-  private static boolean isAllowed(WriteResource resource, SessionPrincipal principal) {
+  /**
+   * 按资源与会话判定是否放行。维护资源读取 query {@code scope}；不读取客户端 enterpriseId。
+   *
+   * @param resource 写资源分类
+   * @param principal 会话主体
+   * @param request 用于读取 maintenance {@code scope} query
+   * @return 是否允许
+   */
+  static boolean isAllowed(
+      WriteResource resource, SessionPrincipal principal, HttpServletRequest request) {
     return switch (resource) {
       case CATEGORY -> RbacMatrix.canWriteCategory(principal.role());
       case PRODUCT -> RbacMatrix.canWriteProduct(principal.role());
-      case MAINTENANCE -> RbacMatrix.canMaintainCatalog(principal.role());
+      case MAINTENANCE ->
+          RbacMatrix.canMaintainCatalog(principal.role(), maintenanceScope(request));
       case IMPORT -> RbacMatrix.canImportProduct(principal.role());
       case IMPORT_REPORT -> RbacMatrix.canGetImportReport(principal.role());
       case NONE -> true;
     };
   }
 
-  static WriteResource classify(String uri) {
+  /**
+   * 读取维护 scope query；缺省返回 null（矩阵走遗留默认）。忽略 {@code enterpriseId}。
+   *
+   * @param request 当前请求
+   * @return {@code full} / {@code myCatalog} / null
+   */
+  static String maintenanceScope(HttpServletRequest request) {
+    if (request == null) {
+      return null;
+    }
+    String scope = request.getParameter("scope");
+    if (scope == null || scope.isBlank()) {
+      return null;
+    }
+    return scope.trim();
+  }
+
+  /**
+   * 按 URI 分类写资源（导入路径须先于通用 /catalog/products）。
+   *
+   * @param uri 请求 URI
+   * @return 资源类型
+   */
+  public static WriteResource classify(String uri) {
     if (uri == null) {
       return WriteResource.NONE;
     }
@@ -143,7 +179,8 @@ public class WriteAuthorizationInterceptor implements HandlerInterceptor {
     objectMapper.writeValue(response.getWriter(), body);
   }
 
-  enum WriteResource {
+  /** 写资源分类（供拦截器与矩阵测试使用）。 */
+  public enum WriteResource {
     CATEGORY,
     PRODUCT,
     MAINTENANCE,

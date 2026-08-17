@@ -1,8 +1,7 @@
-﻿# wsc-contracts@2.3.2 — RBAC 可测矩阵（SNAP-WSC-006 RELEASE amend / HOTFIX-SHELL-002）
-# V1.5 RELEASE amend：恢复目录维护 PROVIDER 可见（对齐 V1.4 ownCreateBy）；推翻 2.3.0 ADMIN-only 纠偏
-# V1.6：管理员开放 myProductsUI（REQ-SHELL-008）
+﻿# wsc-contracts@2.3.3 — RBAC 可测矩阵（SNAP-WSC-008 / PLAN-WSC-8.3 §3.1）
+# V1.6：企业 scope；ADMIN 产品写/导入本企业；PROVIDER 无目录维护；myCatalog 双入口
 
-version: "2.3.2"
+version: "2.3.3"
 package: wsc-contracts
 
 roles:
@@ -15,22 +14,27 @@ matrix:
     categoryMaintainUI: visible
     categoryWriteApi: { expect: 200, on: valid }
     catalogMaintenanceUI: visible
-    catalogMaintenanceApi: { expect: 200, on: valid }
-    productWriteUI: hidden
-    productWriteApi: { expect: 403, code: ERR_FORBIDDEN }
-    productImportUI: hidden
-    productImportApi: { expect: 403, code: ERR_FORBIDDEN }
+    catalogMaintenanceApi: { expect: 200, on: full, scope: full }
+    myCatalogUI: visible
+    myCatalogApi: { expect: 200, on: ownEnterprise, scope: myCatalog }
+    myProductsUI: visible
+    productWriteUI: visible
+    productWriteApi: { expect: 200, on: ownEnterprise }
+    productImportUI: visible
+    productImportApi: { expect: 200, on: ownEnterprise }
     importReportGet: { expect: 200, on: ownOrAdmin }
     userManageUI: visible
     userManageApi: { expect: 200, on: valid }
-    myProductsUI: visible
     sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
 
   - role: PROVIDER
     categoryMaintainUI: hidden
     categoryWriteApi: { expect: 403, code: ERR_FORBIDDEN }
-    catalogMaintenanceUI: visible
-    catalogMaintenanceApi: { expect: 200, on: ownCreateBy }
+    catalogMaintenanceUI: hidden
+    catalogMaintenanceApi: { expect: 403, code: ERR_MAINTENANCE_FORBIDDEN, scope: full }
+    myCatalogUI: visible
+    myCatalogApi: { expect: 200, on: ownCreateBy, scope: myCatalog }
+    myProductsUI: visible
     productWriteUI: visible
     productWriteApi: { expect: 200, on: ownCreateBy }
     productImportUI: visible
@@ -38,14 +42,16 @@ matrix:
     importReportGet: { expect: 200, on: importer }
     userManageUI: hidden
     userManageApi: { expect: 403, code: ERR_FORBIDDEN }
-    myProductsUI: visible
     sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
 
   - role: USER
     categoryMaintainUI: hidden
     categoryWriteApi: { expect: 403, code: ERR_FORBIDDEN }
     catalogMaintenanceUI: hidden
-    catalogMaintenanceApi: { expect: 403, code: ERR_MAINTENANCE_FORBIDDEN }
+    catalogMaintenanceApi: { expect: 403, code: ERR_MAINTENANCE_FORBIDDEN, scope: full }
+    myCatalogUI: hidden
+    myCatalogApi: { expect: 403, code: ERR_MAINTENANCE_FORBIDDEN, scope: myCatalog }
+    myProductsUI: hidden
     productWriteUI: hidden
     productWriteApi: { expect: 403, code: ERR_FORBIDDEN }
     productImportUI: hidden
@@ -53,16 +59,18 @@ matrix:
     importReportGet: { expect: 403, code: ERR_FORBIDDEN }
     userManageUI: hidden
     userManageApi: { expect: 403, code: ERR_FORBIDDEN }
-    myProductsUI: hidden
     sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
 
 notes:
   - 写 API 以服务端会话角色为准，禁止仅信前端隐藏（隐藏 ≠ 授权）
   - 登录身份绑定角色；禁止任意会话角色切换（POST /auth/session/role → 410）
-  - 产品增/改/导入仅 PROVIDER；ADMIN 产品写/导入 hidden + API 403；公共数据目录无写入口
-  - 我的数据产品列表仅 create_by = 当前 userId；空/缺失/异主不可被 PROVIDER 冒领
-  - 目录维护 UI：ADMIN + PROVIDER 可见；API ADMIN 全量 200、PROVIDER ownCreateBy 200（异主/空归属仍 403）；USER → catalogMaintenanceUI hidden、API 403 ERR_MAINTENANCE_FORBIDDEN
+  - mine=true / myCatalog scope / 产品写 / 维护 scope **仅**从 SessionPrincipal.enterpriseId（及角色规则）推导；**拒绝/忽略**客户端 enterpriseId query/body 作授权依据
+  - GET /catalog/products 全链默认全平台（REQ-CAT-018）；mine=true → **本企业**产品（create_by 关联 sys_user.enterprise_id，非 create_by-only）
+  - GET /catalog/maintenance/entries?scope=full|myCatalog：full=ADMIN 全平台目录维护；myCatalog=ADMIN 本企业 / PROVIDER ownCreateBy；PROVIDER 调 scope=full → 403
+  - 我的目录 UI 路由 `/my-catalog`；目录维护全量 `/catalog/maintenance`（仅 ADMIN 可见）
+  - ADMIN 产品写/导入：本企业（ownEnterprise）；PROVIDER：ownCreateBy
+  - PROVIDER **无** catalogMaintenanceUI；catalogMaintenanceApi scope=full → 403
   - 分类树维护仍仅 ADMIN（categoryMaintain* 不授予 PROVIDER）
   - userManage* 仅 ADMIN
   - 导入错误报告：管理员或具备导入权限的提供方可 GET；报告字段白名单不扩大
-  - 我的数据产品目录：ADMIN + PROVIDER 可见（REQ-SHELL-008）
+  - GET /catalog/l2-distribution 可选 l1CategoryId；**不按**登录用户企业过滤

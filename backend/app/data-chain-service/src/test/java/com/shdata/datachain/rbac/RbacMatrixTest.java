@@ -1,9 +1,11 @@
-package com.shdata.datachain.common.security;
+package com.shdata.datachain.rbac;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.shdata.datachain.common.security.RbacMatrix;
+import com.shdata.datachain.common.security.WriteAuthorizationInterceptor;
 import com.shdata.datachain.model.Role;
 import org.junit.jupiter.api.Test;
 
@@ -17,24 +19,47 @@ class RbacMatrixTest {
   }
 
   @Test
-  void catalogMaintenance_adminAndProvider() {
+  void catalogMaintenance_defaultAllowsAdminAndProvider() {
     assertTrue(RbacMatrix.canMaintainCatalog(Role.ADMIN));
     assertTrue(RbacMatrix.canMaintainCatalog(Role.PROVIDER));
     assertFalse(RbacMatrix.canMaintainCatalog(Role.USER));
   }
 
   @Test
-  void productWrite_providerOnly_v14() {
-    assertFalse(RbacMatrix.canWriteProduct(Role.ADMIN));
+  void catalogMaintenance_scopeAware_matchesSection31() {
+    assertTrue(RbacMatrix.canMaintainCatalog(Role.ADMIN, RbacMatrix.MAINTENANCE_SCOPE_FULL));
+    assertTrue(RbacMatrix.canMaintainCatalog(Role.ADMIN, RbacMatrix.MAINTENANCE_SCOPE_MY_CATALOG));
+    assertTrue(RbacMatrix.canMaintainCatalog(Role.ADMIN, null));
+
+    assertFalse(RbacMatrix.canMaintainCatalog(Role.PROVIDER, RbacMatrix.MAINTENANCE_SCOPE_FULL));
+    assertTrue(RbacMatrix.canMaintainCatalog(Role.PROVIDER, RbacMatrix.MAINTENANCE_SCOPE_MY_CATALOG));
+    assertTrue(RbacMatrix.canMaintainCatalog(Role.PROVIDER, null));
+
+    assertFalse(RbacMatrix.canMaintainCatalog(Role.USER, RbacMatrix.MAINTENANCE_SCOPE_FULL));
+    assertFalse(RbacMatrix.canMaintainCatalog(Role.USER, RbacMatrix.MAINTENANCE_SCOPE_MY_CATALOG));
+    assertFalse(RbacMatrix.canMaintainCatalog(Role.USER, "other"));
+    assertFalse(RbacMatrix.canMaintainCatalog(Role.PROVIDER, "other"));
+  }
+
+  @Test
+  void productWrite_adminAndProvider_userForbidden() {
+    assertTrue(RbacMatrix.canWriteProduct(Role.ADMIN));
     assertTrue(RbacMatrix.canWriteProduct(Role.PROVIDER));
     assertFalse(RbacMatrix.canWriteProduct(Role.USER));
   }
 
   @Test
-  void productImport_providerOnly_v14() {
-    assertFalse(RbacMatrix.canImportProduct(Role.ADMIN));
+  void productImport_adminAndProvider_userForbidden() {
+    assertTrue(RbacMatrix.canImportProduct(Role.ADMIN));
     assertTrue(RbacMatrix.canImportProduct(Role.PROVIDER));
     assertFalse(RbacMatrix.canImportProduct(Role.USER));
+  }
+
+  @Test
+  void mineApi_adminAndProvider_userForbidden() {
+    assertTrue(RbacMatrix.canAccessMineApi(Role.ADMIN));
+    assertTrue(RbacMatrix.canAccessMineApi(Role.PROVIDER));
+    assertFalse(RbacMatrix.canAccessMineApi(Role.USER));
   }
 
   @Test

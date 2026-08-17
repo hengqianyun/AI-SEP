@@ -1,0 +1,43 @@
+﻿# tester-wsc-908 本轮 C2 控制台摘录
+# cwd: C:\WorkSpace\AI-SEP
+# env: E2E_RUN=1  E2E_BASE_URL=http://127.0.0.1:5173
+# command: pnpm --dir tests/e2e run test:p0-v14
+# executedAt: 2026-08-17T15:37:04+08:00
+# exitCode: 1（命令可启动并跑完；失败矩阵见 TESTRUN / EVIDENCE）
+
+> @wsc/e2e@0.1.0 test:p0-v14 C:\WorkSpace\AI-SEP\tests\e2e
+> playwright test specs/p0-wsc-v1.4.spec.ts --config=playwright.config.ts
+
+Running 15 tests using 1 worker
+  ok  1 › 1) 真登录 — admin (581ms)
+  ok  2 › 1) 真登录 — provider (547ms)
+  ok  3 › 1) 真登录 — user (639ms)
+  FAIL 2a) ADMIN 用户管理 CRUD 抽样
+    expect(locator).not.toContainText — users-table 仍含 e2e_u_228088（已启用）
+  FAIL 2b) provider 不可达用户管理
+    users-admin-page 未找到
+  FAIL 2b) user 不可达用户管理
+    users-admin-page 未找到
+  FAIL 3) 公共目录无增改导 — admin
+    heading「数据目录」未找到
+  FAIL 3) 公共目录无增改导 — provider
+    heading「数据目录」未找到
+  FAIL 3) 公共目录无增改导 — user
+    heading「数据目录」未找到
+  FAIL 4) PROVIDER 我的产品：增改导 / 无座序图 / 返回仍在我的产品
+    nav-catalog-maintenance 未找到
+  FAIL 4x) ADMIN/USER 无「我的产品」菜单且直达被重定向
+    nav-my-products Expected: 0  Received: 1
+  FAIL 5) ADMIN 产品写 403；分类与维护可达
+    POST status Expected: 403  Received: 200
+  ok 13 › 6) 公共目录座序图 Top5+总数+hover；我的产品无图 (2.7s)
+  ok 14 › 7a) 导入四态抽样（宿主=我的产品 / PROVIDER） (2.6s)
+  ok 15 › 7b) OpenAPI 编辑：Swagger 回填 → 保存 → 再开不丢 (1.5s)
+
+  9 failed
+  6 passed (2.9m)
+ELIFECYCLE Command failed with exit code 1.
+
+C2_EXIT=1
+junit: tests=15 failures=9 skipped=0 errors=0  (tests/e2e/reports/p0-wsc-v1.4/junit.xml timestamp=2026-08-17T07:37:04.742Z)
+# 分类：9 失败均为 intentional V1.6 delta / 预存 UX；无环境/未知回归。不计入 908 failedCommandCount。

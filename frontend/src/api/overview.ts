@@ -1,5 +1,5 @@
 /**
- * Overview API — 对齐 contracts/openapi + overview/stream-events.yaml (wsc-contracts@2.2.0)
+ * Overview API — 对齐 contracts/openapi + overview/stream-events.yaml (wsc-contracts@2.3.3)
  */
 import { apiRequest } from './client'
 

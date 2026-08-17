@@ -6,6 +6,8 @@ import { canImportProduct, canWriteProduct } from '@/features/auth/composables/u
 
 const dir = dirname(fileURLToPath(import.meta.url))
 const pageSrc = readFileSync(join(dir, 'CatalogBrowsePage.vue'), 'utf8')
+const filterBarSrc = readFileSync(join(dir, 'components/BrowseFilterBar.vue'), 'utf8')
+const labelsSrc = readFileSync(join(dir, 'utils/labels.ts'), 'utf8')
 const layoutSrc = readFileSync(join(dir, '../../../layouts/WorkbenchLayout.vue'), 'utf8')
 const routesSrc = readFileSync(join(dir, '../../../router/routes.ts'), 'utf8')
 const importEntrySrc = readFileSync(join(dir, 'composables/useCatalogImportEntry.ts'), 'utf8')
@@ -35,7 +37,6 @@ describe('CatalogBrowsePage (TASK-WSC-603)', () => {
     expect(pageSrc).toContain('确定删除该产品？删除后不可恢复')
     expect(pageSrc).toContain('deleteProduct')
     expect(pageSrc).toContain('deleteConfirmVisible')
-    // 公共目录无删除：删除按钮挂在 writeVisible（mine ∩ PROVIDER）下
     expect(pageSrc).toContain("isMine.value && productWriteVisible")
   })
 
@@ -112,10 +113,73 @@ describe('CatalogBrowsePage UX scheme A', () => {
     expect(pageSrc).toMatch(/\.sticky-chrome\s*\{[^}]*position:\s*relative/s)
     expect(pageSrc).not.toMatch(/\.sticky-chrome\s*\{[^}]*position:\s*sticky/s)
     expect(pageSrc).toMatch(/\.catalog-browse--pinned\s*\{[^}]*overflow:\s*hidden/s)
-    expect(pageSrc).toMatch(/\.nav-card,\s*\n\.filter-bar\s*\{[^}]*background:\s*var\(--card-bg\)/s)
     expect(pageSrc).toMatch(/min-height:\s*calc\(var\(--list-min-h\)\s*\+\s*var\(--product-row-h\)\)/)
     expect(pageSrc).toContain('100dvh')
     expect(pageSrc).not.toContain('max-height: 40vh')
     expect(pageSrc).toMatch(/@media\s*\(max-height:\s*800px\)/)
+  })
+})
+
+describe('TASK-WSC-901 browse filter refactor (REQ-CAT-014 / REQ-CAT-019)', () => {
+  it('901-no-nav-cards: removes V1.5 space/industry tag cards from page', () => {
+    expect(pageSrc).not.toContain('data-testid="catalog-space-tags"')
+    expect(pageSrc).not.toContain('data-testid="catalog-industry-tags"')
+    expect(pageSrc).not.toContain('data-testid="catalog-space-tag"')
+    expect(pageSrc).not.toContain('data-testid="catalog-industry-tag"')
+    expect(pageSrc).not.toContain('class="nav-card')
+    expect(pageSrc).not.toContain('class="tag-bar"')
+    expect(pageSrc).not.toContain('class="tag active"')
+  })
+
+  it('901-no-nav-cards: no advanced filter toggle; filter bar always mounted via BrowseFilterBar', () => {
+    expect(pageSrc).not.toMatch(/高级筛选/)
+    expect(pageSrc).not.toContain('advancedFilter')
+    expect(pageSrc).not.toContain('filter-toggle')
+    expect(pageSrc).toContain('BrowseFilterBar')
+    expect(pageSrc).toMatch(/<BrowseFilterBar[\s\S]*?@apply="applyFilters"/)
+    expect(pageSrc).toMatch(/@category-change="applyCategoryPath"/)
+  })
+
+  it('901-no-industryCategory-query: page does not bind industryCategory filter', () => {
+    expect(pageSrc).not.toContain('INDUSTRY_CATEGORY_OPTIONS')
+    expect(pageSrc).not.toContain('filters.industryCategory')
+    expect(pageSrc).not.toContain('catalog-filter-industry')
+  })
+
+  it('uses Cascader filter component with token mapping', () => {
+    expect(filterBarSrc).toContain('Cascader')
+    expect(filterBarSrc).toContain('data-testid="catalog-filter-category-cascader"')
+    expect(filterBarSrc).toContain('data-browse-filter-theme="ant-token-mapped"')
+    expect(filterBarSrc).toContain('ConfigProvider')
+    expect(filterBarSrc).toContain('change-on-select')
+    expect(filterBarSrc).toContain('allow-clear')
+    expect(labelsSrc).toContain('BROWSE_CATEGORY_CASCADER_LABEL')
+    expect(labelsSrc).toContain('业务视图 / 业务大类')
+  })
+
+  it('supplierName field is separate from q search (REQ-CAT-012)', () => {
+    expect(filterBarSrc).toContain('data-testid="catalog-filter-supplier"')
+    expect(filterBarSrc).toContain('filters.supplierName')
+    expect(filterBarSrc).not.toContain('enterpriseName')
+  })
+
+  it('category loading/empty/error affordances in BrowseFilterBar', () => {
+    expect(filterBarSrc).toContain('data-testid="catalog-filter-category-error"')
+    expect(filterBarSrc).toContain('data-testid="catalog-filter-category-empty"')
+    expect(filterBarSrc).toContain(':loading="categoriesLoading"')
+  })
+})
+
+describe('TASK-WSC-909 preview audit (HOTFIX)', () => {
+  it('909-audit-createBy-updateBy: preview shows 创建人/操作人 readonly', () => {
+    expect(pageSrc).toContain('创建人')
+    expect(pageSrc).toContain('操作人')
+    expect(pageSrc).toContain('data-testid="catalog-preview-create-by"')
+    expect(pageSrc).toContain('data-testid="catalog-preview-update-by"')
+    expect(pageSrc).toContain('auditActorLabel')
+    expect(pageSrc).toContain('preview.createByName')
+    expect(pageSrc).toContain('preview.updateByName')
+    expect(pageSrc).not.toMatch(/v-model[^>]*createBy/)
+    expect(pageSrc).not.toMatch(/v-model[^>]*updateBy/)
   })
 })

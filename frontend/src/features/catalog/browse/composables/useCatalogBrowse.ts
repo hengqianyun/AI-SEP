@@ -14,8 +14,6 @@ export type LoadState = 'idle' | 'loading' | 'empty' | 'ready' | 'error'
 export type CatalogFilters = {
   l1CategoryId: string
   l2CategoryId: string
-  /** GB/T 4754 门类中文原文（产品字段 industryCategory；DEC-WSC-006 / TASK-WSC-606） */
-  industryCategory: string
   dataSource: string
   productType: string
   involvesPublicData: string
@@ -40,7 +38,6 @@ export function createDefaultFilters(): CatalogFilters {
   return {
     l1CategoryId: '',
     l2CategoryId: '',
-    industryCategory: '',
     dataSource: '',
     productType: '',
     involvesPublicData: '',
@@ -58,17 +55,36 @@ export function isRetryableListState(state: LoadState): boolean {
   return state === 'error'
 }
 
+/** 由 l1/l2 筛选项还原 Cascader 绑定值（REQ-CAT-014）。 */
+export function categoryPathFromFilters(l1: string, l2: string): string[] {
+  if (!l1) return []
+  return l2 ? [l1, l2] : [l1]
+}
+
 /** 视觉分区：无 l3 挂载产品的分节 key（钉在已加载列表末段）。 */
 export const UNCATEGORIZED_SECTION_KEY = '__uncategorized__'
 
 /**
+ * 分节 count：优先用服务端 l3Counts（当前筛选全集）；缺省时回退已加载条数。
+ */
+function sectionCount(
+  key: string,
+  loaded: number,
+  l3Counts?: Record<string, number>,
+): number {
+  const total = l3Counts?.[key]
+  return typeof total === 'number' ? total : loaded
+}
+
+/**
  * 将扁平产品列表分节：有 l3 按三级子类；无挂载一律归入单一「未分类数据」分节并钉在末段。
  * 桶内顺序保持 API/追加顺序，**不对**产品做跨页破坏性 sort（REQ-CAT-012 / TASK-WSC-705）。
- * industryCategory 仅为产品字段，不作分节 key（DEC-WSC-006 / TASK-WSC-502）。
+ * {@code count} 取筛选条件下该 L3 全集（{@code l3Counts}），不是当前页已加载条数。
  */
 export function groupProductsByL3(
   products: Product[],
   categories: Category[],
+  l3Counts?: Record<string, number>,
 ): ProductSection[] {
   const l3Order = categories.filter((c) => c.level === 'L3').map((c) => c.id)
   const l3Name = new Map(categories.filter((c) => c.level === 'L3').map((c) => [c.id, c.name]))
@@ -89,7 +105,7 @@ export function groupProductsByL3(
     sections.push({
       l3CategoryId: id,
       title: l3Name.get(id) ?? id,
-      count: list.length,
+      count: sectionCount(id, list.length, l3Counts),
       products: list,
     })
     buckets.delete(id)
@@ -103,13 +119,18 @@ export function groupProductsByL3(
       continue
     }
     const title = list[0]?.categoryPath?.split('/').pop()?.trim() ?? id
-    sections.push({ l3CategoryId: id, title, count: list.length, products: list })
+    sections.push({
+      l3CategoryId: id,
+      title,
+      count: sectionCount(id, list.length, l3Counts),
+      products: list,
+    })
   }
   if (uncategorized && uncategorized.length > 0) {
     sections.push({
       l3CategoryId: UNCATEGORIZED_SECTION_KEY,
       title: '未分类数据',
-      count: uncategorized.length,
+      count: sectionCount(UNCATEGORIZED_SECTION_KEY, uncategorized.length, l3Counts),
       products: uncategorized,
     })
   }
@@ -210,6 +231,8 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
   const page = ref(1)
   const pageSize = ref(10)
   const total = ref(0)
+  /** 当前筛选条件下各 L3 全集条数（服务端聚合；分页不改） */
+  const l3Counts = ref<Record<string, number>>({})
 
   /** 响应 mine（catalog↔my-products 路由复用时不得快照布尔） */
   function isMineList(): boolean {
@@ -221,12 +244,15 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
     const l1 = filters.value.l1CategoryId
     return categories.value.filter((c) => c.level === 'L2' && (!l1 || c.parentId === l1))
   })
+  const allL2Categories = computed(() => categories.value.filter((c) => c.level === 'L2'))
   const l3Categories = computed(() => {
     const l2Ids = new Set(l2Categories.value.map((c) => c.id))
     return categories.value.filter((c) => c.level === 'L3' && l2Ids.has(c.parentId ?? ''))
   })
 
-  const sections = computed(() => groupProductsByL3(products.value, categories.value))
+  const sections = computed(() =>
+    groupProductsByL3(products.value, categories.value, l3Counts.value),
+  )
   const hasMore = computed(() => products.value.length < total.value)
 
   function buildQuery(pageNo: number) {
@@ -237,8 +263,6 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
     }
     if (f.l1CategoryId) query.l1CategoryId = f.l1CategoryId
     if (f.l2CategoryId) query.l2CategoryId = f.l2CategoryId
-    // REQ-CAT-011：UI 文案为「行业类别」，query 键仍为 industryCategory
-    if (f.industryCategory.trim()) query.industryCategory = f.industryCategory.trim()
     if (f.dataSource) query.dataSource = f.dataSource
     if (f.productType) query.productType = f.productType
     if (f.deliveryMethod) query.deliveryMethod = f.deliveryMethod
@@ -247,7 +271,7 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
     // q：产品名/编码；supplierName：企业名称（产品字段）；二者并存、语义分离
     if (f.q.trim()) query.q = f.q.trim()
     if (f.supplierName.trim()) query.supplierName = f.supplierName.trim()
-    // 禁止发送 enterpriseName（会话/主体名 ≠ 产品检索字段）
+    // REQ-CAT-014 / REQ-CAT-019：浏览不传 industryCategory；禁止 enterpriseName
     if (isMineList()) query.mine = true
     return query
   }
@@ -283,6 +307,12 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
       total.value = res.data?.total ?? 0
       page.value = res.data?.page ?? pageNo
       pageSize.value = res.data?.pageSize ?? pageSize.value
+      const nextCounts = res.data?.l3Counts
+      if (nextCounts && Object.keys(nextCounts).length > 0) {
+        l3Counts.value = nextCounts
+      } else if (!append) {
+        l3Counts.value = {}
+      }
 
       if (append) {
         const seen = new Set(products.value.map((p) => p.id))
@@ -309,6 +339,7 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
         listError.value = e instanceof ApiError ? e.message : CATALOG_ERROR_MESSAGE
         products.value = []
         total.value = 0
+        l3Counts.value = {}
       } else {
         listError.value = e instanceof ApiError ? e.message : CATALOG_ERROR_MESSAGE
       }
@@ -336,15 +367,24 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
     }
   }
 
-  function selectL1(l1Id: string) {
-    filters.value.l1CategoryId = l1Id
-    filters.value.l2CategoryId = ''
+  /** Cascader / 分类快捷：更新 l1/l2 并立即重载列表。 */
+  function applyCategoryPath(path: string[]) {
+    filters.value.l1CategoryId = path[0] ?? ''
+    filters.value.l2CategoryId = path[1] ?? ''
     void loadProducts()
   }
 
+  function selectL1(l1Id: string) {
+    applyCategoryPath(l1Id ? [l1Id] : [])
+  }
+
   function selectL2(l2Id: string) {
-    filters.value.l2CategoryId = l2Id
-    void loadProducts()
+    const l1 = filters.value.l1CategoryId
+    if (!l2Id) {
+      applyCategoryPath(l1 ? [l1] : [])
+      return
+    }
+    applyCategoryPath(l1 ? [l1, l2Id] : [l2Id])
   }
 
   function applyFilters() {
@@ -352,13 +392,7 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
   }
 
   function resetFilters() {
-    const keepL1 = filters.value.l1CategoryId
-    const keepL2 = filters.value.l2CategoryId
-    filters.value = {
-      ...createDefaultFilters(),
-      l1CategoryId: keepL1,
-      l2CategoryId: keepL2,
-    }
+    filters.value = createDefaultFilters()
     void loadProducts()
   }
 
@@ -402,6 +436,7 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
     total,
     l1Categories,
     l2Categories,
+    allL2Categories,
     l3Categories,
     loadCategories,
     loadProducts,
@@ -409,11 +444,9 @@ export function useCatalogBrowse(options: { mine?: MaybeRefOrGetter<boolean> } =
     selectProduct,
     selectL1,
     selectL2,
+    applyCategoryPath,
     applyFilters,
     resetFilters,
     init,
   }
 }
-
-
-

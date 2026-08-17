@@ -1,0 +1,4 @@
+# command: pnpm exec vue-tsc --noEmit -p ../ai/runs/RUN-WSC-011/tests/tsconfig.api-only.json --pretty false
+# cwd: frontend
+# exitCode: 0
+# stdout/stderr: (empty — no diagnostics)

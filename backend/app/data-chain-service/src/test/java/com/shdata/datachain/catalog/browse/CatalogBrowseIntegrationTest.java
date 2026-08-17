@@ -1,4 +1,4 @@
-package com.shdata.datachain.model;
+package com.shdata.datachain.catalog.browse;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

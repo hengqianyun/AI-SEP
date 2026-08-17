@@ -1,5 +1,5 @@
 /**
- * Admin users API — 对齐 contracts/openapi (wsc-contracts@2.2.0；REQ-USER-001)
+ * Admin users API — 对齐 contracts/openapi (wsc-contracts@2.3.3；REQ-USER-001 / REQ-USER-002)
  * 响应永不含 password / passwordHash；软删 = PUT deleted: true；启用 = PUT deleted: false；
  * 硬删 = DELETE /admin/users/{userId}（物理删行）。
  * 列表含已停用账号（deleted=true），供管理端「启用」恢复。
@@ -12,6 +12,7 @@ export type AdminUser = {
   username: string
   displayName: string
   role: Role
+  enterpriseId: string
   enterpriseName: string
   deleted: boolean
   createdAt?: string
@@ -23,12 +24,14 @@ export type AdminUserCreate = {
   password: string
   role: Role
   displayName?: string
+  enterpriseId?: string
   enterpriseName?: string
 }
 
 export type AdminUserUpdate = {
   displayName?: string
   role?: Role
+  enterpriseId?: string
   enterpriseName?: string
   password?: string
   /** 软删权威形状 */

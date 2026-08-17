@@ -7,8 +7,10 @@ import com.shdata.datachain.common.exception.BusinessException;
 import com.shdata.datachain.common.port.ChainAttestationPort;
 import com.shdata.datachain.common.response.ServiceResult;
 import com.shdata.datachain.common.security.AuthAuditLogger;
+import com.shdata.datachain.common.security.EnterpriseProductScope;
 import com.shdata.datachain.model.CatalogCategory;
 import com.shdata.datachain.model.CatalogProduct;
+import com.shdata.datachain.model.SessionPrincipal;
 import com.shdata.datachain.repository.CatalogBrowseSeedStore;
 import com.shdata.datachain.repository.InMemoryChainStore;
 import org.slf4j.Logger;
@@ -38,25 +40,28 @@ public class ProductEditorService {
     private final InMemoryChainStore chainStore;
     private final ObjectMapper objectMapper;
     private final AuthAuditLogger auditLogger;
+    private final EnterpriseProductScope enterpriseScope;
 
     public ProductEditorService(
             CatalogBrowseSeedStore catalog,
             ChainAttestationPort attestationPort,
             InMemoryChainStore chainStore,
             ObjectMapper objectMapper,
-            AuthAuditLogger auditLogger) {
+            AuthAuditLogger auditLogger,
+            EnterpriseProductScope enterpriseScope) {
         this.catalog = catalog;
         this.attestationPort = attestationPort;
         this.chainStore = chainStore;
         this.objectMapper = objectMapper;
         this.auditLogger = auditLogger;
+        this.enterpriseScope = enterpriseScope;
     }
 
     /**
      * 新增数据产品，流程：校验字段 → 存证上链 → 写入目录内存。
      * <p>必填：productName、productCode（格式 {DOMAIN}-{FEATURE}-{NNNN}）、productType、industryCategory（GB/T 门类）。
-     * l3CategoryId 可选（传入则须为 L3 叶子节点）。</p>
-     * <p>存证失败时不写入产品，返回 500。</p>
+     * l3CategoryId 可选（传入则须为 L3 叶子节点）。忽略 body.enterpriseId。</p>
+     * <p>存证失败时不写入产品，返回 500。角色门禁由拦截器（ADMIN/PROVIDER）。</p>
      *
      * @param body          产品字段 Map
      * @param actorUserId   操作人用户 ID
@@ -66,7 +71,7 @@ public class ProductEditorService {
     public ServiceResult create(Map<String, Object> body, String actorUserId, String correlationId) {
         String codeHint = stringVal(body == null ? null : body.get("productCode"), "-");
         try {
-            ValidatedWrite write = validateWrite(body, null);
+            ValidatedWrite write = validateWrite(sanitizeWriteBody(body), null);
             String productId = catalog.nextProductId();
             CatalogProduct draft = toProduct(productId, write, 0, null);
             Attested attested = attestAndStore(draft, 1);
@@ -87,26 +92,28 @@ public class ProductEditorService {
     /**
      * 编辑已有数据产品，版本号递增，重新存证上链。
      * <p>校验规则同 create；版本号取当前产品最大版本 +1。</p>
+     * <p>写范围：ADMIN 本企业；PROVIDER 本人 create_by；空/缺失 create_by 或跨企业 → 403。</p>
      *
      * @param productId     产品 ID
-     * @param body          产品字段 Map
-     * @param actorUserId   操作人用户 ID
+     * @param body          产品字段 Map（忽略 enterpriseId）
+     * @param principal     会话主体（仅信此对象）
      * @param correlationId 请求追踪 ID
      * @return 更新后的产品
      */
     public ServiceResult update(
-            String productId, Map<String, Object> body, String actorUserId, String correlationId) {
+            String productId, Map<String, Object> body, SessionPrincipal principal, String correlationId) {
+        String actorUserId = principal == null ? "-" : principal.userId();
         Optional<CatalogProduct> existingOpt = catalog.findProduct(productId);
         if (existingOpt.isEmpty()) {
             return ServiceResult.fail(404, "404", "产品不存在", null);
         }
-        // SNAP-WSC-005 / REQ-CAT-010：空/缺失/异主 create_by 一律 403，禁止 PROVIDER 冒领
-        if (!catalog.isOwnedBy(productId, actorUserId)) {
-            return ServiceResult.fail(403, "ERR_FORBIDDEN", "只能编辑本人创建的产品", null);
+        // SNAP-WSC-008 / REQ-RBAC-002：空/缺失/非授权范围 create_by 一律 403
+        if (!enterpriseScope.canWriteProduct(productId, principal)) {
+            return ServiceResult.fail(403, "ERR_FORBIDDEN", "无权编辑该产品", null);
         }
         CatalogProduct existing = existingOpt.get();
         try {
-            ValidatedWrite write = validateWrite(body, productId);
+            ValidatedWrite write = validateWrite(sanitizeWriteBody(body), productId);
             int priorChain =
                     Math.max(
                             nullSafe(existing.chainCount()),
@@ -137,20 +144,21 @@ public class ProductEditorService {
 
     /**
      * 删除已有数据产品（逻辑删除）。
-     * <p>404 若不存在；403 若非本人 create_by（与 update 同权）。</p>
+     * <p>404 若不存在；403 若非本企业（ADMIN）或非本人 create_by（PROVIDER）；空归属 403。</p>
      *
      * @param productId     产品 ID
-     * @param actorUserId   操作人用户 ID
+     * @param principal     会话主体
      * @param correlationId 请求追踪 ID
      * @return 删除结果（{@code deleted: true}）
      */
-    public ServiceResult delete(String productId, String actorUserId, String correlationId) {
+    public ServiceResult delete(String productId, SessionPrincipal principal, String correlationId) {
+        String actorUserId = principal == null ? "-" : principal.userId();
         Optional<CatalogProduct> existingOpt = catalog.findProduct(productId);
         if (existingOpt.isEmpty()) {
             return ServiceResult.fail(404, "404", "产品不存在", null);
         }
-        if (!catalog.isOwnedBy(productId, actorUserId)) {
-            return ServiceResult.fail(403, "ERR_FORBIDDEN", "只能删除本人创建的产品", null);
+        if (!enterpriseScope.canWriteProduct(productId, principal)) {
+            return ServiceResult.fail(403, "ERR_FORBIDDEN", "无权删除该产品", null);
         }
         CatalogProduct existing = existingOpt.get();
         boolean removed = catalog.removeProduct(productId);
@@ -262,6 +270,7 @@ public class ProductEditorService {
         String productCode = stringVal(body.get("productCode"), "").trim();
         String productType = stringVal(body.get("productType"), "").trim();
         String industryCategoryRaw = stringVal(body.get("industryCategory"), "").trim();
+        // 忽略客户端 enterpriseId / enterpriseName，不得扩大写范围
         String l3CategoryId = stringVal(body.get("l3CategoryId"), "").trim();
 
         if (productName.isEmpty() || productCode.isEmpty()) {
@@ -540,7 +549,28 @@ public class ProductEditorService {
         if (p.updatedAt() != null) {
             m.put("updatedAt", p.updatedAt().toString());
         }
+        catalog.appendAuditFields(m, p.id());
         return m;
+    }
+
+    /**
+     * 忽略客户端伪造的审计字段，create_by/update_by 仅信会话。
+     *
+     * @param body 原始请求体
+     * @return 去掉审计键的副本；null 原样返回
+     */
+    private static Map<String, Object> sanitizeWriteBody(Map<String, Object> body) {
+        if (body == null) {
+            return null;
+        }
+        Map<String, Object> copy = new LinkedHashMap<>(body);
+        copy.remove("createBy");
+        copy.remove("updateBy");
+        copy.remove("createByName");
+        copy.remove("updateByName");
+        copy.remove("create_by");
+        copy.remove("update_by");
+        return copy;
     }
 
     private static String stringVal(Object v, String fallback) {

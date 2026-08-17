@@ -1,0 +1,7 @@
+{
+  "extends": "../../../../frontend/tsconfig.json",
+  "include": [
+    "../../../../frontend/src/api/**/*.ts",
+    "../../../../frontend/src/vite-env.d.ts"
+  ]
+}

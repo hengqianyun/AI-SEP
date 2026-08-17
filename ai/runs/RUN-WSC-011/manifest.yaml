@@ -3,8 +3,11 @@ runId: RUN-WSC-011
 projectId: WSC
 prd: product/prd/wsc-v1.6-catalog-filter-ux.md
 prdVersion: V1.6
-basedOnRun: RUN-WSC-010
+basedOnRun: RUN-WSC-009
+baselineSnapshot: SNAP-WSC-006
+baselineContracts: wsc-contracts@2.3.2
 createdAt: 2026-08-14
+resetAt: 2026-08-17
 status: ACTIVE
-currentNode: PRD_ANALYSIS
-notes: "V1.6 目录筛选优化 / 座序图联动 / 我的目录 / 多企业管理"
+currentNode: PLAN_REVIEW
+notes: "V1.6 目录筛选 / 座序图联动 / 我的目录 / 企业多管理员"

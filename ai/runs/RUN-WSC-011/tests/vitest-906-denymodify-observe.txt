@@ -1,0 +1,24 @@
+# 独立观察（非 906 门禁）denyModify 内 V1.4 红测
+
+command: pnpm --dir frontend exec vitest run src/features/catalog/browse/CatalogBrowsePage.spec.ts src/features/catalog/import/composables/useProductImport.spec.ts
+cwd: repo root
+exitCode: 1
+json: ai/runs/RUN-WSC-011/tests/vitest-906-denymodify-observe.json
+result: Test Files 2 failed (2); Tests 2 failed | 30 passed (32)
+
+失败（与 SNAP-008 / §3.1 ADMIN 写 UI=true 冲突；路径在 906 denyModify / 非 writeSet）：
+
+1. CatalogBrowsePage.spec.ts
+   CatalogBrowsePage (TASK-WSC-603) > product write/import UI only PROVIDER; catalog mode gates via writeVisible=isMine
+   AssertionError: expected true to be false
+   at CatalogBrowsePage.spec.ts:17  expect(canWriteProduct('ADMIN')).toBe(false)
+
+2. useProductImport.spec.ts
+   useProductImport > 权限隐藏：仅 PROVIDER 可挂载弹层；ADMIN/USER 结构不可达（V1.4）
+   AssertionError: expected true to be false
+   at useProductImport.spec.ts:391  expect(canImportProduct('ADMIN')).toBe(false)
+
+其余 30 项通过（含 CatalogBrowsePage 其余 TASK-WSC-603 / 901 用例与 useProductImport 非权限用例）。
+
+判定：本观察不计入 TASK-WSC-906 FAIL；亦不得把未跑的 writeSet spec 记为 PASS。
+PowerShell 在 vitest 失败后打印 ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL / Command "vitest" not found 为 stderr 噪声；JSON 已写出且用例已执行，不记环境阻塞。

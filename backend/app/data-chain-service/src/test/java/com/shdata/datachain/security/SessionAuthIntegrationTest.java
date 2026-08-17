@@ -1,4 +1,4 @@
-package com.shdata.datachain.model;
+package com.shdata.datachain.security;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

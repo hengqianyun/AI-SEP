@@ -1,10 +1,20 @@
 <script setup lang="ts">
 /**
- * 公共目录座序图（REQ-CAT-009 / TASK-WSC-604）。
- * 仅由 CatalogBrowsePage 在 showSeatMap=true 时挂载；无点击筛选。
+ * 公共目录座序图（REQ-CAT-009 / TASK-WSC-604；REQ-CAT-015 / TASK-WSC-902）。
+ * 仅由 CatalogBrowsePage 在 showSeatMap=true 时挂载；无点击筛选；L1 下拉与 browse Cascader 独立。
+ * TASK-WSC-909：标题「数据流通链」相对卡片水平居中；L1 仍靠右。
  */
-import { computed, onMounted, ref } from 'vue'
-import { getL2Distribution, type L2DistributionItem } from '@/api/catalog'
+import { computed, onMounted, ref, watch } from 'vue'
+import { ConfigProvider, Select } from 'ant-design-vue'
+import type { ThemeConfig } from 'ant-design-vue/es/config-provider/context'
+import {
+  getL2Distribution,
+  listCategories,
+  type Category,
+  type L2Distribution,
+  type L2DistributionItem,
+} from '@/api/catalog'
+import { apiRequest } from '@/api/client'
 
 const THEME = [
   { bg: '#06b6d4', text: '#06b6d4' },
@@ -14,6 +24,18 @@ const THEME = [
   { bg: '#14b8a6', text: '#14b8a6' },
 ]
 
+/** §1.5 Ant→token 最小映射（座序图 L1 Select） */
+const SEAT_MAP_FILTER_THEME: ThemeConfig = {
+  token: {
+    colorPrimary: '#3b82f6',
+    colorBorder: '#e5e7eb',
+    colorBgContainer: '#ffffff',
+    borderRadius: 6,
+    fontSize: 14,
+  },
+}
+
+const ALL_L1_VALUE = ''
 const GRID = 400
 const COLS = 50
 /** hover 熄灭其它域时的 opacity 上限（可测） */
@@ -24,6 +46,11 @@ const error = ref<string | null>(null)
 const totalProducts = ref(0)
 const top5 = ref<L2DistributionItem[]>([])
 const hoveredCode = ref<string | null>(null)
+/** 座序图 L1 下拉独立 state，不与 browse Cascader 联动 */
+const selectedL1Id = ref(ALL_L1_VALUE)
+const l1Options = ref<{ value: string; label: string }[]>([
+  { value: ALL_L1_VALUE, label: '全部' },
+])
 
 type Dot = { code: string; color: string; opacity: number }
 
@@ -54,7 +81,6 @@ const dots = computed<Dot[]>(() => {
     arr.push({ code: item.code, color, opacity: 0.35 })
   }
   if (arr.length > GRID) arr.length = GRID
-  // 稳定洗牌：按 code 哈希打散，避免 Math.random 导致测试/重渲抖动
   for (let i = arr.length - 1; i > 0; i--) {
     const j = hashIndex(arr[i]!.code, i) % (i + 1)
     ;[arr[i], arr[j]] = [arr[j]!, arr[i]!]
@@ -74,14 +100,40 @@ function dimOpacity(code: string, base: number): number {
   return Math.min(base, DIM_OPACITY)
 }
 
+/**
+ * 拉取 L2 分布；有 L1 时走 query（903 前 api 未生成带参 helper）。
+ */
+async function fetchL2Distribution(l1CategoryId: string): Promise<L2Distribution> {
+  if (!l1CategoryId) {
+    const res = await getL2Distribution()
+    return res.data ?? { totalProducts: 0, items: [] }
+  }
+  const qs = new URLSearchParams({ l1CategoryId })
+  const res = await apiRequest<L2Distribution>(`/catalog/l2-distribution?${qs}`)
+  return res.data ?? { totalProducts: 0, items: [] }
+}
+
+async function loadL1Options() {
+  try {
+    const res = await listCategories()
+    const l1Items = (res.data?.items ?? []).filter((c: Category) => c.level === 'L1')
+    l1Options.value = [
+      { value: ALL_L1_VALUE, label: '全部' },
+      ...l1Items.map((c) => ({ value: c.id, label: c.name })),
+    ]
+  } catch {
+    l1Options.value = [{ value: ALL_L1_VALUE, label: '全部' }]
+  }
+}
+
 async function load() {
   loading.value = true
   error.value = null
+  hoveredCode.value = null
   try {
-    const res = await getL2Distribution()
-    totalProducts.value = res.data?.totalProducts ?? 0
-    // 消费方 Top5：API 已降序，前端截断
-    top5.value = (res.data?.items ?? []).slice(0, 5)
+    const data = await fetchL2Distribution(selectedL1Id.value)
+    totalProducts.value = data.totalProducts ?? 0
+    top5.value = (data.items ?? []).slice(0, 5)
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加载座序图失败'
     top5.value = []
@@ -91,15 +143,37 @@ async function load() {
   }
 }
 
+watch(selectedL1Id, () => {
+  void load()
+})
+
 onMounted(() => {
+  void loadL1Options()
   void load()
 })
 </script>
 
 <template>
   <section class="seat-map wsc-surface" data-testid="circulation-seat-map">
+    <ConfigProvider :theme="SEAT_MAP_FILTER_THEME">
+      <div
+        class="title-row"
+        data-seat-map-filter-theme="ant-token-mapped"
+        data-testid="seat-map-title-row"
+      >
+        <h2>数据流通链</h2>
+        <Select
+          v-model:value="selectedL1Id"
+          class="l1-select"
+          :options="l1Options"
+          :loading="loading"
+          aria-label="业务视图"
+          data-testid="seat-map-l1-select"
+        />
+      </div>
+    </ConfigProvider>
+
     <div class="title-block">
-      <h2>数据流通链</h2>
       <p v-if="loading" data-testid="seat-map-loading">加载中…</p>
       <p v-else-if="error" class="err" data-testid="seat-map-error">{{ error }}</p>
       <p v-else-if="isEmpty" data-testid="seat-map-empty">暂无流通数据</p>
@@ -139,7 +213,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 图例：仅 hover 高亮，无点击筛选 affordance（非 button / 无 @click） -->
     <div
       v-if="top5.length"
       class="legend"
@@ -175,15 +248,38 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
 }
-.title-block {
-  text-align: center;
-  margin-bottom: 20px;
+.title-row {
+  width: 100%;
+  max-width: 960px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-bottom: 8px;
+  min-height: 40px;
 }
-.title-block h2 {
-  margin: 0 0 8px;
+.title-row h2 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
   font-size: 28px;
   font-weight: 700;
   color: #0f172a;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.l1-select {
+  min-width: 160px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.title-block {
+  text-align: center;
+  margin-bottom: 20px;
 }
 .title-block p {
   margin: 0;

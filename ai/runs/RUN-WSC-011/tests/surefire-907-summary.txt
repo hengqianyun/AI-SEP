@@ -1,0 +1,15 @@
+SUITE com.shdata.datachain.catalog.maintenance.CatalogMaintenanceIntegrationTest tests=6 failures=0 errors=0 skipped=0 time=11.198
+  PASS batchAssociate_and_leafRequired time=0.432
+  PASS provider_batch_ownOk_foreignInFailures time=0.225
+  PASS pagination_pagePageSizeTotal time=0.117
+  PASS user_forbidden_maintenance time=0.092
+  PASS pending_to_maintained_singleAssociate time=0.156
+  PASS provider_listOnlyOwn_and_associateOwn200_other403 time=0.181
+SUITE com.shdata.datachain.catalog.maintenance.MaintenanceScopeIntegrationTest tests=3 failures=0 errors=0 skipped=0 time=3.81
+  PASS admin_scopeFullAndMyCatalog_200 time=0.136
+  PASS user_anyScope_403 time=0.106
+  PASS provider_scopeFull_403_myCatalog_200 time=0.122
+SUITE com.shdata.datachain.catalog.maintenance.MyCatalogScopeSplitIntegrationTest tests=1 failures=0 errors=0 skipped=0 time=7.446
+  PASS adminDualEntry_fullN_myCatalogM_providerOwnOnly time=0.896
+TOTAL tests=10 failures=0 errors=0 skipped=0
+BUILD SUCCESS Total time=28.850 s EXITCODE=0

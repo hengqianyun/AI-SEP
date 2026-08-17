@@ -1,14 +1,17 @@
 /**
- * Catalog API — 对齐 contracts/openapi (wsc-contracts@2.2.0)
- * industryCategory（GB/T 门类）；l3CategoryId 可空；Browse 分页 + mine；L2 分布；v0729 同步导入。
+ * Catalog API — 对齐 contracts/openapi (wsc-contracts@2.3.3)
+ * V1.6：enterprise scope；maintenance scope=full|myCatalog；l2-distribution?l1CategoryId=；
+ * mine=本企业；ADMIN 产品写/导入本企业；浏览 l1/l2 Cascader；supplierName 独立 query。
+ * industryCategory（GB/T 门类）；l3CategoryId 可空；Browse 分页 + mine；v0729 同步导入。
  * typeSpecific：api/dataset/report/other；OTHER 允许 contentDescription。
- * 产品写/导入仅 PROVIDER（契约叙述；鉴权由后端强制）。
  */
 import { apiRequest, getApiBaseUrl } from './client'
 
 export type ProductType = 'DATASET' | 'REPORT' | 'API' | 'OTHER'
 export type CategoryLevel = 'L1' | 'L2' | 'L3'
 export type MaintenanceStatus = 'PENDING' | 'MAINTAINED'
+/** 目录维护 scope（硬冻结 full | myCatalog） */
+export type MaintenanceScope = 'full' | 'myCatalog'
 export type UpdateFrequency =
   | 'REALTIME'
   | 'DAILY'
@@ -142,8 +145,14 @@ export type Product = ProductWrite & {
   chainCount: number
   categoryPath?: string
   latestVersionNo?: number
-  /** 创建者 userId；mine=true 过滤依据 */
+  /** 创建者 userId（审计/归属字段，非本企业 scope 判定依据）。本企业产品范围见 listProducts 的 mine 参数（enterpriseId 比较，非 create_by-only；REQ-CAT-016）。空/缺失不可被 PROVIDER 冒领 */
   createBy?: string | null
+  /** 最近操作人 userId（服务端审计；客户端不得覆盖） */
+  updateBy?: string | null
+  /** 创建人显示名（优先于 createBy） */
+  createByName?: string | null
+  /** 操作人显示名（优先于 updateBy） */
+  updateByName?: string | null
   updatedAt?: string
 }
 
@@ -152,6 +161,11 @@ export type ProductPage = {
   page: number
   pageSize: number
   total: number
+  /**
+   * 当前筛选条件下各 L3 全集条数（含 `__uncategorized__`）。
+   * 分页只截断 items，不改变本 map。
+   */
+  l3Counts?: Record<string, number>
 }
 
 export type L2DistributionItem = {
@@ -164,6 +178,46 @@ export type L2Distribution = {
   /** 真实产品总数（非 Top5 之和） */
   totalProducts: number
   items: L2DistributionItem[]
+}
+
+export type L2DistributionQuery = {
+  /** 可选 L1 过滤（REQ-CAT-015）；空则全平台 */
+  l1CategoryId?: string
+}
+
+/** 产品列表 query（对齐 OpenAPI listProducts） */
+export type ListProductsQuery = {
+  l1CategoryId?: string
+  l2CategoryId?: string
+  l3CategoryId?: string
+  /** 浏览场景弃用；schema 保留 */
+  industryCategory?: string
+  dataSource?: string
+  productType?: ProductType | string
+  involvesPublicData?: boolean
+  deliveryMethod?: string
+  /** 产品名/编码 contains */
+  q?: string
+  /** 产品字段 supplierName 模糊匹配（与 q 分离；REQ-CAT-012） */
+  supplierName?: string
+  /** true → 本企业产品（REQ-CAT-016） */
+  mine?: boolean
+  page?: number
+  pageSize?: number
+}
+
+export type ListMaintenanceEntriesQuery = {
+  /**
+   * OpenAPI 必填：full=全量目录维护；myCatalog=我的目录。
+   * 既有调用方在 907 接入前可省略（后端默认行为由 905 实现）。
+   */
+  scope?: MaintenanceScope
+  status?: 'ALL' | 'MAINTAINED' | 'PENDING'
+  l1CategoryId?: string
+  l2CategoryId?: string
+  l3CategoryId?: string
+  page?: number
+  pageSize?: number
 }
 
 export type MaintenanceEntry = {
@@ -248,11 +302,14 @@ export function deleteCategory(categoryId: string) {
   return apiRequest<null>(`/catalog/categories/${categoryId}`, { method: 'DELETE' })
 }
 
-export function getL2Distribution() {
-  return apiRequest<L2Distribution>('/catalog/l2-distribution')
+export function getL2Distribution(query: L2DistributionQuery = {}) {
+  const qs = new URLSearchParams()
+  if (query.l1CategoryId) qs.set('l1CategoryId', query.l1CategoryId)
+  const suffix = qs.toString() ? `?${qs}` : ''
+  return apiRequest<L2Distribution>(`/catalog/l2-distribution${suffix}`)
 }
 
-export function listProducts(query: Record<string, string | number | boolean | undefined> = {}) {
+export function listProducts(query: ListProductsQuery = {}) {
   const qs = new URLSearchParams()
   for (const [k, v] of Object.entries(query)) {
     if (v !== undefined && v !== '') qs.set(k, String(v))
@@ -285,9 +342,7 @@ export function deleteProduct(productId: string) {
   })
 }
 
-export function listMaintenanceEntries(
-  query: Record<string, string | number | undefined> = {},
-) {
+export function listMaintenanceEntries(query: ListMaintenanceEntriesQuery) {
   const qs = new URLSearchParams()
   for (const [k, v] of Object.entries(query)) {
     if (v !== undefined && v !== '') qs.set(k, String(v))

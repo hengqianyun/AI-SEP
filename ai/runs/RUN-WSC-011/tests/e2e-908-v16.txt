@@ -1,0 +1,26 @@
+﻿# tester-wsc-908 本轮 C1 控制台摘录
+# cwd: C:\WorkSpace\AI-SEP
+# env: E2E_RUN=1  E2E_BASE_URL=http://127.0.0.1:5173
+# command: pnpm --dir tests/e2e run test:p0-v16
+# executedAt: 2026-08-17T15:35:59+08:00
+# exitCode: 0
+
+> @wsc/e2e@0.1.0 test:p0-v16 C:\WorkSpace\AI-SEP\tests\e2e
+> playwright test specs/p0-wsc-v1.6.spec.ts --config=playwright.v16.config.ts
+
+Running 10 tests using 1 worker
+  ok  1 [chromium] › specs\p0-wsc-v1.6.spec.ts:50:7 › §6.1-1) 浏览筛选 V1.6 (2.2s)
+  ok  2 [chromium] › specs\p0-wsc-v1.6.spec.ts:102:7 › §6.1-2) 座序图 L1 (3.4s)
+  ok  3 [chromium] › specs\p0-wsc-v1.6.spec.ts:147:7 › §6.1-3) 全链无企业过滤 (2.7s)
+  ok  4 [chromium] › specs\p0-wsc-v1.6.spec.ts:187:7 › §6.1-4) 我的数据产品本企业 (5.0s)
+  ok  5 [chromium] › specs\p0-wsc-v1.6.spec.ts:241:7 › §6.1-5) 导航 ADMIN 双入口 (3.7s)
+  ok  6 [chromium] › specs\p0-wsc-v1.6.spec.ts:297:7 › §6.1-6a) PROVIDER 仅我的目录 (2.5s)
+  ok  7 [chromium] › specs\p0-wsc-v1.6.spec.ts:329:7 › §6.1-6b) USER 隔离 (1.7s)
+  ok  8 [chromium] › specs\p0-wsc-v1.6.spec.ts:351:7 › §6.1-7) 我的目录维护 UX (1.2s)
+  ok  9 [chromium] › specs\p0-wsc-v1.6.spec.ts:389:7 › §6.1-8) 行业类别非浏览 (1.7s)
+  ok 10 [chromium] › specs\p0-wsc-v1.6.spec.ts:426:7 › §6.1-9) V1.5/V1.4 回归抽样 (2.2s)
+
+  10 passed (28.0s)
+
+C1_EXIT=0
+junit: tests=10 failures=0 skipped=0 errors=0  (tests/e2e/reports/p0-wsc-v1.6/junit.xml timestamp=2026-08-17T07:35:59.159Z)

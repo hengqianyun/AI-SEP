@@ -1,9 +1,11 @@
 ﻿import type { RouteRecordRaw } from 'vue-router'
 import PlaceholderView from '@/views/PlaceholderView.vue'
+import { requireDeepLinkAccess } from '@/features/shell/routeGuards'
 
 /**
- * 根路由清单（TASK-WSC-101 增量：契约 2.0.0 / overview 可编译启动）。
- * 目录维护业务页路由由后续任务追加；本任务不实现 catalog/shell/auth/chain 业务页。
+ * 根路由清单。
+ * TASK-WSC-906：`/my-catalog` meta/title/guard；void 前 `/my-maintenance` 重定向。
+ * TASK-WSC-907：`/my-catalog` 接入 CatalogMaintenancePage（scope=myCatalog）；保留 ADMIN 双入口 meta.title。
  */
 export const routes: RouteRecordRaw[] = [
   {
@@ -24,18 +26,26 @@ export const routes: RouteRecordRaw[] = [
     name: 'my-products',
     component: () => import('@/features/catalog/browse/CatalogBrowsePage.vue'),
     props: { mode: 'mine', showSeatMap: false },
+    beforeEnter: requireDeepLinkAccess,
     meta: { title: '我的数据产品', requiresProvider: true },
   },
   {
     path: '/my-maintenance',
-    name: 'my-maintenance',
+    redirect: '/my-catalog',
+  },
+  {
+    path: '/my-catalog',
+    name: 'my-catalog',
     component: () => import('@/features/catalog/maintenance/CatalogMaintenancePage.vue'),
-    meta: { title: '我的目录' },
+    props: { scope: 'myCatalog' },
+    beforeEnter: requireDeepLinkAccess,
+    meta: { title: '我的目录（本企业/本人）' },
   },
   {
     path: '/admin/users',
     name: 'admin-users',
     component: () => import('@/features/users/UsersAdminPage.vue'),
+    beforeEnter: requireDeepLinkAccess,
     meta: { title: '用户管理' },
   },
   {
@@ -66,7 +76,9 @@ export const routes: RouteRecordRaw[] = [
     path: '/catalog/maintenance',
     name: 'catalog-maintenance',
     component: () => import('@/features/catalog/maintenance/CatalogMaintenancePage.vue'),
-    meta: { title: '目录维护' },
+    props: { scope: 'full' },
+    beforeEnter: requireDeepLinkAccess,
+    meta: { title: '目录维护（全量）' },
   },
   {
     path: '/chain/products/:productId',
@@ -85,5 +97,3 @@ export const routes: RouteRecordRaw[] = [
     },
   },
 ]
-
-

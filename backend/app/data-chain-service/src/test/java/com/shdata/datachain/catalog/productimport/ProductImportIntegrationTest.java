@@ -358,6 +358,21 @@ class ProductImportIntegrationTest {
   }
 
   @Test
+  void admin_importOwnEnterprise_200() throws Exception {
+    stubAttest();
+    MockHttpSession admin = login("admin", "demo");
+    mockMvc
+        .perform(
+            multipart("/api/v1/catalog/products/import")
+                .file(fixture("full-success.csv"))
+                .session(admin)
+                .param("enterpriseId", "999999"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("0"))
+        .andExpect(jsonPath("$.data.successCount").value(2));
+  }
+
+  @Test
   void ordinaryUser_importForbidden() throws Exception {
     MockHttpSession session = login("user", "demo");
     mockMvc

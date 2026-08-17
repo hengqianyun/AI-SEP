@@ -12,7 +12,7 @@ import {
 import { useAuthStore } from '@/features/auth/store/authStore'
 
 const auth = useAuthStore()
-const { role } = storeToRefs(auth)
+const { role, session } = storeToRefs(auth)
 /** 602：用户管理仅 ADMIN（内联门禁，不经 603 矩阵助手） */
 const allowed = computed(() => role.value === 'ADMIN')
 
@@ -28,7 +28,8 @@ const form = ref({
   password: '',
   displayName: '',
   role: 'PROVIDER' as Role,
-  enterpriseName: '演示企业',
+  enterpriseId: '',
+  enterpriseName: '',
 })
 
 const editOpen = ref(false)
@@ -50,7 +51,8 @@ function resetCreateForm() {
     password: '',
     displayName: '',
     role: 'PROVIDER',
-    enterpriseName: '演示企业',
+    enterpriseId: session.value?.enterpriseId ?? '',
+    enterpriseName: session.value?.enterpriseName ?? '',
   }
 }
 
@@ -132,6 +134,7 @@ async function onCreate() {
       password: form.value.password,
       displayName: form.value.displayName.trim() || undefined,
       role: form.value.role,
+      enterpriseId: form.value.enterpriseId.trim() || undefined,
       enterpriseName: form.value.enterpriseName.trim() || undefined,
     })
     createOpen.value = false
@@ -278,7 +281,13 @@ onMounted(() => {
               <td>{{ u.username }}</td>
               <td>{{ u.displayName }}</td>
               <td data-testid="user-row-role-label">{{ roleLabel(u.role) }}</td>
-              <td>{{ u.enterpriseName }}</td>
+              <td>
+                <span data-testid="user-enterprise-name">{{ u.enterpriseName }}</span>
+                <span
+                  class="enterprise-id"
+                  data-testid="user-enterprise-id"
+                >{{ u.enterpriseId }}</span>
+              </td>
               <td>
                 <span
                   v-if="!u.deleted"
@@ -381,8 +390,20 @@ onMounted(() => {
               </select>
             </label>
             <label>
-              企业名
-              <input v-model="form.enterpriseName" />
+              企业 ID
+              <input
+                v-model="form.enterpriseId"
+                data-testid="user-enterprise-id-input"
+                autocomplete="off"
+              />
+            </label>
+            <label>
+              企业名称
+              <input
+                v-model="form.enterpriseName"
+                data-testid="user-enterprise-name-input"
+                autocomplete="off"
+              />
             </label>
           </div>
           <div class="modal-actions">
@@ -704,6 +725,13 @@ td {
 th {
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+.enterprise-id {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-tertiary);
+  font-size: 12px;
 }
 
 .actions {

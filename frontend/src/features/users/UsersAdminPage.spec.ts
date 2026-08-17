@@ -103,4 +103,14 @@ describe('UsersAdminPage (TASK-WSC-602 / TASK-WSC-606)', () => {
     expect(routesSrc).toContain("path: '/admin/users'")
     expect(routesSrc).toContain('UsersAdminPage')
   })
+
+  it('904: shows enterpriseId, inherits session enterprise on create, no enterprise CRUD UI', () => {
+    expect(src).toContain('data-testid="user-enterprise-id"')
+    expect(src).toContain('data-testid="user-enterprise-name"')
+    expect(src).toContain('data-testid="user-enterprise-id-input"')
+    expect(src).toContain('session.value?.enterpriseId')
+    expect(src).toContain('enterpriseId: form.value.enterpriseId.trim()')
+    expect(src).not.toContain('企业管理')
+    expect(src).not.toMatch(/createEnterprise|deleteEnterprise|listEnterprises/)
+  })
 })

@@ -16,6 +16,7 @@ vi.mock('@/api/catalog', () => ({
 
 import {
   catalogEmptyMessage,
+  categoryPathFromFilters,
   createDefaultFilters,
   fillUntilScrollable,
   groupProductsByL3,
@@ -23,6 +24,7 @@ import {
   isRetryableListState,
   needsMoreContentToScroll,
   shouldAutoLoadMore,
+  UNCATEGORIZED_SECTION_KEY,
   useCatalogBrowse,
 } from './useCatalogBrowse'
 
@@ -39,6 +41,14 @@ function product(id: string, overrides: Partial<Product> = {}): Product {
   } as Product
 }
 
+const sampleCategories: Category[] = [
+  { id: 'l1-a', name: '视图A', level: 'L1', parentId: undefined },
+  { id: 'l2-a1', name: '大类A1', level: 'L2', parentId: 'l1-a' },
+  { id: 'l2-a2', name: '大类A2', level: 'L2', parentId: 'l1-a' },
+  { id: 'l1-b', name: '视图B', level: 'L1', parentId: undefined },
+  { id: 'l2-b1', name: '大类B1', level: 'L2', parentId: 'l1-b' },
+]
+
 describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
   it('empty message is explicit and stable (testid catalog-empty)', () => {
     expect(catalogEmptyMessage()).toContain('未找到符合条件的数据产品')
@@ -51,13 +61,14 @@ describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
     expect(isRetryableListState('ready')).toBe(false)
   })
 
-  it('default filters include industryCategory (GB/T 门类)', () => {
+  it('default filters omit industryCategory (REQ-CAT-014 / REQ-CAT-019)', () => {
     const f = createDefaultFilters()
     expect(f.l1CategoryId).toBe('')
     expect(f.l2CategoryId).toBe('')
-    expect(f.industryCategory).toBe('')
+    expect(f).not.toHaveProperty('industryCategory')
     expect(f.productType).toBe('')
     expect(f.q).toBe('')
+    expect(f.supplierName).toBe('')
   })
 
   it('product type labels cover four types', () => {
@@ -83,6 +94,30 @@ describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
     expect(sections[1]).toMatchObject({ l3CategoryId: 'l3b', title: '结构化病历', count: 1 })
   })
 
+  it('909-l3-count-full-total: section count uses server totals, not loaded subset', () => {
+    const cats: Category[] = [
+      { id: 'l3a', name: '脱敏病历', level: 'L3', parentId: 'l2' },
+    ]
+    const page1 = [{ id: '1', l3CategoryId: 'l3a' }] as Product[]
+    const page2 = [
+      { id: '1', l3CategoryId: 'l3a' },
+      { id: '2', l3CategoryId: 'l3a' },
+    ] as Product[]
+    const totals = { l3a: 5, [UNCATEGORIZED_SECTION_KEY]: 3 }
+    expect(groupProductsByL3(page1, cats, totals)[0]!.count).toBe(5)
+    expect(groupProductsByL3(page2, cats, totals)[0]!.count).toBe(5)
+    expect(groupProductsByL3(page2, cats, totals)[0]!.products).toHaveLength(2)
+    const uncategorizedPage = [
+      { id: 'u1' },
+      { id: 'u2' },
+    ] as Product[]
+    const uncategorized = groupProductsByL3(uncategorizedPage, cats, totals).find(
+      (s) => s.title === '未分类数据',
+    )
+    expect(uncategorized?.count).toBe(3)
+    expect(uncategorized?.products).toHaveLength(2)
+  })
+
   it('groupProductsByL3 preserves filter semantics for load-more append order', () => {
     const cats: Category[] = [{ id: 'l3a', name: '脱敏病历', level: 'L3', parentId: 'l2' }]
     const page1 = [{ id: '1', l3CategoryId: 'l3a' }] as Product[]
@@ -90,8 +125,8 @@ describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
       { id: '1', l3CategoryId: 'l3a' },
       { id: '2', l3CategoryId: 'l3a' },
     ] as Product[]
-    expect(groupProductsByL3(page1, cats)[0]!.count).toBe(1)
-    expect(groupProductsByL3(page2, cats)[0]!.count).toBe(2)
+    expect(groupProductsByL3(page1, cats)[0]!.products).toHaveLength(1)
+    expect(groupProductsByL3(page2, cats)[0]!.products.map((p) => p.id)).toEqual(['1', '2'])
     expect(groupProductsByL3(page2, cats)[0]!.products.every((p) => p.l3CategoryId === 'l3a')).toBe(
       true,
     )
@@ -116,6 +151,13 @@ describe('catalog browse helpers (REQ-CAT-001..003 / TASK-WSC-104)', () => {
   })
 })
 
+describe('categoryPathFromFilters (REQ-CAT-014)', () => {
+  it('maps l1-only, l1+l2, and empty', () => {
+    expect(categoryPathFromFilters('', '')).toEqual([])
+    expect(categoryPathFromFilters('l1-a', '')).toEqual(['l1-a'])
+    expect(categoryPathFromFilters('l1-a', 'l2-a1')).toEqual(['l1-a', 'l2-a1'])
+  })
+})
 
 describe('isNearScrollBottom (REQ-UX-004 / TASK-WSC-305)', () => {
   it('returns true when remaining scroll distance is below threshold', () => {
@@ -134,7 +176,6 @@ describe('isNearScrollBottom (REQ-UX-004 / TASK-WSC-305)', () => {
   })
 
   it('uses default threshold of 80 (strict less-than)', () => {
-    // remain = 500 - 321 - 100 = 79 < 80 → true; remain = 80 → false
     expect(isNearScrollBottom({ scrollHeight: 500, scrollTop: 321, clientHeight: 100 })).toBe(true)
     expect(isNearScrollBottom({ scrollHeight: 500, scrollTop: 320, clientHeight: 100 })).toBe(false)
   })
@@ -143,9 +184,7 @@ describe('isNearScrollBottom (REQ-UX-004 / TASK-WSC-305)', () => {
 describe('auto-fill when list does not overflow (FIND-WSC-305-R1-001)', () => {
   it('needsMoreContentToScroll when content shorter than pane', () => {
     expect(needsMoreContentToScroll({ scrollHeight: 400, clientHeight: 740 })).toBe(true)
-    // overflow >= threshold → 已可滚，无需续载
     expect(needsMoreContentToScroll({ scrollHeight: 900, clientHeight: 740 })).toBe(false)
-    // overflow < threshold still needs fill（900-740 才够；780-740=40 < 80）
     expect(needsMoreContentToScroll({ scrollHeight: 780, clientHeight: 740 }, 80)).toBe(true)
   })
 
@@ -199,7 +238,7 @@ describe('auto-fill when list does not overflow (FIND-WSC-305-R1-001)', () => {
 
   it('fillUntilScrollable keeps loading until scrollable or !hasMore', async () => {
     let loaded = 10
-    let total = 30
+    const total = 30
     let scrollHeight = 400
     const clientHeight = 740
     const loadMore = vi.fn(async () => {
@@ -350,18 +389,172 @@ describe('useCatalogBrowse loadMore / hasMore (REQ-CAT-001 / REQ-UX-004)', () =>
     expect(browse.products.value.map((p) => p.id)).toEqual(['a', 'b', 'c'])
     expect(browse.hasMore.value).toBe(false)
   })
+})
 
-  it('applyFilters sends industryCategory query (not L2/L3 tree id)', async () => {
+describe('TASK-WSC-909 l3Counts (HOTFIX)', () => {
+  beforeEach(() => {
+    listProducts.mockReset()
+    listCategories.mockReset()
+    getProduct.mockReset()
+    listCategories.mockResolvedValue({ data: { items: [] as Category[] } })
+    getProduct.mockImplementation(async (id: string) => ({
+      data: product(id),
+    }))
+  })
+
+  it('909-l3-count-full-total: loadMore does not inflate section count', async () => {
+    const cats: Category[] = [{ id: 'l3a', name: '脱敏病历', level: 'L3', parentId: 'l2' }]
+    listCategories.mockResolvedValue({ data: { items: cats } })
+    const page1 = Array.from({ length: 2 }, (_, i) => product(`p${i + 1}`))
+    const page2 = [product('p3'), product('p4')]
+    const l3Counts = { l3a: 4 }
+    listProducts
+      .mockResolvedValueOnce({
+        data: { items: page1, total: 4, page: 1, pageSize: 2, l3Counts },
+      })
+      .mockResolvedValueOnce({
+        data: { items: page2, total: 4, page: 2, pageSize: 2, l3Counts },
+      })
+
+    const browse = useCatalogBrowse()
+    await browse.init()
+    expect(browse.products.value).toHaveLength(2)
+    expect(browse.sections.value[0]!.count).toBe(4)
+
+    await browse.loadMore()
+    expect(browse.products.value).toHaveLength(4)
+    expect(browse.sections.value[0]!.count).toBe(4)
+  })
+})
+
+describe('TASK-WSC-901 browse query (REQ-CAT-014 / REQ-CAT-019)', () => {
+  beforeEach(() => {
+    listProducts.mockReset()
+    listCategories.mockReset()
+    getProduct.mockReset()
+    listCategories.mockResolvedValue({ data: { items: sampleCategories } })
+    getProduct.mockImplementation(async (id: string) => ({
+      data: product(id),
+    }))
     listProducts.mockResolvedValue({
       data: { items: [product('a')], total: 1, page: 1, pageSize: 10 },
     })
+  })
+
+  it('901-no-industryCategory-query: listProducts never sends industryCategory or enterpriseName', async () => {
     const browse = useCatalogBrowse()
-    browse.filters.value.industryCategory = '建筑业'
+    browse.filters.value.supplierName = '测试企业'
+    browse.filters.value.l1CategoryId = 'l1-a'
+    browse.filters.value.l2CategoryId = 'l2-a1'
     await browse.applyFilters()
-    expect(listProducts).toHaveBeenCalledWith(
-      expect.objectContaining({ industryCategory: '建筑业', page: 1 }),
-    )
-    expect(listProducts.mock.calls[0]![0]).not.toHaveProperty('l3CategoryId')
+
+    const query = listProducts.mock.calls[0]![0] as Record<string, unknown>
+    expect(query).toMatchObject({
+      l1CategoryId: 'l1-a',
+      l2CategoryId: 'l2-a1',
+      supplierName: '测试企业',
+      page: 1,
+    })
+    expect(query).not.toHaveProperty('industryCategory')
+    expect(query).not.toHaveProperty('enterpriseName')
+  })
+
+  it.each([
+    { label: 'catalog', mine: false },
+    { label: 'mine', mine: true },
+  ])('901-no-industryCategory-query ($label mode): query omits industryCategory', async ({ mine }) => {
+    const browse = useCatalogBrowse({ mine })
+    browse.filters.value.l1CategoryId = 'l1-a'
+    await browse.applyFilters()
+    const query = listProducts.mock.calls.at(-1)![0] as Record<string, unknown>
+    expect(query).not.toHaveProperty('industryCategory')
+    expect(query).not.toHaveProperty('enterpriseName')
+    if (mine) {
+      expect(query).toMatchObject({ mine: true, l1CategoryId: 'l1-a' })
+    } else {
+      expect(query).not.toHaveProperty('mine')
+    }
+  })
+
+  it('901-cascader-l1-l2-clear: L1 only sends l1CategoryId without l2CategoryId', async () => {
+    const browse = useCatalogBrowse()
+    browse.applyCategoryPath(['l1-a'])
+    await vi.waitFor(() => expect(listProducts).toHaveBeenCalled())
+
+    const query = listProducts.mock.calls.at(-1)![0] as Record<string, unknown>
+    expect(query).toMatchObject({ l1CategoryId: 'l1-a', page: 1 })
+    expect(query).not.toHaveProperty('l2CategoryId')
+  })
+
+  it('901-cascader-l1-l2-clear: L1+L2 sends both category ids', async () => {
+    const browse = useCatalogBrowse()
+    browse.applyCategoryPath(['l1-a', 'l2-a1'])
+    await vi.waitFor(() => expect(listProducts).toHaveBeenCalled())
+
+    expect(listProducts.mock.calls.at(-1)![0]).toMatchObject({
+      l1CategoryId: 'l1-a',
+      l2CategoryId: 'l2-a1',
+    })
+  })
+
+  it('901-cascader-l1-l2-clear: clear removes l1 and l2 from query', async () => {
+    const browse = useCatalogBrowse()
+    browse.applyCategoryPath(['l1-a', 'l2-a1'])
+    await vi.waitFor(() => expect(listProducts).toHaveBeenCalledTimes(1))
+
+    browse.applyCategoryPath([])
+    await vi.waitFor(() => expect(listProducts).toHaveBeenCalledTimes(2))
+
+    const query = listProducts.mock.calls.at(-1)![0] as Record<string, unknown>
+    expect(query).not.toHaveProperty('l1CategoryId')
+    expect(query).not.toHaveProperty('l2CategoryId')
+  })
+
+  it.each([
+    { label: 'catalog', mine: false },
+    { label: 'mine', mine: true },
+  ])('901-cascader-l1-l2-clear ($label mode): cascader boundaries', async ({ mine }) => {
+    const browse = useCatalogBrowse({ mine })
+    browse.applyCategoryPath(['l1-b'])
+    await vi.waitFor(() => expect(listProducts).toHaveBeenCalled())
+
+    let query = listProducts.mock.calls.at(-1)![0] as Record<string, unknown>
+    expect(query).toMatchObject({ l1CategoryId: 'l1-b' })
+    expect(query).not.toHaveProperty('l2CategoryId')
+
+    browse.applyCategoryPath(['l1-b', 'l2-b1'])
+    await vi.waitFor(() => expect(listProducts.mock.calls.length).toBeGreaterThan(1))
+    query = listProducts.mock.calls.at(-1)![0] as Record<string, unknown>
+    expect(query).toMatchObject({ l1CategoryId: 'l1-b', l2CategoryId: 'l2-b1' })
+
+    browse.applyCategoryPath([])
+    await vi.waitFor(() => expect(listProducts.mock.calls.length).toBeGreaterThan(2))
+    query = listProducts.mock.calls.at(-1)![0] as Record<string, unknown>
+    expect(query).not.toHaveProperty('l1CategoryId')
+    expect(query).not.toHaveProperty('l2CategoryId')
+  })
+
+  it('supplierName still sent on applyFilters (REQ-CAT-012)', async () => {
+    const browse = useCatalogBrowse()
+    browse.filters.value.supplierName = 'Acme Corp'
+    await browse.applyFilters()
+    expect(listProducts.mock.calls[0]![0]).toMatchObject({ supplierName: 'Acme Corp' })
+  })
+
+  it('resetFilters clears category path and reloads', async () => {
+    const browse = useCatalogBrowse()
+    browse.filters.value.l1CategoryId = 'l1-a'
+    browse.filters.value.l2CategoryId = 'l2-a1'
+    browse.filters.value.supplierName = 'X'
+    await browse.resetFilters()
+
+    expect(browse.filters.value.l1CategoryId).toBe('')
+    expect(browse.filters.value.l2CategoryId).toBe('')
+    expect(browse.filters.value.supplierName).toBe('')
+    const query = listProducts.mock.calls.at(-1)![0] as Record<string, unknown>
+    expect(query).not.toHaveProperty('l1CategoryId')
+    expect(query).not.toHaveProperty('l2CategoryId')
+    expect(query).not.toHaveProperty('supplierName')
   })
 })
 

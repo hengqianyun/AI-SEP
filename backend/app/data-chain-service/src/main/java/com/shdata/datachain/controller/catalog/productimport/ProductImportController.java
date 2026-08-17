@@ -27,7 +27,7 @@ import com.shdata.datachain.service.catalog.productimport.ProductImportService;
 import org.springframework.web.multipart.MultipartFile;
 import com.shdata.datachain.service.catalog.productimport.ProductImportService;
 
-/** 批量导入 API — /catalog/products/import*（鉴权由 WriteAuthorizationInterceptor）。 */
+/** 批量导入 API — /catalog/products/import*（角色门禁由拦截器；ADMIN 本企业 / PROVIDER 可导入；actor 仅取会话）。 */
 @RestController
 @RequestMapping("/api/v1/catalog/products/import")
 public class ProductImportController {
@@ -63,7 +63,7 @@ public class ProductImportController {
     String correlationId = CorrelationIdSupport.resolve(request);
     SessionPrincipal principal = AuthController.currentPrincipal(request);
     String actor = principal == null ? "-" : principal.userId();
-    // file 缺失：请求级格式错误（非 stub 空成功）。SessionAuth 矩阵探测请带 multipart。
+    // 忽略 multipart/query 中的 enterpriseId；create_by 绑定会话 userId
     return service.importFile(file, actor, correlationId).toResponseEntity(correlationId);
   }
 

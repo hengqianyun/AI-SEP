@@ -1,10 +1,10 @@
-# wsc-contracts@2.2.0 — 错误码目录
+# wsc-contracts@2.3.3 — 错误码目录
 # 与 contracts/openapi/openapi.yaml 示例及统一响应包装一致
 # 继承 V1.1；V1.3 新增 ERR_IMPORT_TEMPLATE_UNSUPPORTED（旧模板/非 v0729 表头整文件拒绝）
 # V2.2：行业分类改为 industryCategory 门类枚举；ERR_CATEGORY_LEAF_REQUIRED 仅用于显式非法 L3 / 维护关联
 # V2.2.0（SNAP-WSC-005）：切角色禁用、用户管理冲突/404
 
-version: "2.2.0"
+version: "2.3.3"
 package: wsc-contracts
 
 codes:

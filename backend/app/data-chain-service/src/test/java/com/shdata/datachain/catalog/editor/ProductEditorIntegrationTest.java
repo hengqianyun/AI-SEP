@@ -531,6 +531,85 @@ class ProductEditorIntegrationTest {
         .andExpect(status().isNotFound());
   }
 
+  @Test
+  void audit_createBy_updateBy_ignoresClientBody_andPreservesCreator() throws Exception {
+    stubAttest(
+        "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "did:wsc:sim:audit");
+
+    MockHttpSession provider = login("provider", "demo");
+    MvcResult providerSession =
+        mockMvc.perform(get("/api/v1/auth/session").session(provider)).andExpect(status().isOk()).andReturn();
+    String providerId =
+        com.jayway.jsonpath.JsonPath.read(
+            providerSession.getResponse().getContentAsString(), "$.data.userId");
+
+    MvcResult created =
+        mockMvc
+            .perform(
+                post("/api/v1/catalog/products")
+                    .session(provider)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                          "productCode":"AUD-WSC-9091",
+                          "productName":"审计留档产品",
+                          "productType":"OTHER",
+                          "industryCategory":"卫生和社会工作",
+                          "createBy":"forged-creator",
+                          "updateBy":"forged-operator",
+                          "createByName":"伪造创建人",
+                          "updateByName":"伪造操作人"
+                        }
+                        """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.createBy").value(providerId))
+            .andExpect(jsonPath("$.data.updateBy").value(providerId))
+            .andExpect(jsonPath("$.data.createByName").value("演示提供方"))
+            .andExpect(jsonPath("$.data.updateByName").value("演示提供方"))
+            .andReturn();
+    String productId =
+        com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.data.id");
+
+    MockHttpSession admin = login("admin", "demo");
+    MvcResult adminSession =
+        mockMvc.perform(get("/api/v1/auth/session").session(admin)).andExpect(status().isOk()).andReturn();
+    String adminId =
+        com.jayway.jsonpath.JsonPath.read(
+            adminSession.getResponse().getContentAsString(), "$.data.userId");
+
+    mockMvc
+        .perform(
+            put("/api/v1/catalog/products/" + productId)
+                .session(admin)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "productCode":"AUD-WSC-9091",
+                      "productName":"审计留档产品-v2",
+                      "productType":"OTHER",
+                      "industryCategory":"卫生和社会工作",
+                      "createBy":"still-forged",
+                      "updateBy":"still-forged-op"
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.productName").value("审计留档产品-v2"))
+        .andExpect(jsonPath("$.data.createBy").value(providerId))
+        .andExpect(jsonPath("$.data.updateBy").value(adminId))
+        .andExpect(jsonPath("$.data.createByName").value("演示提供方"))
+        .andExpect(jsonPath("$.data.updateByName").value("演示管理员"));
+
+    mockMvc
+        .perform(get("/api/v1/catalog/products/" + productId).session(admin))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.createBy").value(providerId))
+        .andExpect(jsonPath("$.data.updateBy").value(adminId))
+        .andExpect(jsonPath("$.data.createByName").value("演示提供方"))
+        .andExpect(jsonPath("$.data.updateByName").value("演示管理员"));
+  }
+
   private void stubAttest(String hash, String did) {
     Mockito.when(attestationPort.attest(Mockito.any()))
         .thenAnswer(

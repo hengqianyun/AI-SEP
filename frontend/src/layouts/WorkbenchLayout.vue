@@ -3,7 +3,18 @@ import { computed, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/features/auth/store/authStore'
-import { canMaintainCatalog, canSeeMyProducts, canSeeMyMaintenance, canSeeMyMaintenance } from '@/features/auth/composables/useCanWrite'
+import {
+  canMaintainCatalog,
+  canSeeMyCatalog,
+  canSeeMyProducts,
+} from '@/features/auth/composables/useCanWrite'
+import { isDeepLinkAllowed } from '@/features/shell/deepLinkAccess'
+import {
+  ROUTE_CATALOG_BROWSE,
+  ROUTE_MY_PRODUCTS,
+  isCatalogGroupActive,
+  isNavActive,
+} from '@/features/shell/navSurfaces'
 
 const CATALOG_GROUP_OPEN_KEY = 'wsc.nav.catalogGroupOpen'
 
@@ -13,15 +24,13 @@ const route = useRoute()
 const router = useRouter()
 
 const catalogMaintenanceVisible = computed(() => canMaintainCatalog(role.value))
-/** 602���û������ ADMIN�������Ž���603 ���û��ˣ� */
+/** 602：用户管理仅 ADMIN（源码字面量保留，供既有 spec 扫描） */
 const userManageVisible = computed(() => role.value === 'ADMIN')
-/** 603���ҵ����ݲ�Ʒ�� PROVIDER */
+/** 603：我的数据产品 — ADMIN + PROVIDER */
 const myProductsVisible = computed(() => canSeeMyProducts(role.value))
-const myMaintenanceVisible = computed(() => canSeeMyMaintenance(role.value))
-const myMaintenanceVisible = computed(() => canSeeMyMaintenance(role.value))
-const myMaintenanceVisible = computed(() => canSeeMyMaintenance(role.value))
+const myCatalogVisible = computed(() => canSeeMyCatalog(role.value))
 
-/** һ��������Ŀ¼��չ��̬��sessionStorage �������䣨REQ-SHELL-001 / HOTFIX-SHELL-002�� */
+/** 一级「数据目录」展开态，sessionStorage 会话级持久（REQ-SHELL-001 / HOTFIX-SHELL-002） */
 function readCatalogGroupOpen(): boolean {
   try {
     const stored = sessionStorage.getItem(CATALOG_GROUP_OPEN_KEY)
@@ -49,64 +58,51 @@ function toggleCatalogGroup() {
 }
 
 const navOpen = [
-  { to: '/overview', label: '����', icon: 'overview' },
+  { to: '/overview', label: '总览', icon: 'overview' },
 ] as const
 
 const navClosed = [
-  { feature: 'registration', label: '���ݵǼ�', icon: 'registration' },
-  { feature: 'orders', label: '���׶���', icon: 'orders' },
-  { feature: 'connectors', label: '����������', icon: 'connectors' },
+  { feature: 'registration', label: '数据登记', icon: 'registration' },
+  { feature: 'orders', label: '交易订单', icon: 'orders' },
+  { feature: 'connectors', label: '连接器管理', icon: 'connectors' },
 ] as const
 
 const activePath = computed(() => route.path)
 
-/** ˫���棺д·���� from=mine �� meta.fromMine ʱ������ҵĲ�Ʒ��active��UX-002�� */
+/** 双表面：写路径带 from=mine 或 meta.fromMine 时高亮「我的数据产品」（UX-002） */
 const onMineSurface = computed(
   () =>
-    activePath.value === '/my-products' ||
-    activePath.value.startsWith('/my-products/') ||
-    route.query.from === 'mine' ||
-    route.meta.fromMine === true,
+    isNavActive(ROUTE_MY_PRODUCTS, activePath.value, route.query.from, route.meta.fromMine === true),
 )
 
-const onMaintenanceSurface = computed(() =>
-  activePath.value.startsWith('/catalog/maintenance'),
-)
-
-/** һ��������Ŀ¼������һ�ӱ��漤��ʱ���� */
-const catalogGroupActive = computed(
-  () =>
-    onMineSurface.value ||
-    onMaintenanceSurface.value ||
-    activePath.value === '/catalog' ||
-    activePath.value.startsWith('/catalog/'),
+const catalogGroupActive = computed(() =>
+  isCatalogGroupActive(activePath.value, route.query.from, route.meta.fromMine === true),
 )
 
 function isActive(path: string) {
-  if (path === '/catalog') {
-    if (onMaintenanceSurface.value) return false
-    if (onMineSurface.value) return false
-    return activePath.value === '/catalog' || activePath.value.startsWith('/catalog/')
-  }
-  if (path === '/catalog/maintenance') {
-    return onMaintenanceSurface.value
-  }
-  if (path === '/my-products') {
-    return onMineSurface.value
-  }
-  return activePath.value === path || activePath.value.startsWith(path + '/')
+  return isNavActive(path, activePath.value, route.query.from, route.meta.fromMine === true)
 }
 
 /**
- * REQ-RBAC-001 / HOTFIX-SHELL-002��USER������Ȩ��ɫ������Ŀ¼ά����ṹ���ɴ
- * ADMIN/PROVIDER �������ά��ҳ onMounted �ſ�˫���ա�
+ * REQ-SHELL-009：无权限深链结构不可达（USER 维护/我的目录/我的产品/用户管理；PROVIDER 无目录维护）。
+ * 页面 onMounted 可再做双保险；907 可扩 /my-catalog 页级 guard，不得删除 ADMIN 双入口。
  */
 watch(
   [() => route.path, role],
   () => {
-    if (!onMaintenanceSurface.value) return
-    if (canMaintainCatalog(role.value)) return
-    void router.replace('/catalog')
+    if (isDeepLinkAllowed(route.path, role.value)) return
+    void router.replace(ROUTE_CATALOG_BROWSE)
+  },
+  { immediate: true },
+)
+
+watch(
+  () => route.meta.title,
+  (title) => {
+    if (typeof document === 'undefined') return
+    if (typeof title === 'string' && title.trim()) {
+      document.title = title
+    }
   },
   { immediate: true },
 )
@@ -123,13 +119,13 @@ async function onLogout() {
 const roleLabel = computed(() => {
   switch (role.value) {
     case 'ADMIN':
-      return '����Ա'
+      return '管理员'
     case 'PROVIDER':
-      return '�����ṩ��'
+      return '数据提供方'
     case 'USER':
-      return '��ͨ�û�'
+      return '普通用户'
     default:
-      return '��'
+      return '—'
   }
 })
 </script>
@@ -147,11 +143,11 @@ const roleLabel = computed(() => {
         </div>
         <div class="sidebar-brand">
           <p class="brand-eyebrow">WORKSPACE CONSOLE</p>
-          <h1 class="brand-title">����˹���̨</h1>
+          <h1 class="brand-title">接入端工作台</h1>
         </div>
       </div>
 
-      <nav class="sidebar-menu" aria-label="������">
+      <nav class="sidebar-menu" aria-label="主导航">
         <RouterLink
           v-for="item in navOpen"
           :key="item.to"
@@ -168,17 +164,7 @@ const roleLabel = computed(() => {
           <span>{{ item.label }}</span>
         </RouterLink>
 
-              <RouterLink
-                v-if="myMaintenanceVisible"
-                to="/my-maintenance"
-                class="menu-item menu-item--sub"
-                :class="{ active: isActive('/my-maintenance') }"
-                data-testid="nav-my-maintenance"
-              >
-                <span>我的目录</span>
-              </RouterLink>
-
-        <!-- REQ-SHELL-001��һ��������Ŀ¼��������/չ�� -->
+        <!-- REQ-SHELL-009：一级「数据目录」可收起/展开 -->
         <div
           class="menu-group"
           data-testid="nav-catalog-group"
@@ -198,7 +184,7 @@ const roleLabel = computed(() => {
               <path d="M7 12h10" />
               <path d="M10 18h4" />
             </svg>
-            <span class="menu-group-title">����Ŀ¼</span>
+            <span class="menu-group-title">数据目录</span>
             <svg
               class="menu-group-chevron"
               :class="{ open: catalogGroupOpen }"
@@ -219,7 +205,7 @@ const roleLabel = computed(() => {
             id="nav-catalog-submenu"
             class="menu-sub"
             role="group"
-            aria-label="����Ŀ¼�Ӳ˵�"
+            aria-label="数据目录子菜单"
           >
             <RouterLink
               to="/catalog"
@@ -227,17 +213,17 @@ const roleLabel = computed(() => {
               :class="{ active: isActive('/catalog') }"
               data-testid="nav-catalog-browse"
             >
-              <span>ȫ������Ŀ¼</span>
+              <span>全链数据目录</span>
             </RouterLink>
 
             <RouterLink
-              v-if="catalogMaintenanceVisible"
-              to="/catalog/maintenance"
+              v-if="myCatalogVisible"
+              to="/my-catalog"
               class="menu-item menu-item--sub"
-              :class="{ active: isActive('/catalog/maintenance') }"
-              data-testid="nav-catalog-maintenance"
+              :class="{ active: isActive('/my-catalog') }"
+              data-testid="nav-my-catalog"
             >
-              <span>Ŀ¼ά��</span>
+              <span>我的目录</span>
             </RouterLink>
 
             <RouterLink
@@ -247,7 +233,17 @@ const roleLabel = computed(() => {
               :class="{ active: isActive('/my-products') }"
               data-testid="nav-my-products"
             >
-              <span>�ҵ����ݲ�Ʒ</span>
+              <span>我的数据产品</span>
+            </RouterLink>
+
+            <RouterLink
+              v-if="catalogMaintenanceVisible"
+              to="/catalog/maintenance"
+              class="menu-item menu-item--sub"
+              :class="{ active: isActive('/catalog/maintenance') }"
+              data-testid="nav-catalog-maintenance"
+            >
+              <span>目录维护</span>
             </RouterLink>
           </div>
         </div>
@@ -265,7 +261,7 @@ const roleLabel = computed(() => {
             <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
-          <span>�û�����</span>
+          <span>用户管理</span>
         </RouterLink>
 
         <button
@@ -292,16 +288,25 @@ const roleLabel = computed(() => {
             <line x1="12" y1="17" x2="12" y2="21" />
           </svg>
           <span class="menu-label">{{ item.label }}</span>
-          <span class="badge">δ����</span>
+          <span class="badge">未开放</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
-        <div class="company-card">
-          <h3>{{ enterpriseName || '��' }}</h3>
+        <div
+          class="company-card"
+          data-testid="sidebar-enterprise"
+          data-enterprise-readonly="true"
+        >
+          <h3 data-testid="sidebar-enterprise-name">{{ enterpriseName || '—' }}</h3>
+          <p
+            v-if="session?.enterpriseId"
+            class="enterprise-id"
+            data-testid="sidebar-enterprise-id"
+          >{{ session.enterpriseId }}</p>
           <p v-if="session" class="user-line">{{ session.displayName }}</p>
-          <p class="role-line" data-testid="session-role-label">��ɫ��{{ roleLabel }}</p>
-          <button type="button" class="logout" @click="onLogout">�˳���¼</button>
+          <p class="role-line" data-testid="session-role-label">角色：{{ roleLabel }}</p>
+          <button type="button" class="logout" @click="onLogout">退出登录</button>
         </div>
       </div>
     </aside>
@@ -527,6 +532,12 @@ const roleLabel = computed(() => {
   color: #fff;
 }
 
+.enterprise-id {
+  margin: 0;
+  font-size: 12px;
+  color: var(--sidebar-text-muted);
+}
+
 .user-line {
   margin: 0;
   font-size: 12px;
@@ -586,11 +597,3 @@ const roleLabel = computed(() => {
   }
 }
 </style>
-
-
-
-
-
-
-
-

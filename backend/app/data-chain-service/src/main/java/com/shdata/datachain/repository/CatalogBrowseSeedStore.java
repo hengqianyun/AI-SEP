@@ -5,14 +5,14 @@ import com.shdata.datachain.common.mapper.CatalogEntityMapper;
 import com.shdata.datachain.model.CatalogCategory;
 import com.shdata.datachain.model.CatalogProduct;
 import com.shdata.datachain.entity.DataProductEntity;
-import com.shdata.datachain.repository.IndustryCategoryRepository;
-import com.shdata.datachain.repository.DataProductRepository;
+import com.shdata.datachain.entity.SysUserEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -31,13 +31,33 @@ public class CatalogBrowseSeedStore implements ApplicationRunner {
 
     private final IndustryCategoryRepository categoryRepo;
     private final DataProductRepository productRepo;
+    private final SysUserRepository userRepo;
     private final AtomicInteger productSeq = new AtomicInteger(200);
     private final AtomicInteger categorySeq = new AtomicInteger(200);
 
+    /**
+     * 测试用两参构造（无用户仓储时审计展示回退 userId）。
+     *
+     * @param categoryRepo 分类仓储
+     * @param productRepo 产品仓储
+     */
     public CatalogBrowseSeedStore(IndustryCategoryRepository categoryRepo,
                                   DataProductRepository productRepo) {
+        this(categoryRepo, productRepo, null);
+    }
+
+    /**
+     * @param categoryRepo 分类仓储
+     * @param productRepo 产品仓储
+     * @param userRepo 用户仓储（解析创建人/操作人显示名；可为 null）
+     */
+    @Autowired
+    public CatalogBrowseSeedStore(IndustryCategoryRepository categoryRepo,
+                                  DataProductRepository productRepo,
+                                  SysUserRepository userRepo) {
         this.categoryRepo = categoryRepo;
         this.productRepo = productRepo;
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -278,16 +298,93 @@ public class CatalogBrowseSeedStore implements ApplicationRunner {
     /** 读取产品归属 create_by。 */
     @Transactional(readOnly = true)
     public Optional<String> findProductOwner(String productId) {
-        try {
-            long lid = Long.parseLong(productId);
-            return productRepo.findById(lid).map(DataProductEntity::getCreateBy);
-        } catch (NumberFormatException e) {
-            return productRepo.findAll().stream()
-                    .filter(p -> productId.equals(p.getProductCode()))
-                    .findFirst()
-                    .map(DataProductEntity::getCreateBy);
+        return findProductAudit(productId).map(ProductAudit::createBy);
+    }
+
+    /**
+     * 读取产品审计字段（create_by / update_by）。
+     *
+     * @param productId 产品 id 或 product_code
+     * @return 审计；产品不存在则 empty
+     */
+    @Transactional(readOnly = true)
+    public Optional<ProductAudit> findProductAudit(String productId) {
+        DataProductEntity entity = resolveEntity(productId);
+        if (entity == null) {
+            return Optional.empty();
+        }
+        String createBy = entity.getCreateBy() == null ? "" : entity.getCreateBy();
+        String updateBy = entity.getUpdateBy() == null ? "" : entity.getUpdateBy();
+        return Optional.of(new ProductAudit(createBy, updateBy));
+    }
+
+    /**
+     * 将创建人/操作人写入 API 视图。显示名优先，回退 userId。
+     *
+     * @param target 目标 map（产品 JSON）
+     * @param productId 产品 id
+     */
+    @Transactional(readOnly = true)
+    public void appendAuditFields(Map<String, Object> target, String productId) {
+        if (target == null || productId == null || productId.isBlank()) {
+            return;
+        }
+        Optional<ProductAudit> auditOpt = findProductAudit(productId);
+        if (auditOpt.isEmpty()) {
+            return;
+        }
+        ProductAudit audit = auditOpt.get();
+        putActor(target, "createBy", "createByName", audit.createBy());
+        putActor(target, "updateBy", "updateByName", audit.updateBy());
+    }
+
+    private void putActor(Map<String, Object> target, String idKey, String nameKey, String token) {
+        if (token == null || token.isBlank()) {
+            return;
+        }
+        target.put(idKey, token);
+        String label = actorLabel(token);
+        if (label != null && !label.isBlank()) {
+            target.put(nameKey, label);
         }
     }
+
+    /**
+     * 审计展示标签：显示名优先，回退 userId。
+     *
+     * @param userToken create_by / update_by 原值
+     * @return 非空标签；空 token 返回空串
+     */
+    @Transactional(readOnly = true)
+    public String actorLabel(String userToken) {
+        if (userToken == null || userToken.isBlank()) {
+            return "";
+        }
+        String token = userToken.trim();
+        if (userRepo == null) {
+            return token;
+        }
+        Optional<SysUserEntity> user = Optional.empty();
+        try {
+            long id = Long.parseLong(token);
+            user = userRepo.findById(id).filter(u -> !Boolean.TRUE.equals(u.getDelFlag()));
+        } catch (NumberFormatException ignored) {
+            // 非数字则按用户名解析
+        }
+        if (user.isEmpty()) {
+            user = userRepo.findByUsernameAndDelFlag(token.toLowerCase(), false);
+        }
+        if (user.isPresent()) {
+            String name = user.get().getDisplayName();
+            if (name != null && !name.isBlank()) {
+                return name.trim();
+            }
+        }
+        return token;
+    }
+
+    /** 产品审计快照。 */
+    public record ProductAudit(String createBy, String updateBy) {}
 
     /**
      * 是否为本人产品：create_by 非空且等于 actorUserId。

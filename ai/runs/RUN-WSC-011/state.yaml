@@ -1,60 +1,287 @@
-﻿# RUN-WSC-011 State
-runId: RUN-WSC-011
-currentNode: TASK_DISPATCH
-status: ACTIVE
-startedAt: 2026-08-14
-lastUpdated: 2026-08-14
-
-# 已完成节点
+﻿runId: RUN-WSC-011
+currentNode: COMPLETED
+round: 3
+status: COMPLETED
+blockedBy: []
+releasePaused: false
 completedNodes:
   - PRD_ANALYSIS
   - REQUIREMENT_REVIEW
   - PLAN_DRAFT
+  - PLAN_REVISE_R1
+  - PLAN_REVISE_R2
   - PLAN_REVIEW
   - PLAN_APPROVED
-
-# 当前任务
-currentTask:
-  taskId: TASK-WSC-901
-  status: READY
-  wave: A
-  requirements: [REQ-SHELL-009, REQ-SHELL-010]
-
-# 待执行任务
-pendingTasks:
-  - taskId: TASK-WSC-902
+  - INTEGRATION
+  - RELEASE_REVIEW
+  - COMPLETED
+kind: FEATURE
+basedOnRun: RUN-WSC-009
+scope: |
+  V1.6 目录筛选重构 / 座序图业务视图联动 / 我的目录 / 企业多管理员
+activeSnapshotId: SNAP-WSC-008
+snapshotStatus: APPROVED
+snapshotApprovedAt: 2026-08-17
+activePlanId: PLAN-WSC-8.3
+candidatePlanPath: planning/proposals/PLAN-WSC-8.3.md
+approvedPlanPath: planning/approved/PLAN-WSC-8.3.md
+previousPlanId: PLAN-WSC-8.2
+planStatus: APPROVED
+planType: APPROVED
+planReviewRound: 3
+planReviewConsensus: REACHED
+planReviewSummary: planning/reviews/wsc-8.1/round-3/SUMMARY.md
+prdPath: product/prd/wsc-v1.6-catalog-filter-ux.md
+contractsTarget: wsc-contracts@2.3.2
+activeWave: null
+activeTaskIds: []
+verifiedTaskIds:
+  - TASK-WSC-901
+  - TASK-WSC-902
+  - TASK-WSC-903
+  - TASK-WSC-904
+  - TASK-WSC-905
+  - TASK-WSC-906
+  - TASK-WSC-907
+  - TASK-WSC-908
+  - TASK-WSC-909
+  - TASK-WSC-910
+e2eEvidence: TESTRUN-WSC-E2E-V16
+e2eReportDir: tests/e2e/reports/p0-wsc-v1.6/
+taskStatus:
+  TASK-WSC-901:
+    status: VERIFIED
+    testDecision: PASS
+  TASK-WSC-902:
+    status: VERIFIED
+    testDecision: PASS
+  TASK-WSC-903:
+    status: VERIFIED
+    testerInstance: tester-wsc-903
+    testReport: ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-903.md
+    testDecision: PASS
+    securityReviewerR2Instance: security-reviewer-wsc-903-r2
+    securityReviewR2Report: ai/runs/RUN-WSC-011/reviews/SEC-REV-TASK-WSC-903-R2.md
+    securityReviewDecision: APPROVE
+    closedSecFinding: FIND-SEC-WSC-903-001
+    fixRound: 2
+    fixedSecFinding: FIND-SEC-WSC-903-001
+    actorInstance: developer-wsc-903-sec-r1
+    securityReviewerInstance: security-reviewer-wsc-903
+    securityReviewReport: ai/runs/RUN-WSC-011/reviews/SEC-REV-TASK-WSC-903.md
+    securityReviewR1Decision: REQUEST_CHANGES
+    priorActorInstance: developer-wsc-903-r2
+    r2ReviewerInstance: code-reviewer-wsc-903-r2
+    r2ReviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-903-R2.md
+    r2ReviewDecision: APPROVE
+    devReport: ai/runs/RUN-WSC-011/DEV-TASK-WSC-903.md
+    reviewerInstance: code-reviewer-wsc-903
+    reviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-903.md
+    reviewDecision: APPROVE
+    reviewRound: 2
+    closedFinding: FIND-WSC-903-R1-001
+  TASK-WSC-904:
+    status: VERIFIED
+    testerInstance: tester-wsc-904
+    testReport: ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-904.md
+    testDecision: PASS
+    migrationReviewerR2Instance: migration-reviewer-wsc-904-r2
+    migrationReviewR2Report: ai/runs/RUN-WSC-011/reviews/MIG-REV-TASK-WSC-904-R2.md
+    migrationReviewDecision: APPROVE
+    closedMigFinding: FIND-MIG-WSC-904-001
+    fixedMigFinding: FIND-MIG-WSC-904-001
+    actorInstance: developer-wsc-904-mig-r1
+    priorActorInstance: developer-wsc-904
+    migrationReviewerInstance: migration-reviewer-wsc-904
+    migrationReviewReport: ai/runs/RUN-WSC-011/reviews/MIG-REV-TASK-WSC-904.md
+    migrationReviewR1Decision: REQUEST_CHANGES
+    reviewerInstance: code-reviewer-wsc-904
+    reviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-904.md
+    reviewDecision: APPROVE
+    devReport: ai/runs/RUN-WSC-011/DEV-TASK-WSC-904.md
+    riskTags: [schema-migration, handles-pii, enterprise-model]
+  TASK-WSC-905:
+    status: VERIFIED
+    testerInstance: tester-wsc-905
+    testReport: ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-905.md
+    testDecision: PASS
+    securityReviewerInstance: security-reviewer-wsc-905
+    securityReviewReport: ai/runs/RUN-WSC-011/reviews/SEC-REV-TASK-WSC-905.md
+    securityReviewDecision: APPROVE
+    reviewerInstance: code-reviewer-wsc-905
+    reviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-905.md
+    reviewDecision: APPROVE
+    actorInstance: developer-wsc-905
+    devReport: ai/runs/RUN-WSC-011/DEV-TASK-WSC-905.md
+    riskTags: [rbac-breaking, data-isolation, enterprise-scope, auth-model-change]
+  TASK-WSC-906:
+    status: VERIFIED
+    testerInstance: tester-wsc-906
+    testReport: ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-906.md
+    testDecision: PASS
+    securityReviewerInstance: security-reviewer-wsc-906
+    securityReviewReport: ai/runs/RUN-WSC-011/reviews/SEC-REV-TASK-WSC-906.md
+    securityReviewDecision: APPROVE
+    reviewerInstance: code-reviewer-wsc-906
+    reviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-906.md
+    reviewDecision: APPROVE
+    actorInstance: developer-wsc-906
+    devReport: ai/runs/RUN-WSC-011/DEV-TASK-WSC-906.md
+    riskTags: [shell-nav, rbac-visibility, prelanding-reconcile, auth-model-change]
+  TASK-WSC-907:
+    status: VERIFIED
+    testerInstance: tester-wsc-907
+    testReport: ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-907.md
+    testDecision: PASS
+    r2ReviewerInstance: code-reviewer-wsc-907-r2
+    r2ReviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-907-R2.md
+    r2ReviewDecision: APPROVE
+    closedFinding: FIND-WSC-907-001
+    openP2: FIND-WSC-907-002
+    fixedFinding: FIND-WSC-907-001
+    reviewerInstance: code-reviewer-wsc-907
+    reviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-907.md
+    reviewDecision: APPROVE
+    reviewRound: 2
+    actorInstance: developer-wsc-907-r1
+    priorActorInstance: developer-wsc-907
+    devReport: ai/runs/RUN-WSC-011/DEV-TASK-WSC-907.md
+    riskTags: [maintenance-reuse, scope-isolation, enum-regression]
+  TASK-WSC-908:
+    status: VERIFIED
+    testerInstance: tester-wsc-908
+    testReport: ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-908.md
+    testDecision: PASS
+    evidenceId: TESTRUN-WSC-E2E-V16
+    reviewerInstance: code-reviewer-wsc-908
+    reviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-908.md
+    reviewDecision: APPROVE
+    reviewRound: 1
+    openP2Count: 2
+    actorInstance: developer-wsc-908
+    devReport: ai/runs/RUN-WSC-011/DEV-TASK-WSC-908.md
+    riskTags: [e2e-gate, release-evidence]
+  TASK-WSC-909:
+    status: VERIFIED
+    testDecision: PASS
+    actorInstance: developer-wsc-909
+    devReport: ai/runs/RUN-WSC-011/DEV-TASK-WSC-909.md
+    kind: HOTFIX
+    blocksRelease: true
+    brief: ai/runs/RUN-WSC-011/HOTFIX-TASK-WSC-909.md
+    reviewerInstance: code-reviewer-wsc-909
+    reviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-909.md
+    reviewDecision: APPROVE
+    reviewRound: 1
+    p0Count: 0
+    p1Count: 0
+    openP2Count: 2
+    openP2:
+      - FIND-WSC-909-001
+      - FIND-WSC-909-002
+    testerInstance: tester-wsc-909
+    testReport: ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-909.md
+  TASK-WSC-910:
+    status: VERIFIED
+    testDecision: PASS
+    actorInstance: developer-wsc-910-r1
+    priorActorInstance: developer-wsc-910
+    devReport: ai/runs/RUN-WSC-011/DEV-TASK-WSC-910.md
+    kind: HOTFIX
+    blocksRelease: true
+    brief: ai/runs/RUN-WSC-011/HOTFIX-TASK-WSC-910.md
+    reviewerInstance: code-reviewer-wsc-910
+    reviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-910.md
+    reviewDecision: REQUEST_CHANGES
+    reviewRound: 2
+    r2ReviewerInstance: code-reviewer-wsc-910-r2
+    r2ReviewReport: ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-910-R2.md
+    r2ReviewDecision: APPROVE
+    p0Count: 0
+    p1Count: 0
+    openP2Count: 1
+    closedFinding: FIND-WSC-910-001
+    openP2:
+      - FIND-WSC-910-002
+    fixRound: 1
+    testerInstance: tester-wsc-910
+    testReport: ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-910.md
+humanDecisions:
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
     wave: A
-    requirements: [REQ-CAT-014, REQ-CAT-015, REQ-CAT-016]
-  - taskId: TASK-WSC-903
+    taskIds: [TASK-WSC-901, TASK-WSC-902]
+    parallel: true
+    at: 2026-08-17T10:44:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
     wave: B
-    requirements: [REQ-CAT-017, REQ-USER-002]
-    dependsOn: [TASK-WSC-901]
-  - taskId: TASK-WSC-904
+    taskIds: [TASK-WSC-903]
+    at: 2026-08-17T11:06:00+08:00
+    utterance: 继续
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
     wave: B
-    requirements: [REQ-CAT-017, REQ-USER-002, REQ-CAT-020]
-    dependsOn: [TASK-WSC-903]
-  - taskId: TASK-WSC-905
+    taskIds: [TASK-WSC-904]
+    at: 2026-08-17T12:20:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
+    wave: B
+    taskIds: [TASK-WSC-905]
+    at: 2026-08-17T12:55:00+08:00
+    utterance: 继续
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
     wave: C
-    requirements: [REQ-CAT-017]
-    dependsOn: [TASK-WSC-903]
-  - taskId: TASK-WSC-906
-    wave: C
-    requirements: [REQ-CAT-018, REQ-CAT-019]
-    dependsOn: [TASK-WSC-903]
-  - taskId: TASK-WSC-907
+    taskIds: [TASK-WSC-906]
+    at: 2026-08-17T13:26:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
     wave: D
-    requirements: [REQ-USER-002, REQ-CAT-020]
-    dependsOn: [TASK-WSC-903, TASK-WSC-904]
-  - taskId: TASK-WSC-908
+    taskIds: [TASK-WSC-907]
+    at: 2026-08-17T13:56:30+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
     wave: E
-    requirements: [all]
-    dependsOn: [TASK-WSC-905, TASK-WSC-906, TASK-WSC-907]
-
-# 制品清单
-artifacts:
-  prd: product/prd/wsc-v1.6-catalog-filter-ux.md
-  snapshot: product/requirements/SNAP-WSC-008.md
-  plan: planning/approved/PLAN-WSC-8.1.md
-
-# 下一步动作
-nextAction: "调度TASK-WSC-901进入DEVELOPMENT阶段"
+    taskIds: [TASK-WSC-908]
+    at: 2026-08-17T14:41:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
+    wave: HOTFIX
+    taskIds: [TASK-WSC-909]
+    at: 2026-08-17T16:05:00+08:00
+    utterance: 确认
+  - identity: productOwner
+    action: CONFIRM_TASK_DISPATCH
+    planId: PLAN-WSC-8.3
+    wave: HOTFIX
+    taskIds: [TASK-WSC-910]
+    at: 2026-08-17T16:42:00+08:00
+    utterance: 确认
+  - identity: maintainer
+    action: APPROVE_RELEASE
+    planId: PLAN-WSC-8.3
+    snapshotId: SNAP-WSC-008
+    at: 2026-08-17T17:22:00+08:00
+    utterance: 批准发布
+    approvalId: APPR-WSC-RELEASE-011
+integrationReviewerInstance: integration-reviewer-wsc-011
+integrationReviewReport: planning/reviews/integration/REV-WSC-INTEGRATION-011.md
+integrationReviewDecision: APPROVE
+releaseApprovalId: APPR-WSC-RELEASE-011
+approvalsPath: ai/runs/RUN-WSC-011/approvals.yaml
+nextAction: null
+updatedAt: 2026-08-17T17:22:00+08:00

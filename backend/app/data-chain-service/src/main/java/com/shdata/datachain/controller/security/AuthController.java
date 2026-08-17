@@ -4,7 +4,7 @@ import com.shdata.datachain.common.constant.SessionKeys;
 import com.shdata.datachain.common.security.AuthAuditLogger;
 import com.shdata.datachain.common.support.ApiEnvelope;
 import com.shdata.datachain.common.support.CorrelationIdSupport;
-import com.shdata.datachain.common.support.SessionViews;
+import com.shdata.datachain.common.security.SessionContextSupport;
 import com.shdata.datachain.model.LoginRequest;
 import com.shdata.datachain.model.SessionPrincipal;
 import com.shdata.datachain.service.security.UserAccountService;
@@ -54,7 +54,8 @@ public class AuthController {
     HttpSession session = request.getSession(true);
     session.setAttribute(SessionKeys.PRINCIPAL, principal.get());
 
-    return ResponseEntity.ok(ApiEnvelope.ok(SessionViews.toMap(principal.get()), correlationId));
+    return ResponseEntity.ok(
+        ApiEnvelope.ok(SessionContextSupport.toMap(principal.get()), correlationId));
   }
 
   @GetMapping("/session")
@@ -64,7 +65,8 @@ public class AuthController {
     if (principal == null) {
       return unauthorized(correlationId, "未登录或会话已失效");
     }
-    return ResponseEntity.ok(ApiEnvelope.ok(SessionViews.toMap(principal), correlationId));
+    return ResponseEntity.ok(
+        ApiEnvelope.ok(SessionContextSupport.toMap(principal), correlationId));
   }
 
   @DeleteMapping("/session")

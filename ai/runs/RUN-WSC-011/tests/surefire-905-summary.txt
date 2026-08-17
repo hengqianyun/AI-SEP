@@ -1,0 +1,58 @@
+SUITE com.shdata.datachain.rbac.RbacMatrixTest tests=9 failures=0 errors=0 skipped=0 time=0
+  PASS userManage_onlyAdmin time=0
+  PASS productWrite_adminAndProvider_userForbidden time=0
+  PASS importReportGet_adminAndProvider time=0
+  PASS mineApi_adminAndProvider_userForbidden time=0
+  PASS productImport_adminAndProvider_userForbidden time=0
+  PASS catalogMaintenance_scopeAware_matchesSection31 time=0
+  PASS categoryWrite_onlyAdmin time=0
+  PASS catalogMaintenance_defaultAllowsAdminAndProvider time=0
+  PASS classify_importPathsPrecedeProducts time=0
+SUITE com.shdata.datachain.catalog.browse.EnterpriseScopeCatalogIntegrationTest tests=5 failures=0 errors=0 skipped=0 time=3.319
+  PASS user_mineWriteImportMaintenance_403 time=0.088
+  PASS mine_enterpriseScope_sameEnterpriseVisible_crossHidden time=0.395
+  PASS query_hasNoEnterpriseNameFilter time=0.087
+  PASS fullChain_crossEnterpriseParity_andIgnoresClientEnterpriseQuery time=0.258
+  PASS admin_writeOwnEnterprise200_crossAndEmpty403_providerForeign403 time=0.379
+SUITE com.shdata.datachain.catalog.maintenance.MaintenanceScopeIntegrationTest tests=3 failures=0 errors=0 skipped=0 time=2.034
+  PASS admin_scopeFullAndMyCatalog_200 time=0.085
+  PASS user_anyScope_403 time=0.081
+  PASS provider_scopeFull_403_myCatalog_200 time=0.086
+SUITE com.shdata.datachain.catalog.browse.ListProductsFilterSortIntegrationTest tests=2 failures=0 errors=0 skipped=0 time=2.621
+  PASS supplierName_fuzzyContains_separateFromQ time=0.108
+  PASS sort_uncategorizedLast_updatedAtDesc_crossPage time=0.229
+SUITE com.shdata.datachain.catalog.browse.CreateByOwnershipIntegrationTest tests=3 failures=0 errors=0 skipped=0 time=10.011
+  PASS mineTrue_listsOnlyOwnCreateBy time=0.457
+  PASS admin_productWriteAllowed_user_productWriteForbidden time=0.173
+  PASS provider_updateOwn_200_emptyAndOther_403 time=0.183
+SUITE com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest tests=8 failures=0 errors=0 skipped=0 time=2.88
+  PASS attestationFailure_noHalfProduct_noOrphanChain time=0.185
+  PASS delete_own_200_foreign_403_missing_404 time=0.113
+  PASS create_other_withContentDescription_version1 time=0.101
+  PASS create_dataset_report_roundTrip_andLegacyEndpointRead time=0.107
+  PASS create_api_endpointsConflict_keepsClientEndpoints time=0.095
+  PASS create_requiresIndustryCategory_andRejectsInvalidL3 time=0.08
+  PASS ordinaryUser_productWriteForbidden time=0.068
+  PASS update_incrementsVersion_oldReadable_conflictAndFormat time=0.094
+SUITE com.shdata.datachain.catalog.productimport.ProductImportIntegrationTest tests=11 failures=0 errors=0 skipped=0 time=2.584
+  PASS legacyTemplate_requestLevelReject_zeroWrites time=0.088
+  PASS oversize_requestLevelReject time=0.07
+  PASS admin_importOwnEnterprise_200 time=0.086
+  PASS partialSuccess_andAllFail_rowLevel time=0.106
+  PASS openapiCell_badText_rowFail_sharedFixture_endpoints time=0.101
+  PASS reportGet_forbiddenForUserAndUnauthenticated time=0.207
+  PASS ordinaryUser_importForbidden time=0.066
+  PASS formatInvalid_notMappedToTemplateUnsupported time=0.071
+  PASS fullSuccess_autoCode_searchableAndChained time=0.089
+  PASS categoryMismatch_andRequiredMissing_rowLevel time=0.086
+  PASS template_matchesV0729Columns_andAuthoritativeXlsx time=0.079
+SUITE com.shdata.datachain.catalog.maintenance.CatalogMaintenanceIntegrationTest tests=6 failures=0 errors=0 skipped=0 time=2.637
+  PASS batchAssociate_and_leafRequired time=0.097
+  PASS provider_batch_ownOk_foreignInFailures time=0.095
+  PASS pagination_pagePageSizeTotal time=0.08
+  PASS user_forbidden_maintenance time=0.073
+  PASS pending_to_maintained_singleAssociate time=0.104
+  PASS provider_listOnlyOwn_and_associateOwn200_other403 time=0.111
+TOTAL tests=47 failures=0 errors=0 skipped=0
+NAMED 905-mine-enterprise-scope -> method mine_enterpriseScope_sameEnterpriseVisible_crossHidden PASS
+NAMED 905-provider-maintenance-403 -> method provider_scopeFull_403_myCatalog_200 PASS

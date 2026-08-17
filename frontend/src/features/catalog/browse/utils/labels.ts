@@ -37,6 +37,14 @@ export const PUBLIC_DATA_OPTIONS = [
   { value: 'false', label: '不涉及公共数据' },
 ] as const
 
+/** REQ-CAT-014：Cascader 标签与占位（业务视图 → 业务大类） */
+export const BROWSE_CATEGORY_CASCADER_LABEL = '业务视图 / 业务大类'
+export const BROWSE_CATEGORY_CASCADER_PLACEHOLDER = '请选择业务视图 / 业务大类'
+export const BROWSE_L1_LABEL = '业务视图'
+export const BROWSE_L2_LABEL = '业务大类'
+export const BROWSE_SUPPLIER_NAME_LABEL = '企业名称'
+export const BROWSE_SUPPLIER_NAME_PLACEHOLDER = '按企业名称模糊搜索'
+
 export const CATALOG_EMPTY_MESSAGE = '未找到符合条件的数据产品，请调整筛选或搜索关键词'
 
 /** 我的数据产品空态（与公共目录可区分，UX-002） */

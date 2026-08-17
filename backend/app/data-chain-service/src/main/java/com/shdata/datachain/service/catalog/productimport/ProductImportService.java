@@ -31,7 +31,7 @@ import com.shdata.datachain.common.codec.ImportFileCodec;
 import com.shdata.datachain.repository.ImportReportStore;
 import com.shdata.datachain.repository.CatalogBrowseSeedStore;
 
-/** 同步批量导入：请求级拒绝 vs 行级结果；成功行经 ProductEditorService 写入并上链。 */
+/** 同步批量导入：请求级拒绝 vs 行级结果；成功行经 ProductEditorService 写入并上链（ADMIN 本企业 / PROVIDER）。 */
 @Service
 public class ProductImportService {
 

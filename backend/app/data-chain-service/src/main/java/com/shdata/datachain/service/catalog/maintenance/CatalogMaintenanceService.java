@@ -2,9 +2,12 @@ package com.shdata.datachain.service.catalog.maintenance;
 
 import com.shdata.datachain.common.exception.BusinessException;
 import com.shdata.datachain.common.response.ServiceResult;
+import com.shdata.datachain.common.security.EnterpriseProductScope;
+import com.shdata.datachain.common.security.RbacMatrix;
 import com.shdata.datachain.model.CatalogCategory;
 import com.shdata.datachain.model.CatalogProduct;
 import com.shdata.datachain.model.Role;
+import com.shdata.datachain.model.SessionPrincipal;
 import com.shdata.datachain.repository.CatalogBrowseSeedStore;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,18 +21,29 @@ import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 /**
- * 目录维护：列表筛选/分页、单条与批量挂载三级（REQ-CAT-007 / TASK-WSC-607）。
+ * 目录维护：列表筛选/分页、单条与批量挂载三级（REQ-CAT-007 / REQ-CAT-017 / TASK-WSC-907）。
  *
- * <p>维护状态：有有效 {@code l3CategoryId} → MAINTAINED，否则 PENDING。
- * ADMIN 全量；PROVIDER 仅 {@code create_by=本人}（对齐产品写隔离）。
+ * <p>Tips：
+ * <ul>
+ *   <li>{@link #list} — {@code scope=full} ADMIN 全平台；{@code myCatalog} ADMIN 本企业 / PROVIDER 本人 create_by</li>
+ *   <li>本企业判定复用 {@link EnterpriseProductScope}（create_by → sys_user.enterprise_id）</li>
+ *   <li>维护状态：有有效 {@code l3CategoryId} → MAINTAINED，否则 PENDING</li>
+ * </ul>
  */
 @Service
 public class CatalogMaintenanceService {
 
   private final CatalogBrowseSeedStore catalog;
+  private final EnterpriseProductScope enterpriseScope;
 
-  public CatalogMaintenanceService(CatalogBrowseSeedStore catalog) {
+  /**
+   * @param catalog 目录存储
+   * @param enterpriseScope 本企业产品判定（§3.2）
+   */
+  public CatalogMaintenanceService(
+      CatalogBrowseSeedStore catalog, EnterpriseProductScope enterpriseScope) {
     this.catalog = catalog;
+    this.enterpriseScope = enterpriseScope;
   }
 
   /** 演示用待关联条目（不改 browse seed 源码；仅 upsert 缺三级产品）。 */
@@ -52,8 +66,8 @@ public class CatalogMaintenanceService {
    * @param l3CategoryId 三级分类筛选（可选）
    * @param page         页码（1-based）
    * @param pageSize     每页条数（≤100）
-   * @param actorRole    会话角色
-   * @param actorUserId  会话用户 ID（PROVIDER 时用于 create_by 过滤）
+   * @param actor        会话主体（scope 仅信此对象的企业/角色，忽略客户端 enterpriseId）
+   * @param scope        {@code full} / {@code myCatalog}；空则遗留默认
    * @return 分页结果
    */
   public ServiceResult list(
@@ -63,17 +77,13 @@ public class CatalogMaintenanceService {
       String l3CategoryId,
       int page,
       int pageSize,
-      Role actorRole,
-      String actorUserId) {
+      SessionPrincipal actor,
+      String scope) {
     String statusNorm = normalizeStatus(status);
     int safePage = Math.max(page, 1);
     int safeSize = Math.min(Math.max(pageSize, 1), 100);
 
-    // PROVIDER 仅本人产品；ADMIN 全量
-    List<CatalogProduct> source =
-        actorRole == Role.PROVIDER
-            ? catalog.productsOwnedBy(actorUserId)
-            : catalog.products();
+    List<CatalogProduct> source = sourceProducts(actor, scope);
 
     List<CatalogProduct> filtered =
         source.stream()
@@ -100,17 +110,18 @@ public class CatalogMaintenanceService {
   /**
    * 将单条产品挂载到指定三级分类。
    *
-   * @param productId   产品 ID
-   * @param body        请求体，须含 {@code l3CategoryId}
-   * @param actorRole   会话角色
-   * @param actorUserId 会话用户 ID
+   * @param productId 产品 ID
+   * @param body      请求体，须含 {@code l3CategoryId}
+   * @param actor     会话主体
+   * @param scope     {@code full} / {@code myCatalog}
    * @return 挂载后的产品条目
    */
   public ServiceResult associate(
-      String productId, Map<String, Object> body, Role actorRole, String actorUserId) {
+      String productId, Map<String, Object> body, SessionPrincipal actor, String scope) {
     try {
-      requireOwnershipIfProvider(productId, actorRole, actorUserId);
+      requireWritable(productId, actor, scope);
       String l3Id = requireL3Id(body);
+      String actorUserId = actor == null ? "-" : actor.userId();
       CatalogProduct updated = applyAssociate(productId, l3Id, actorUserId);
       return ServiceResult.ok(toEntry(updated));
     } catch (BusinessException ex) {
@@ -122,13 +133,13 @@ public class CatalogMaintenanceService {
    * 批量将多产品挂载到同一三级分类。
    * <p>逐条处理：单条失败不影响其他产品，最终返回成功数与失败明细。</p>
    *
-   * @param body        请求体，须含 {@code productIds} 列表和 {@code l3CategoryId}
-   * @param actorRole   会话角色
-   * @param actorUserId 会话用户 ID
+   * @param body  请求体，须含 {@code productIds} 列表和 {@code l3CategoryId}
+   * @param actor 会话主体
+   * @param scope {@code full} / {@code myCatalog}
    * @return 含 successCount/failureCount/failures 的结果
    */
   public ServiceResult batchAssociate(
-      Map<String, Object> body, Role actorRole, String actorUserId) {
+      Map<String, Object> body, SessionPrincipal actor, String scope) {
     if (body == null) {
       return ServiceResult.fail(400, "ERR_VALIDATION", "请求体不能为空", null);
     }
@@ -155,7 +166,8 @@ public class CatalogMaintenanceService {
         continue;
       }
       try {
-        requireOwnershipIfProvider(productId, actorRole, actorUserId);
+        requireWritable(productId, actor, scope);
+        String actorUserId = actor == null ? "-" : actor.userId();
         applyAssociate(productId, l3Id, actorUserId);
         success++;
       } catch (BusinessException ex) {
@@ -175,21 +187,70 @@ public class CatalogMaintenanceService {
   }
 
   /**
-   * PROVIDER 只能维护本人 create_by 产品；空/异主 → 403；不存在 → 404。
-   * ADMIN 跳过归属校验。
+   * 按角色与 scope 判定是否可维护该产品。
+   *
+   * <p>PROVIDER：仅本人 create_by。ADMIN + {@code myCatalog}：仅本企业。ADMIN + full/缺省：全平台。
+   * 空/缺失 create_by 在受限 scope 下 → 403。不存在 → 404。
+   *
+   * @param productId 产品 id 或编码
+   * @param actor     会话主体
+   * @param scope     维护 scope
    */
-  private void requireOwnershipIfProvider(String productId, Role actorRole, String actorUserId) {
+  private void requireWritable(String productId, SessionPrincipal actor, String scope) {
     Optional<CatalogProduct> existing = catalog.findProduct(productId);
     if (existing.isEmpty()) {
       throw new BusinessException(404, "404", "产品不存在", null);
     }
-    if (actorRole != Role.PROVIDER) {
+    Role role = actor == null ? null : actor.role();
+    if (role == Role.PROVIDER) {
+      String actorUserId = actor.userId();
+      if (!catalog.isOwnedBy(productId, actorUserId)) {
+        throw new BusinessException(403, "ERR_FORBIDDEN", "只能维护本人创建的产品", null);
+      }
       return;
     }
-    // SNAP-WSC-005 / TASK-WSC-607：空/缺失/异主 create_by 一律 403，禁止 PROVIDER 冒领
-    if (!catalog.isOwnedBy(productId, actorUserId)) {
-      throw new BusinessException(403, "ERR_FORBIDDEN", "只能维护本人创建的产品", null);
+    if (role == Role.ADMIN && isMyCatalogScope(scope)) {
+      if (!enterpriseScope.isProductInEnterprise(productId, actor.enterpriseId())) {
+        throw new BusinessException(403, "ERR_FORBIDDEN", "只能维护本企业产品", null);
+      }
     }
+  }
+
+  /**
+   * 按会话角色与 scope 选择列表源。
+   *
+   * <p>PROVIDER 一律本人 create_by；ADMIN {@code myCatalog} 按本企业；其余 ADMIN 全平台。
+   *
+   * @param actor 会话主体
+   * @param scope {@code full} / {@code myCatalog} / 空
+   * @return 未分页的源列表
+   */
+  private List<CatalogProduct> sourceProducts(SessionPrincipal actor, String scope) {
+    Role role = actor == null ? null : actor.role();
+    if (role == Role.PROVIDER) {
+      return catalog.productsOwnedBy(actor.userId());
+    }
+    if (role == Role.ADMIN && isMyCatalogScope(scope)) {
+      String enterpriseId = actor.enterpriseId();
+      return catalog.products().stream()
+          .filter(
+              p -> {
+                String createBy = catalog.findProductOwner(p.id()).orElse("");
+                return enterpriseScope.matchesMineEnterprise(createBy, enterpriseId);
+              })
+          .collect(Collectors.toList());
+    }
+    return catalog.products();
+  }
+
+  /**
+   * 是否为我的目录 scope（大小写敏感，与契约 enum 一致）。
+   *
+   * @param scope query scope
+   * @return true 当且仅当 myCatalog
+   */
+  private static boolean isMyCatalogScope(String scope) {
+    return scope != null && RbacMatrix.MAINTENANCE_SCOPE_MY_CATALOG.equals(scope.trim());
   }
 
   private CatalogProduct applyAssociate(String productId, String l3Id, String actorUserId) {

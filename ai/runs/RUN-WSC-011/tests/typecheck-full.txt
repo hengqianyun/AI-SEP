@@ -1,0 +1,9 @@
+> data-chain-static@0.1.0 typecheck C:\WorkSpace\AI-SEP\frontend
+> vue-tsc --noEmit -p tsconfig.json --pretty false
+
+src/layouts/WorkbenchLayout.vue(6,48): error TS2300: Duplicate identifier 'canSeeMyMaintenance'.
+src/layouts/WorkbenchLayout.vue(6,69): error TS2300: Duplicate identifier 'canSeeMyMaintenance'.
+src/layouts/WorkbenchLayout.vue(20,7): error TS2451: Cannot redeclare block-scoped variable 'myMaintenanceVisible'.
+src/layouts/WorkbenchLayout.vue(21,7): error TS2451: Cannot redeclare block-scoped variable 'myMaintenanceVisible'.
+src/layouts/WorkbenchLayout.vue(22,7): error TS2451: Cannot redeclare block-scoped variable 'myMaintenanceVisible'.
+ ELIFECYCLE  Command failed with exit code 2.

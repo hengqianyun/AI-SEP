@@ -27,7 +27,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 管理员用户管理 API（REQ-USER-001）。响应永不含 password / passwordHash。
+ * 管理员用户管理 API（REQ-USER-001 / REQ-USER-002）。响应永不含 password / passwordHash。
+ * 创建用户可指定 {@code enterpriseId}，缺省继承操作者企业。
  */
 @RestController
 @RequestMapping("/api/v1/admin/users")
@@ -70,8 +71,10 @@ public class AdminUserController {
                             body.password(),
                             body.displayName(),
                             role,
+                            body.enterpriseId(),
                             body.enterpriseName(),
-                            principal.userId());
+                            principal.userId(),
+                            principal.enterpriseId());
             return ResponseEntity.ok(ApiEnvelope.ok(toUserMap(created), correlationId));
         } catch (BusinessException ex) {
             return ResponseEntity.status(ex.httpStatus())
@@ -103,6 +106,7 @@ public class AdminUserController {
                             id,
                             body.displayName(),
                             body.role(),
+                            body.enterpriseId(),
                             body.enterpriseName(),
                             body.password(),
                             body.deleted(),
@@ -172,6 +176,7 @@ public class AdminUserController {
         m.put("username", u.username());
         m.put("displayName", u.displayName());
         m.put("role", u.role() == null ? null : u.role().name());
+        m.put("enterpriseId", u.enterpriseId());
         m.put("enterpriseName", u.enterpriseName());
         m.put("deleted", u.deleted());
         if (u.createdAt() != null) {

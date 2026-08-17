@@ -1,0 +1,33 @@
+# RUN-WSC-011 批准记录
+# 人类决策原文落盘；Orchestrator 不得伪造。
+
+approvals:
+  - id: APPR-WSC-RELEASE-011
+    runId: RUN-WSC-011
+    planId: PLAN-WSC-8.3
+    snapshotId: SNAP-WSC-008
+    identity: maintainer
+    action: APPROVE_RELEASE
+    decision: APPROVE
+    decidedAt: 2026-08-17T17:22:00+08:00
+    source: chat
+    utterance: 批准发布
+    scope: feature-package
+    basedOn:
+      - product/requirements/SNAP-WSC-008.md
+      - planning/approved/PLAN-WSC-8.3.md
+      - planning/reviews/integration/REV-WSC-INTEGRATION-011.md
+      - ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-908.md
+      - TESTRUN-WSC-E2E-V16
+      - ai/runs/RUN-WSC-011/HOTFIX-TASK-WSC-909.md
+      - ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-909.md
+      - ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-909.md
+      - ai/runs/RUN-WSC-011/HOTFIX-TASK-WSC-910.md
+      - ai/runs/RUN-WSC-011/reviews/REV-TASK-WSC-910-R2.md
+      - ai/runs/RUN-WSC-011/tests/TESTRUN-TASK-WSC-910.md
+    notes: |
+      V1.6：目录筛选重构、座序图业务视图、我的目录、企业多管理员。
+      契约实际冻在 wsc-contracts@2.3.3（state.contractsTarget 仍写 2.3.2，整合审查已记录分叉）。
+      HOTFIX-909：座序图标题居中、L3 全集 count、产品创建人/操作人留档。
+      HOTFIX-910：目录维护/我的目录分页 pageSize 选择（10/20/50/100）。
+      非阻塞 P2：FIND-WSC-909-001、FIND-WSC-909-002、FIND-WSC-910-002。

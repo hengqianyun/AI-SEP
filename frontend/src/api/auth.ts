@@ -1,6 +1,6 @@
 /**
- * Auth API — 对齐 contracts/openapi (wsc-contracts@2.2.0)
- * LoginRequest 无 role；POST /auth/session/role 始终 410 + ERR_ROLE_SWITCH_DISABLED。
+ * Auth API — 对齐 contracts/openapi (wsc-contracts@2.3.3)
+ * LoginRequest 无 role；Session 必填 enterpriseId+enterpriseName；POST /auth/session/role 始终 410。
  */
 import { apiRequest } from './client'
 
@@ -10,6 +10,8 @@ export type Session = {
   userId: string
   displayName: string
   role: Role
+  /** 企业 ID；mine/myCatalog/写 scope 单一真源（REQ-USER-002）；904 落地前可能缺失 */
+  enterpriseId?: string
   enterpriseName?: string
 }
 

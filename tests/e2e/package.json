@@ -6,7 +6,8 @@
     "test": "playwright test",
     "test:p0": "playwright test p0-wsc.spec.ts",
     "test:p0-v13": "playwright test specs/p0-wsc-v1.3.spec.ts --config=playwright.config.ts",
-    "test:p0-v14": "playwright test specs/p0-wsc-v1.4.spec.ts --config=playwright.config.ts"
+    "test:p0-v14": "playwright test specs/p0-wsc-v1.4.spec.ts --config=playwright.config.ts",
+    "test:p0-v16": "playwright test specs/p0-wsc-v1.6.spec.ts --config=playwright.v16.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1"

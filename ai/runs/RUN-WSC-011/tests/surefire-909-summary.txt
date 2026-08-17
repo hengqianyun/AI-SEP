@@ -1,0 +1,19 @@
+﻿===== TEST-com.shdata.datachain.catalog.browse.ListProductsFilterSortIntegrationTest.xml =====
+name=com.shdata.datachain.catalog.browse.ListProductsFilterSortIntegrationTest tests=3 failures=0 errors=0 skipped=0 time=15.365
+  supplierName_fuzzyContains_separateFromQ  time=0.966  PASS
+  l3Counts_fullTotal_independentOfPageSize  time=0.475  PASS
+  sort_uncategorizedLast_updatedAtDesc_crossPage  time=0.453  PASS
+
+===== TEST-com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest.xml =====
+name=com.shdata.datachain.catalog.editor.ProductEditorIntegrationTest tests=9 failures=0 errors=0 skipped=0 time=6.547
+  attestationFailure_noHalfProduct_noOrphanChain  time=0.306  PASS
+  delete_own_200_foreign_403_missing_404  time=0.189  PASS
+  audit_createBy_updateBy_ignoresClientBody_andPreservesCreator  time=0.261  PASS
+  create_other_withContentDescription_version1  time=0.138  PASS
+  create_dataset_report_roundTrip_andLegacyEndpointRead  time=0.156  PASS
+  create_api_endpointsConflict_keepsClientEndpoints  time=0.136  PASS
+  create_requiresIndustryCategory_andRejectsInvalidL3  time=0.141  PASS
+  ordinaryUser_productWriteForbidden  time=0.107  PASS
+  update_incrementsVersion_oldReadable_conflictAndFormat  time=0.175  PASS
+
+

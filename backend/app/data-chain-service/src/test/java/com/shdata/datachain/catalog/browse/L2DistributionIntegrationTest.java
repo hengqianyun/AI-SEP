@@ -144,6 +144,140 @@ class L2DistributionIntegrationTest {
     assertFalse(foundOnBrowse, "l2-distribution must not remain on CatalogBrowseController");
   }
 
+  @Test
+  void l1CategoryId_filtersToMatchingL1Only() throws Exception {
+    seed("L2-EMR-0001", "cat-l2-emr", "cat-l1-health", "cat-l3-emr-desense");
+    seed("L2-EMR-0002", "cat-l2-emr", "cat-l1-health", "cat-l3-emr-desense");
+    seed("L2-IMG-0001", "cat-l2-imaging", "cat-l1-health", "cat-l3-img-ct");
+    seed("L2-CRD-0001", "cat-l2-credit", "cat-l1-finance", "cat-l3-credit-score");
+
+    MockHttpSession session = login("user", "demo");
+    mockMvc
+        .perform(
+            get("/api/v1/catalog/l2-distribution")
+                .param("l1CategoryId", "cat-l1-health")
+                .session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.code").value("0"))
+        .andExpect(jsonPath("$.data.totalProducts").value(3))
+        .andExpect(jsonPath("$.data.items.length()").value(2))
+        .andExpect(jsonPath("$.data.items[0].code").value("cat-l2-emr"))
+        .andExpect(jsonPath("$.data.items[0].count").value(2))
+        .andExpect(jsonPath("$.data.items[1].code").value("cat-l2-imaging"))
+        .andExpect(jsonPath("$.data.items[1].count").value(1));
+  }
+
+  @Test
+  void l1CategoryId_totalProductsMatchesL1Subset() throws Exception {
+    seed("L2-EMR-0001", "cat-l2-emr", "cat-l1-health", "cat-l3-emr-desense");
+    seed("L2-NOL2-0001", null, "cat-l1-health", null);
+    seed("L2-CRD-0001", "cat-l2-credit", "cat-l1-finance", "cat-l3-credit-score");
+
+    MockHttpSession session = login("user", "demo");
+    MvcResult result =
+        mockMvc
+            .perform(
+                get("/api/v1/catalog/l2-distribution")
+                    .param("l1CategoryId", "cat-l1-health")
+                    .session(session))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.totalProducts").value(2))
+            .andReturn();
+
+    int total =
+        JsonPath.read(result.getResponse().getContentAsString(), "$.data.totalProducts");
+    List<Integer> counts =
+        JsonPath.read(result.getResponse().getContentAsString(), "$.data.items[*].count");
+    int cardSum = counts.stream().mapToInt(Integer::intValue).sum();
+    assertTrue(total >= cardSum, "totalProducts includes products without L2 in L1");
+    assertEquals(2, total);
+    assertEquals(1, cardSum);
+  }
+
+  @Test
+  void crossEnterpriseParity_adminAndUserSameFullChainResult() throws Exception {
+    seed("L2-EMR-0001", "cat-l2-emr", "cat-l1-health", "cat-l3-emr-desense");
+    seed("L2-CRD-0001", "cat-l2-credit", "cat-l1-finance", "cat-l3-credit-score");
+
+    MockHttpSession userSession = login("user", "demo");
+    MockHttpSession adminSession = login("admin", "demo");
+
+    MvcResult userAll =
+        mockMvc
+            .perform(get("/api/v1/catalog/l2-distribution").session(userSession))
+            .andExpect(status().isOk())
+            .andReturn();
+    MvcResult adminAll =
+        mockMvc
+            .perform(get("/api/v1/catalog/l2-distribution").session(adminSession))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    assertDistributionDataEqual(userAll, adminAll, "full-chain distribution must not vary by role/enterprise session");
+
+    MvcResult userL1 =
+        mockMvc
+            .perform(
+                get("/api/v1/catalog/l2-distribution")
+                    .param("l1CategoryId", "cat-l1-health")
+                    .session(userSession))
+            .andExpect(status().isOk())
+            .andReturn();
+    MvcResult adminL1 =
+        mockMvc
+            .perform(
+                get("/api/v1/catalog/l2-distribution")
+                    .param("l1CategoryId", "cat-l1-health")
+                    .session(adminSession))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    assertDistributionDataEqual(
+        userL1, adminL1, "L1-filtered distribution must not vary by role/enterprise session");
+  }
+
+  @Test
+  void noEnterpriseScopeParam_responseUnchanged() throws Exception {
+    seed("L2-EMR-0001", "cat-l2-emr", "cat-l1-health", "cat-l3-emr-desense");
+
+    MockHttpSession session = login("user", "demo");
+    MvcResult baseline =
+        mockMvc
+            .perform(get("/api/v1/catalog/l2-distribution").session(session))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    MvcResult withEnterpriseParam =
+        mockMvc
+            .perform(
+                get("/api/v1/catalog/l2-distribution")
+                    .param("enterpriseId", "999")
+                    .param("enterpriseName", "篡改企业")
+                    .session(session))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    assertDistributionDataEqual(
+        baseline,
+        withEnterpriseParam,
+        "enterprise query params must not filter l2-distribution");
+    assertFalse(
+        withEnterpriseParam.getResponse().getContentAsString().contains("enterprise"),
+        "response must not expose enterprise filter fields");
+  }
+
+  private static void assertDistributionDataEqual(MvcResult a, MvcResult b, String message)
+      throws Exception {
+    String bodyA = a.getResponse().getContentAsString();
+    String bodyB = b.getResponse().getContentAsString();
+    Object totalA = JsonPath.read(bodyA, "$.data.totalProducts");
+    Object totalB = JsonPath.read(bodyB, "$.data.totalProducts");
+    assertEquals(totalA, totalB, message + " (totalProducts)");
+    Object itemsA = JsonPath.read(bodyA, "$.data.items");
+    Object itemsB = JsonPath.read(bodyB, "$.data.items");
+    assertEquals(itemsA, itemsB, message + " (items)");
+  }
+
   private static boolean matchesL2Distribution(RequestMappingInfo info) {
     if (info.getPathPatternsCondition() != null) {
       return info.getPathPatternsCondition().getPatterns().stream()
