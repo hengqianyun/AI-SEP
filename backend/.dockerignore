@@ -4,6 +4,9 @@
 .vscode
 .claude
 **/target
+!app/data-chain-service/target
+app/data-chain-service/target/*
+!app/data-chain-service/target/data-chain-service-*.jar
 logs
 *.log
 deploy/.env

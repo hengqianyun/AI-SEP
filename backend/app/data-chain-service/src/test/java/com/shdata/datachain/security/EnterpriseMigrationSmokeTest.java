@@ -35,7 +35,7 @@ class EnterpriseMigrationSmokeTest {
             "INSERT INTO sys_user (username, password_hash, display_name, role, enterprise_name, create_by, update_by) "
                 + "VALUES ('old_unknown', 'x', '未知', 'USER', '未知公司', 'system', 'system')");
       }
-      runClasspathSql(conn, "sql/migration/V7__create_sys_enterprise_and_user_enterprise_id.sql");
+      runClasspathSql(conn, "sql/migration/V9__create_sys_enterprise_and_user_enterprise_id.sql");
 
       long demoId = queryLong(conn, "SELECT id FROM sys_enterprise WHERE code='DEMO'");
       long unassignedId = queryLong(conn, "SELECT id FROM sys_enterprise WHERE code='UNASSIGNED'");

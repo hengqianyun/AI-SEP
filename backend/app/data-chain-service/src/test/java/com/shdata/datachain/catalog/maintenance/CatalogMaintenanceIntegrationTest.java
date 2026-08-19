@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.jayway.jsonpath.JsonPath;
 import com.shdata.datachain.common.port.ChainAttestationPort;
 import com.shdata.datachain.repository.CatalogBrowseSeedStore;
+import com.shdata.datachain.repository.InMemoryChainStore;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import org.springframework.test.web.servlet.MvcResult;
       "spring.jpa.hibernate.ddl-auto=create-drop",
       "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
       "spring.flyway.enabled=false",
+      "chainmp.enabled=false",
       "spring.autoconfigure.exclude="
           + "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,"
           + "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"
@@ -44,6 +46,7 @@ class CatalogMaintenanceIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
   @Autowired private CatalogBrowseSeedStore catalog;
+  @Autowired private InMemoryChainStore chainStore;
   @MockBean private ChainAttestationPort attestationPort;
 
   @Test
@@ -67,6 +70,9 @@ class CatalogMaintenanceIntegrationTest {
         .andExpect(jsonPath("$.data.maintenanceStatus").value("MAINTAINED"))
         .andExpect(jsonPath("$.data.l3CategoryId").value("cat-l3-txn-retail"))
         .andExpect(jsonPath("$.data.categoryPath").isNotEmpty());
+
+    org.assertj.core.api.Assertions.assertThat(chainStore.listByProductId("PEND-0001"))
+        .hasSize(1);
 
     mockMvc
         .perform(get("/api/v1/catalog/maintenance/entries?status=PENDING").session(admin))
@@ -221,6 +227,11 @@ class CatalogMaintenanceIntegrationTest {
         .andExpect(jsonPath("$.data.failureCount").value(1))
         .andExpect(jsonPath("$.data.failures[0].productId").value(foreignId))
         .andExpect(jsonPath("$.data.failures[0].reasonCode").value("ERR_FORBIDDEN"));
+
+    org.assertj.core.api.Assertions.assertThat(chainStore.listByProductId("MAINT-BAT-6074"))
+        .hasSize(2);
+    org.assertj.core.api.Assertions.assertThat(chainStore.listByProductId("MAINT-BAT-6075"))
+        .hasSize(1);
   }
 
   private String createProduct(MockHttpSession session, String code, String name) throws Exception {

@@ -14,6 +14,7 @@ import com.shdata.datachain.entity.DataProductEntity;
 import com.shdata.datachain.entity.IndustryCategoryEntity;
 import com.shdata.datachain.repository.DataProductRepository;
 import com.shdata.datachain.repository.IndustryCategoryRepository;
+import com.shdata.datachain.repository.ChainVersionRepository;
 import com.shdata.datachain.common.security.AuthAuditLogger;
 import com.shdata.datachain.service.catalog.admin.CategoryAdminService;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ class CategoryAdminServiceTest {
   private CategoryAdminService service;
   private IndustryCategoryRepository categoryRepo;
   private DataProductRepository productRepo;
+  private ChainVersionRepository chainVersionRepo;
   private List<IndustryCategoryEntity> categoryList;
   private List<DataProductEntity> productList;
 
@@ -39,6 +41,7 @@ class CategoryAdminServiceTest {
   void setUp() {
     categoryRepo = mock(IndustryCategoryRepository.class);
     productRepo = mock(DataProductRepository.class);
+    chainVersionRepo = mock(ChainVersionRepository.class);
 
     categoryList = new ArrayList<>();
     productList = new ArrayList<>();
@@ -60,8 +63,9 @@ class CategoryAdminServiceTest {
       return e;
     });
     when(productRepo.count()).thenReturn((long) productList.size());
+    when(chainVersionRepo.findAll()).thenReturn(List.of());
 
-    catalog = new CatalogBrowseSeedStore(categoryRepo, productRepo);
+    catalog = new CatalogBrowseSeedStore(categoryRepo, productRepo, chainVersionRepo);
     // 种子分类（与旧内存 seed 一致）
     seedCategory("cat-l1-health", "医疗卫生", "L1", null);
     seedCategory("cat-l1-finance", "金融服务", "L1", null);
@@ -114,8 +118,11 @@ class CategoryAdminServiceTest {
     when(mockCategoryRepo.save(any())).thenReturn(only);
     when(mockProductRepo.findAll()).thenReturn(List.of());
     when(mockProductRepo.count()).thenReturn(0L);
+    ChainVersionRepository mockChainVersionRepo = mock(ChainVersionRepository.class);
+    when(mockChainVersionRepo.findAll()).thenReturn(List.of());
 
-    CatalogBrowseSeedStore isolated = new CatalogBrowseSeedStore(mockCategoryRepo, mockProductRepo);
+    CatalogBrowseSeedStore isolated =
+        new CatalogBrowseSeedStore(mockCategoryRepo, mockProductRepo, mockChainVersionRepo);
     CategoryAdminService isolatedSvc = new CategoryAdminService(isolated, mock(AuthAuditLogger.class));
     ServiceResult deny = isolatedSvc.delete("l3-only", "admin", "corr-last");
     assertFalse(deny.ok());

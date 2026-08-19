@@ -1,6 +1,6 @@
 ---
 id: RULE-ORG-CODING
-version: 1.0.0
+version: 1.0.1
 status: active
 owner: tech-lead
 override: allowed-with-adr
@@ -39,11 +39,12 @@ sourceOfTruth:
 
 ## 前端编码约定
 
-细则见 `skill.frontend-developer` 与 `RULE-PROJECT-LAYOUT` 前端节。摘要：
+细则见 `RULE-GLOBAL-FRONTEND`、`skill.frontend-developer` 与 `RULE-PROJECT-LAYOUT` 前端节。摘要：
 
 - 业务代码：`frontend/src/features/<feature>/`
 - 组件：Vue 3 `<script setup lang="ts">`
 - API 基址仅经 `VITE_API_BASE_URL`；不得硬编码后端 Origin
+- 写成功须 toast；删除/禁用/取消须二次确认；分页须支持页码跳转与 pageSize 更换（权威：`RULE-GLOBAL-FRONTEND`）
 
 ## 代码（后端）
 

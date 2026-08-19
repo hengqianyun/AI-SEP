@@ -47,7 +47,30 @@ wsc:
   cors:
     allowed-origins: ${WSC_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
 
+# ChainMP 信息存证；默认使用本地模拟适配器，生产环境通过环境变量开启真实上链。
+chainmp:
+  # 是否调用真实 ChainMP 接口：false 时完全不请求远端服务。
+  enabled: ${CHAINMP_ENABLED:true}
+  # 是否允许使用 mock 上链结果：
+  # - enabled=false 时，true=直接使用 mock，false=上链任务失败；
+  # - enabled=true 时，true=真实提交/查询重试耗尽后降级为 mock，false=重试耗尽后任务失败。
+  # 正式环境若不允许模拟凭证，建议设置为 false。
+  mock-enabled: ${CHAINMP_MOCK_ENABLED:true}
+  base-url: ${CHAINMP_BASE_URL:http://172.20.105.190:3000}
+  app-id: ${CHAINMP_APP_ID:}
+  app-secret: ${CHAINMP_APP_SECRET:}
+  connect-timeout-seconds: ${CHAINMP_CONNECT_TIMEOUT_SECONDS:5}
+  read-timeout-seconds: ${CHAINMP_READ_TIMEOUT_SECONDS:10}
+  submit-max-attempts: ${CHAINMP_SUBMIT_MAX_ATTEMPTS:3}
+  query-max-attempts: ${CHAINMP_QUERY_MAX_ATTEMPTS:5}
+  retry-delay-millis: ${CHAINMP_RETRY_DELAY_MILLIS:2000}
+
 management:
+  health:
+    # 当前业务未使用 Redis。禁用 Redis 健康检查，避免 /actuator/health 为探活创建
+    # 一条长期空闲的 Lettuce 连接，并在远端网络设备回收连接后持续触发自动重连。
+    redis:
+      enabled: ${MANAGEMENT_HEALTH_REDIS_ENABLED:false}
   endpoints:
     web:
       exposure:

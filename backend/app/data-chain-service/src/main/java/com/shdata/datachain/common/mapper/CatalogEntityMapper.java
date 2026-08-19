@@ -30,6 +30,19 @@ public final class CatalogEntityMapper {
      * DataProductEntity → CatalogProduct
      */
     public static CatalogProduct toProduct(DataProductEntity e) {
+        return toProduct(e, 0, null);
+    }
+
+    /**
+     * DataProductEntity → CatalogProduct，并带入从上链版本表汇总的链元数据。
+     *
+     * @param e 产品实体
+     * @param chainCount 已落库链版本数量
+     * @param latestVersionNo 最新链版本号；无版本时为 null
+     * @return 产品领域模型
+     */
+    public static CatalogProduct toProduct(
+            DataProductEntity e, int chainCount, Integer latestVersionNo) {
         return new CatalogProduct(
                 e.getId() == null ? "" : String.valueOf(e.getId()),
                 e.getProductCode(),
@@ -38,8 +51,8 @@ public final class CatalogEntityMapper {
                 e.getL2CategoryCode(),
                 e.getL1CategoryCode(),
                 e.getCategoryPath(),
-                0, // chainCount — 后续从 chain_version 联查
-                null, // latestVersionNo — 同上
+                chainCount,
+                latestVersionNo,
                 e.getDataSource(),
                 e.getDeliveryMethod(),
                 e.getInvolvesPublicData(),

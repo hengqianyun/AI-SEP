@@ -5,12 +5,14 @@ import com.shdata.datachain.common.mapper.CatalogEntityMapper;
 import com.shdata.datachain.model.CatalogCategory;
 import com.shdata.datachain.model.CatalogProduct;
 import com.shdata.datachain.entity.DataProductEntity;
+import com.shdata.datachain.entity.ChainVersionEntity;
 import com.shdata.datachain.entity.SysUserEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -31,32 +33,38 @@ public class CatalogBrowseSeedStore implements ApplicationRunner {
 
     private final IndustryCategoryRepository categoryRepo;
     private final DataProductRepository productRepo;
+    private final ChainVersionRepository chainVersionRepo;
     private final SysUserRepository userRepo;
     private final AtomicInteger productSeq = new AtomicInteger(200);
     private final AtomicInteger categorySeq = new AtomicInteger(200);
 
     /**
-     * 测试用两参构造（无用户仓储时审计展示回退 userId）。
+     * 测试用构造（无用户仓储时审计展示回退 userId）。
      *
      * @param categoryRepo 分类仓储
      * @param productRepo 产品仓储
+     * @param chainVersionRepo 上链版本仓储
      */
     public CatalogBrowseSeedStore(IndustryCategoryRepository categoryRepo,
-                                  DataProductRepository productRepo) {
-        this(categoryRepo, productRepo, null);
+                                  DataProductRepository productRepo,
+                                  ChainVersionRepository chainVersionRepo) {
+        this(categoryRepo, productRepo, chainVersionRepo, null);
     }
 
     /**
      * @param categoryRepo 分类仓储
      * @param productRepo 产品仓储
+     * @param chainVersionRepo 上链版本仓储
      * @param userRepo 用户仓储（解析创建人/操作人显示名；可为 null）
      */
     @Autowired
     public CatalogBrowseSeedStore(IndustryCategoryRepository categoryRepo,
                                   DataProductRepository productRepo,
+                                  ChainVersionRepository chainVersionRepo,
                                   SysUserRepository userRepo) {
         this.categoryRepo = categoryRepo;
         this.productRepo = productRepo;
+        this.chainVersionRepo = chainVersionRepo;
         this.userRepo = userRepo;
     }
 
@@ -117,8 +125,9 @@ public class CatalogBrowseSeedStore implements ApplicationRunner {
     /** 列出所有未删除的产品。 */
     @Transactional(readOnly = true)
     public List<CatalogProduct> products() {
+        Map<String, ChainStats> chainStats = loadChainStats();
         return productRepo.findAll().stream()
-                .map(CatalogEntityMapper::toProduct)
+                .map(entity -> toProductWithChainStats(entity, chainStats))
                 .map(this::restoreOtherTypeSpecific)
                 .toList();
     }
@@ -128,13 +137,17 @@ public class CatalogBrowseSeedStore implements ApplicationRunner {
     public Optional<CatalogProduct> findProduct(String id) {
         try {
             long lid = Long.parseLong(id);
-            return productRepo.findById(lid).map(CatalogEntityMapper::toProduct).map(this::restoreOtherTypeSpecific);
+            Map<String, ChainStats> chainStats = loadChainStats();
+            return productRepo.findById(lid)
+                    .map(entity -> toProductWithChainStats(entity, chainStats))
+                    .map(this::restoreOtherTypeSpecific);
         } catch (NumberFormatException e) {
             // 旧自定义 ID（如 "prod-emr-001"），转为按 product_code 查
+            Map<String, ChainStats> chainStats = loadChainStats();
             return productRepo.findAll().stream()
                     .filter(p -> id.equals(p.getProductCode()))
                     .findFirst()
-                    .map(CatalogEntityMapper::toProduct)
+                    .map(entity -> toProductWithChainStats(entity, chainStats))
                     .map(this::restoreOtherTypeSpecific);
         }
     }
@@ -143,10 +156,11 @@ public class CatalogBrowseSeedStore implements ApplicationRunner {
     @Transactional(readOnly = true)
     public Optional<CatalogProduct> findProductByCode(String productCode) {
         if (productCode == null) return Optional.empty();
+        Map<String, ChainStats> chainStats = loadChainStats();
         return productRepo.findAll().stream()
                 .filter(p -> productCode.equals(p.getProductCode()))
                 .findFirst()
-                .map(CatalogEntityMapper::toProduct)
+                .map(entity -> toProductWithChainStats(entity, chainStats))
                 .map(this::restoreOtherTypeSpecific);
     }
 
@@ -288,11 +302,51 @@ public class CatalogBrowseSeedStore implements ApplicationRunner {
         if (userId == null || userId.isBlank()) {
             return List.of();
         }
+        Map<String, ChainStats> chainStats = loadChainStats();
         return productRepo.findAll().stream()
                 .filter(e -> userId.equals(e.getCreateBy()))
-                .map(CatalogEntityMapper::toProduct)
+                .map(entity -> toProductWithChainStats(entity, chainStats))
                 .map(this::restoreOtherTypeSpecific)
                 .toList();
+    }
+
+    /**
+     * 一次性汇总所有产品的链版本数量和最新版本号，避免目录列表逐产品查询。
+     *
+     * @return product_code 对应的链统计
+     */
+    private Map<String, ChainStats> loadChainStats() {
+        Map<String, ChainStats> result = new HashMap<>();
+        for (ChainVersionEntity version : chainVersionRepo.findAll()) {
+            result.merge(
+                    version.getProductCode(),
+                    new ChainStats(1, version.getVersionNo()),
+                    (left, right) ->
+                            new ChainStats(
+                                    left.count() + right.count(),
+                                    Math.max(left.latestVersionNo(), right.latestVersionNo())));
+        }
+        return result;
+    }
+
+    /**
+     * 把预先汇总的链统计合并进产品模型。
+     *
+     * @param entity 产品实体
+     * @param chainStats 链统计索引
+     * @return 含真实链次数和最新版本号的产品
+     */
+    private CatalogProduct toProductWithChainStats(
+            DataProductEntity entity, Map<String, ChainStats> chainStats) {
+        ChainStats stats = chainStats.get(entity.getProductCode());
+        return CatalogEntityMapper.toProduct(
+                entity,
+                stats == null ? 0 : stats.count(),
+                stats == null ? null : stats.latestVersionNo());
+    }
+
+    /** 产品链版本聚合结果。 */
+    private record ChainStats(int count, int latestVersionNo) {
     }
 
     /** 读取产品归属 create_by。 */

@@ -6,6 +6,7 @@ defaults:
   rules:
     - RULE-GLOBAL-SECRETS
     - RULE-GLOBAL-CONSENSUS
+    - RULE-GLOBAL-FRONTEND
     - RULE-ORG-STACK
 
 byRole:

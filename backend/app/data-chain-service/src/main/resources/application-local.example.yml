@@ -16,6 +16,23 @@ wsc:
   cors:
     allowed-origins: http://localhost:5173,http://127.0.0.1:5173
 
+chainmp:
+  # 是否调用真实 ChainMP 接口；本地开发通常设置为 false。
+  enabled: ${CHAINMP_ENABLED:true}
+  # 是否允许直接使用或降级使用 mock 结果；本地开发通常设置为 true。
+  # enabled=false + mock-enabled=true：不请求远端，直接 mock。
+  # enabled=true + mock-enabled=true：请求真实接口，重试耗尽后 mock。
+  # enabled=true + mock-enabled=false：请求真实接口，重试耗尽后失败。
+  # enabled=false + mock-enabled=false：不请求远端，上链任务直接失败。
+  mock-enabled: ${CHAINMP_MOCK_ENABLED:true}
+  base-url: ${CHAINMP_BASE_URL:http://127.0.0.1:3000}
+  app-id: ${CHAINMP_APP_ID:}
+  app-secret: ${CHAINMP_APP_SECRET:}
+
+  submit-max-attempts: 3
+  query-max-attempts: 5
+  retry-delay-millis: 2000
+
 logging:
   level:
     com.shdata.datachain: INFO

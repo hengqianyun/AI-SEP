@@ -7,7 +7,7 @@ inputSchema: task-package@1
 compatibleRoles: [developer]
 appliesTo:
   paths: [frontend/**]
-relatedRules: [RULE-ORG-STACK, RULE-PROJECT-LAYOUT]
+relatedRules: [RULE-GLOBAL-FRONTEND, RULE-ORG-STACK, RULE-PROJECT-LAYOUT]
 pilot: WSC
 ---
 
@@ -56,6 +56,7 @@ pilot: WSC
 - 跨页状态用 Pinia；禁止硬编码后端 URL
 - 异步页必须提供 loading、empty、error、success
 - 写操作按钮按角色权限显示，且不得仅靠前端隐藏作为安全边界
+- 交互底线见 `RULE-GLOBAL-FRONTEND`：写成功 toast；删除/禁用/取消二次确认；分页须跳页与更换 pageSize
 
 ## 禁止事项
 

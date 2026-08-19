@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -80,6 +80,7 @@ const catalogGroupActive = computed(() =>
 )
 
 function isActive(path: string) {
+  if (path === ROUTE_MY_PRODUCTS) return onMineSurface.value
   return isNavActive(path, activePath.value, route.query.from, route.meta.fromMine === true)
 }
 

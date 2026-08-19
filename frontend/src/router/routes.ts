@@ -1,4 +1,4 @@
-﻿import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 import PlaceholderView from '@/views/PlaceholderView.vue'
 import { requireDeepLinkAccess } from '@/features/shell/routeGuards'
 
@@ -19,7 +19,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'catalog',
     component: () => import('@/features/catalog/browse/CatalogBrowsePage.vue'),
     props: { mode: 'catalog', showSeatMap: true },
-    meta: { title: '数据目录' },
+    meta: { title: '全链数据目录' },
   },
   {
     path: '/my-products',

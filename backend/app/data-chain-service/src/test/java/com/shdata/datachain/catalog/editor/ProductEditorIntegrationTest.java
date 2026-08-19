@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.MvcResult;
       "spring.jpa.hibernate.ddl-auto=create-drop",
       "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
       "spring.flyway.enabled=false",
+      "chainmp.enabled=false",
       "spring.autoconfigure.exclude="
           + "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,"
           + "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"
@@ -99,7 +100,16 @@ class ProductEditorIntegrationTest {
         .andExpect(jsonPath("$.data.items[0].metadataHash").isNotEmpty())
         .andExpect(jsonPath("$.data.items[0].ownerDID").isNotEmpty())
         .andExpect(jsonPath("$.data.items[0].timestamp").isNotEmpty())
+        .andExpect(jsonPath("$.data.items[0].status").value("mocked"))
+        .andExpect(jsonPath("$.data.items[0].mocked").value(true))
+        .andExpect(jsonPath("$.data.items[0].transactionHash").value(org.hamcrest.Matchers.startsWith("mock:")))
         .andExpect(jsonPath("$.data.items[0].certificate.owner").isNotEmpty());
+
+    mockMvc
+        .perform(get("/api/v1/catalog/products/" + productId).session(session))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.chainCount").value(1))
+        .andExpect(jsonPath("$.data.latestVersionNo").value(1));
 
     String v1Id = chainStore.listByProductId(productCode).get(0).versionId();
     mockMvc

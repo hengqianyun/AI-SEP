@@ -10,6 +10,7 @@ defaults:
   rules:
     - RULE-GLOBAL-SECRETS
     - RULE-GLOBAL-CONSENSUS
+    - RULE-GLOBAL-FRONTEND
     # active 后取消注释：
     # - RULE-ORG-STACK
     # - RULE-ORG-CODING

@@ -4,21 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shdata.datachain.common.constant.IndustryCategories;
 import com.shdata.datachain.common.exception.BusinessException;
-import com.shdata.datachain.common.port.ChainAttestationPort;
 import com.shdata.datachain.common.response.ServiceResult;
 import com.shdata.datachain.common.security.AuthAuditLogger;
 import com.shdata.datachain.common.security.EnterpriseProductScope;
 import com.shdata.datachain.model.CatalogCategory;
 import com.shdata.datachain.model.CatalogProduct;
+import com.shdata.datachain.model.ChainEvidenceRequest;
+import com.shdata.datachain.model.ChainEvidenceResult;
 import com.shdata.datachain.model.SessionPrincipal;
 import com.shdata.datachain.repository.CatalogBrowseSeedStore;
 import com.shdata.datachain.repository.InMemoryChainStore;
+import com.shdata.datachain.service.chain.ChainEvidenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /**
@@ -36,7 +39,7 @@ public class ProductEditorService {
     public static final Pattern PRODUCT_CODE = Pattern.compile("^[A-Z0-9]+-[A-Z0-9]+-[0-9]{4,}$");
 
     private final CatalogBrowseSeedStore catalog;
-    private final ChainAttestationPort attestationPort;
+    private final ChainEvidenceService chainEvidenceService;
     private final InMemoryChainStore chainStore;
     private final ObjectMapper objectMapper;
     private final AuthAuditLogger auditLogger;
@@ -44,13 +47,13 @@ public class ProductEditorService {
 
     public ProductEditorService(
             CatalogBrowseSeedStore catalog,
-            ChainAttestationPort attestationPort,
+            ChainEvidenceService chainEvidenceService,
             InMemoryChainStore chainStore,
             ObjectMapper objectMapper,
             AuthAuditLogger auditLogger,
             EnterpriseProductScope enterpriseScope) {
         this.catalog = catalog;
-        this.attestationPort = attestationPort;
+        this.chainEvidenceService = chainEvidenceService;
         this.chainStore = chainStore;
         this.objectMapper = objectMapper;
         this.auditLogger = auditLogger;
@@ -74,11 +77,13 @@ public class ProductEditorService {
             ValidatedWrite write = validateWrite(sanitizeWriteBody(body), null);
             String productId = catalog.nextProductId();
             CatalogProduct draft = toProduct(productId, write, 0, null);
-            Attested attested = attestAndStore(draft, 1);
-            CatalogProduct published = withChainMeta(draft, 1, attested.versionNo());
-            CatalogProduct saved = catalog.upsertProduct(published, actorUserId);
-            auditLogger.productSubmit(actorUserId, saved.productCode(), "SUCCESS", null, correlationId);
-            return ServiceResult.ok(toMap(saved));
+            CatalogProduct saved = catalog.upsertProduct(draft, actorUserId);
+            AttestationSubmission submission = submitAttestation(saved, 0);
+            CatalogProduct response =
+                    completedProduct(
+                            saved, 1, submission.versionNo(), submission.future());
+            auditLogger.productSubmit(actorUserId, response.productCode(), "SUCCESS", null, correlationId);
+            return ServiceResult.ok(toMap(response));
         } catch (BusinessException ex) {
             auditLogger.productSubmit(actorUserId, codeHint, "FAILURE", ex.code(), correlationId);
             return ServiceResult.fail(ex.httpStatus(), ex.code(), ex.getMessage(), ex.data());
@@ -121,16 +126,19 @@ public class ProductEditorService {
             int nextVersion =
                     Math.max(
                             chainStore.latestVersionNo(existing.productCode()),
-                            nullSafe(existing.latestVersionNo()))
-                            + 1;
+                            nullSafe(existing.latestVersionNo()));
             CatalogProduct draft =
                     toProduct(productId, write, priorChain, existing.latestVersionNo());
-            Attested attested = attestAndStore(draft, nextVersion);
-            CatalogProduct published =
-                    withChainMeta(draft, priorChain + 1, attested.versionNo());
-            CatalogProduct saved = catalog.upsertProduct(published, actorUserId);
-            auditLogger.productSubmit(actorUserId, saved.productCode(), "SUCCESS", null, correlationId);
-            return ServiceResult.ok(toMap(saved));
+            CatalogProduct saved = catalog.upsertProduct(draft, actorUserId);
+            AttestationSubmission submission = submitAttestation(saved, nextVersion);
+            CatalogProduct response =
+                    completedProduct(
+                            saved,
+                            priorChain + 1,
+                            submission.versionNo(),
+                            submission.future());
+            auditLogger.productSubmit(actorUserId, response.productCode(), "SUCCESS", null, correlationId);
+            return ServiceResult.ok(toMap(response));
         } catch (BusinessException ex) {
             auditLogger.productSubmit(actorUserId, existing.productCode(), "FAILURE", ex.code(), correlationId);
             return ServiceResult.fail(ex.httpStatus(), ex.code(), ex.getMessage(), ex.data());
@@ -173,34 +181,141 @@ public class ProductEditorService {
         return v == null ? 0 : v;
     }
 
-    private Attested attestAndStore(CatalogProduct product, int versionNo) {
+    /**
+     * 预留下一版本号：取已落库链版本与传入基线的较大者 +1。
+     *
+     * @param productCode 产品编码
+     * @param versionBaseline 当前已知最大版本号
+     * @return 下一版本号
+     */
+    private int reserveNextVersion(String productCode, int versionBaseline) {
+        return Math.max(chainStore.latestVersionNo(productCode), versionBaseline) + 1;
+    }
+
+    /**
+     * 构造上链请求并异步提交，完成后把统一上链结果写入产品快照和版本表。
+     *
+     * @param product 已持久化产品
+     * @param versionNo 本次预留版本号
+     * @return 完成后返回新版本号的 Future
+     */
+    private CompletableFuture<Attested> attestAndStoreAsync(CatalogProduct product, int versionNo) {
         String versionId =
                 "cv-" + product.id() + "-v" + versionNo + "-" + UUID.randomUUID().toString().substring(0, 8);
         Map<String, Object> snapshot = buildSnapshot(product, versionId, versionNo);
         String snapshotJson = writeJson(snapshot);
+        ChainEvidenceRequest request =
+                new ChainEvidenceRequest(
+                        versionId,
+                        snapshotJson,
+                        Map.of("product_code", product.productCode(), "event_type", "catalog_attest"));
+        return chainEvidenceService
+                .submitAndConfirmAsync(request)
+                .thenApply(result -> storeAttestation(product, versionNo, versionId, snapshot, result));
+    }
 
-        ChainAttestationPort.AttestationResult attested =
-                attestationPort.attest(
-                        new ChainAttestationPort.AttestationRequest(
-                                product.productCode(), versionNo, snapshotJson));
+    /**
+     * 观察异步上链任务：失败时仅记日志，不改变主任务的完成语义。
+     *
+     * @param future 异步任务
+     * @param productCode 产品编码（仅用于日志）
+     */
+    private void observeAsyncFailure(CompletableFuture<Attested> future, String productCode) {
+        future.exceptionally(
+                ex -> {
+                    log.warn("异步上链失败，产品已落库：productCode={}", productCode, ex);
+                    return null;
+                });
+    }
 
+    /**
+     * 等待异步上链完成后组装带版本号的产品响应。
+     *
+     * @param saved 已持久化产品
+     * @param chainCount 上链次数
+     * @param versionNo 本次预留版本号
+     * @param future 上链任务
+     * @return 完成后的产品（含最新版本号）
+     */
+    private CatalogProduct completedProduct(
+            CatalogProduct saved, int chainCount, int versionNo, CompletableFuture<Attested> future) {
+        future.join();
+        return withChainMeta(saved, chainCount, versionNo);
+    }
+
+    /**
+     * 为已持久化产品提交一个新的异步存证版本。
+     *
+     * <p>供目录维护等非编辑器写入口复用，版本基线同时参考产品视图和已落库链版本，确保维护操作也会生成
+     * 新的目录快照。</p>
+     *
+     * @param product 已持久化的最新产品数据
+     * @return 完成后返回新版本号的 Future
+     */
+    public CompletableFuture<Integer> submitCurrentProductVersionAsync(CatalogProduct product) {
+        Objects.requireNonNull(product, "product 不能为空");
+        int versionBaseline =
+                Math.max(
+                        chainStore.latestVersionNo(product.productCode()),
+                        nullSafe(product.latestVersionNo()));
+        AttestationSubmission submission = submitAttestation(product, versionBaseline);
+        return submission.future().thenApply(Attested::versionNo);
+    }
+
+    /**
+     * 预留版本号、提交异步存证并注册失败观察器。
+     *
+     * @param product 已持久化产品
+     * @param versionBaseline 当前已知最大版本号
+     * @return 本次预留版本与异步任务
+     */
+    private AttestationSubmission submitAttestation(
+            CatalogProduct product, int versionBaseline) {
+        int versionNo = reserveNextVersion(product.productCode(), versionBaseline);
+        CompletableFuture<Attested> future = attestAndStoreAsync(product, versionNo);
+        observeAsyncFailure(future, product.productCode());
+        return new AttestationSubmission(versionNo, future);
+    }
+
+    /**
+     * 把统一上链结果写入产品快照和版本表。
+     */
+    private Attested storeAttestation(
+            CatalogProduct product,
+            int versionNo,
+            String versionId,
+            Map<String, Object> snapshot,
+            ChainEvidenceResult result) {
+        String metadataHash = "sha256:" + result.contentHash();
+        String ownerDID =
+                result.mocked()
+                        ? "did:wsc:sim:" + result.contentHash().substring(0, 16)
+                        : "did:chainmp:" + result.contentHash().substring(0, 32);
+        String certOwner =
+                result.mocked() ? "模拟权属方-" + product.productCode() : "ChainMP-" + result.evidenceId();
         Map<String, Object> attestation = new LinkedHashMap<>();
-        attestation.put("metadataHash", attested.metadataHash());
-        attestation.put("ownerDID", attested.ownerDID());
-        attestation.put("timestamp", attested.timestamp().toString());
-        attestation.put("certificate", Map.of("owner", attested.certificate().owner()));
+        attestation.put("evidenceId", result.evidenceId());
+        attestation.put("chainId", result.chainId());
+        attestation.put("metadataHash", metadataHash);
+        attestation.put("ownerDID", ownerDID);
+        attestation.put("status", result.status());
+        attestation.put("transactionHash", result.transactionHash());
+        attestation.put("blockNumber", result.blockNumber());
+        attestation.put("mocked", result.mocked());
+        attestation.put("timestamp", result.timestamp().toString());
+        attestation.put("certificate", Map.of("owner", certOwner));
         snapshot.put("attestation", attestation);
-        snapshot.put("capturedAt", attested.timestamp().toString());
-        snapshotJson = writeJson(snapshot);
+        snapshot.put("capturedAt", result.timestamp().toString());
+        String snapshotJson = writeJson(snapshot);
 
         chainStore.appendVersion(
                 versionId,
                 product.productCode(),
                 versionNo,
-                attested.metadataHash(),
-                attested.ownerDID(),
-                attested.timestamp(),
-                attested.certificate().owner(),
+                metadataHash,
+                ownerDID,
+                result.timestamp(),
+                certOwner,
                 snapshotJson);
         return new Attested(versionNo, versionId);
     }
@@ -629,5 +744,9 @@ public class ProductEditorService {
     }
 
     private record Attested(int versionNo, String versionId) {
+    }
+
+    /** 本次异步存证预留的版本号与任务句柄。 */
+    private record AttestationSubmission(int versionNo, CompletableFuture<Attested> future) {
     }
 }

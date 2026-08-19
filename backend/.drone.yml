@@ -1,0 +1,129 @@
+kind: pipeline
+type: docker
+name: data-chain-backend
+
+platform:
+  os: linux
+  arch: arm64
+
+trigger:
+  event:
+    - push
+    - promote
+
+global-variables:
+  UPDATE_MANIFEST_IMAGE: &UPDATE_MANIFEST_IMAGE tjdocker.sdata.net.cn/repository/docker/bianjie/update-kustomization:1.31.0-5.6.0
+  DOCKER_REGISTRY: &DOCKER_REGISTRY swr.shdg-int-1.tianji.datagroup.sh.cegn.cn
+  DOCKER_IMAGE: &DOCKER_IMAGE swr.shdg-int-1.tianji.datagroup.sh.cegn.cn/dataspace/data-chain-backend
+  DOCKER_TAG: &DOCKER_TAG ${DRONE_BRANCH}-${DRONE_COMMIT_SHA:0:7}
+
+volumes:
+  - name: maven-cache
+    host:
+      path: /data/drone/maven-cache
+  - name: maven-settings
+    host:
+      path: /data/drone/settings.xml
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+
+steps:
+  - name: build-and-test
+    image: maven:3.9.9-eclipse-temurin-17
+    commands:
+      - mvn clean package -pl app/data-chain-service -am -DskipTests=true -B -V -U
+    volumes:
+      - name: maven-settings
+        path: /usr/share/maven/conf/settings.xml
+      - name: maven-cache
+        path: /root/.m2
+    when:
+      event:
+        - push
+        - tag
+      branch:
+        - develop
+        - master
+        - release-*
+
+  - name: build-image
+    image: plugins/docker:20.18
+    privileged: true
+    settings:
+      registry: *DOCKER_REGISTRY
+      repo: *DOCKER_IMAGE
+      username:
+        from_secret: cce_docker_username
+      password:
+        from_secret: cce_docker_password
+      tags:
+        - *DOCKER_TAG
+      dry_run: false
+      dockerfile: Dockerfile
+      pull_image: false
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      event:
+        - push
+        - tag
+      branch:
+        - develop
+        - master
+        - release-*
+    depends_on:
+      - build-and-test
+
+  - name: update-manifests-dev
+    image: *UPDATE_MANIFEST_IMAGE
+    environment:
+      IMAGES: *DOCKER_IMAGE
+      IMAGE_TAG: *DOCKER_TAG
+      MANIFEST_HOST: tjgit.sdata.net.cn
+      MANIFEST_USER: cicd
+      MANIFEST_USER_PASSWORD:
+        from_secret: cicd_git_password
+      MANIFEST_USER_EMAIL: cicd@shdatagroup.com
+      MANIFEST_GROUP: data-chain
+      MANIFEST_REPO: data-chain-deploy
+      MANIFEST_BRANCH: master
+      KUSTOMIZATION: kustomize/dev
+    depends_on:
+      - build-image
+    when:
+      event:
+        - promote
+      branch:
+        - develop
+        - master
+      target:
+        - dev
+
+  - name: update-manifests-uat
+    image: *UPDATE_MANIFEST_IMAGE
+    environment:
+      IMAGES: *DOCKER_IMAGE
+      IMAGE_TAG: *DOCKER_TAG
+      MANIFEST_HOST: tjgit.sdata.net.cn
+      MANIFEST_USER: cicd
+      MANIFEST_USER_PASSWORD:
+        from_secret: cicd_git_password
+      MANIFEST_USER_EMAIL: cicd@shdatagroup.com
+      MANIFEST_GROUP: data-chain
+      MANIFEST_REPO: data-chain-deploy
+      MANIFEST_BRANCH: master
+      KUSTOMIZATION: kustomize/uat
+    depends_on:
+      - build-image
+    when:
+      event:
+        - promote
+      branch:
+        - develop
+        - master
+      target:
+        - uat
+
+

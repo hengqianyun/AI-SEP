@@ -9,6 +9,7 @@ import com.shdata.datachain.model.CatalogProduct;
 import com.shdata.datachain.model.Role;
 import com.shdata.datachain.model.SessionPrincipal;
 import com.shdata.datachain.repository.CatalogBrowseSeedStore;
+import com.shdata.datachain.service.catalog.editor.ProductEditorService;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,15 +35,20 @@ import org.springframework.stereotype.Service;
 public class CatalogMaintenanceService {
 
   private final CatalogBrowseSeedStore catalog;
+  private final ProductEditorService productEditorService;
   private final EnterpriseProductScope enterpriseScope;
 
   /**
    * @param catalog 目录存储
+   * @param productEditorService 产品编辑服务（挂载后异步上链）
    * @param enterpriseScope 本企业产品判定（§3.2）
    */
   public CatalogMaintenanceService(
-      CatalogBrowseSeedStore catalog, EnterpriseProductScope enterpriseScope) {
+      CatalogBrowseSeedStore catalog,
+      ProductEditorService productEditorService,
+      EnterpriseProductScope enterpriseScope) {
     this.catalog = catalog;
+    this.productEditorService = productEditorService;
     this.enterpriseScope = enterpriseScope;
   }
 
@@ -293,8 +299,10 @@ public class CatalogMaintenanceService {
             l3Id,
             src.industryCategory(),
             Instant.now());
-    // 保留 create_by；刷新 update_by（actor 非空时）
-    return catalog.upsertProduct(updated, actorUserId);
+    // 保留 create_by；刷新 update_by（actor 非空时），并为分类元数据变更生成新链版本。
+    CatalogProduct saved = catalog.upsertProduct(updated, actorUserId);
+    productEditorService.submitCurrentProductVersionAsync(saved);
+    return saved;
   }
 
   private String requireL3Id(Map<String, Object> body) {

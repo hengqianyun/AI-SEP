@@ -98,7 +98,7 @@ describe('WorkbenchLayout TASK-WSC-906 (REQ-SHELL-009 / REQ-SHELL-010)', () => {
     expect(layoutSrc).toContain('onMineSurface')
     expect(layoutSrc).toContain('document.title')
 
-    expect(routesSrc).toContain("title: '数据目录'")
+    expect(routesSrc).toContain("title: '全链数据目录'")
     expect(routesSrc).toContain("title: '我的数据产品'")
     expect(routesSrc).toContain("title: '目录维护（全量）'")
     expect(routesSrc).toContain("title: '我的目录（本企业/本人）'")

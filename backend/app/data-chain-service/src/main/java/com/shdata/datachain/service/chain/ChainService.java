@@ -61,6 +61,16 @@ public class ChainService {
         item.put("metadataHash", v.metadataHash());
         item.put("ownerDID", v.ownerDID());
         item.put("certificate", cert);
+        // mock/真实链状态存放在快照 attestation 中；版本列表直接透出关键字段供页面展示。
+        Object rawAttestation = v.snapshot().get("attestation");
+        if (rawAttestation instanceof Map<?, ?> attestation) {
+            item.put("evidenceId", attestation.get("evidenceId"));
+            item.put("chainId", attestation.get("chainId"));
+            item.put("status", attestation.get("status"));
+            item.put("transactionHash", attestation.get("transactionHash"));
+            item.put("blockNumber", attestation.get("blockNumber"));
+            item.put("mocked", attestation.get("mocked"));
+        }
         return item;
     }
 }

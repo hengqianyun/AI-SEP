@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
       "spring.jpa.hibernate.ddl-auto=create-drop",
       "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
       "spring.flyway.enabled=false",
+      "chainmp.enabled=false",
       "spring.autoconfigure.exclude="
           + "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,"
           + "org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"

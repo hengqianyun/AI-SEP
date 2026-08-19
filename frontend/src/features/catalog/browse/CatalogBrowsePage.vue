@@ -38,7 +38,7 @@ const isMine = computed(() => props.mode === 'mine')
 const seatMapVisible = computed(() =>
   props.showSeatMap !== undefined ? props.showSeatMap : !isMine.value,
 )
-const pageTitle = computed(() => (isMine.value ? '我的数据产品' : '数据目录'))
+const pageTitle = computed(() => (isMine.value ? '我的数据产品' : '全链数据目录'))
 const pageSubtitle = computed(() =>
   isMine.value
     ? '管理本人创建的数据产品（新增 / 编辑 / 导入）'
