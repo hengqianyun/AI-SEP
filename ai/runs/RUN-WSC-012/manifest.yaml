@@ -1,0 +1,19 @@
+# RUN-WSC-012 Manifest
+runId: RUN-WSC-012
+projectId: WSC
+workflowId: ai-software-delivery
+workflowVersion: 1.0.0
+prd: product/prd/wsc-v1.7-transaction-orders.md
+prdVersion: V1.7
+basedOnRun: RUN-WSC-011
+baselineSnapshot: SNAP-WSC-008
+baselineContracts: wsc-contracts@2.3.2
+createdAt: 2026-08-19
+createdBy: orchestrator
+mode: semi-automatic-pilot
+status: ACTIVE
+currentNode: PRD_ANALYSIS
+notes: "V1.7 交易订单（链内一事一议简易流程）"
+artifacts:
+  prd: product/prd/wsc-v1.7-transaction-orders.md
+  intakeDraft: temp/product/prd/wsc-v1.7-transaction-orders-draft.md

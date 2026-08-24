@@ -12,6 +12,8 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const { role } = storeToRefs(auth)
+/** USER 角色可见订购入口（REQ-WSC-ORDER-002） */
+const orderEntryVisible = computed(() => role.value === 'USER')
 /** 公共目录结构不可达增改导：仅 from=mine 时显示编辑入口 */
 const fromMine = computed(() => route.query.from === 'mine')
 const editEntryVisible = computed(
@@ -41,6 +43,11 @@ function goChain() {
 function goBack() {
   void router.push(fromMine.value ? '/my-products' : '/catalog')
 }
+
+function goOrder() {
+  if (!orderEntryVisible.value || !productId.value) return
+  void router.push(`/orders/subscribe/${productId.value}`)
+}
 </script>
 
 <template>
@@ -56,6 +63,15 @@ function goBack() {
         <h1 class="detail-page-title">产品详情</h1>
       </div>
       <div class="detail-page-header-right">
+        <button
+          v-if="orderEntryVisible"
+          type="button"
+          class="btn btn-primary"
+          data-testid="detail-order-entry"
+          @click="goOrder"
+        >
+          立即订购
+        </button>
         <button type="button" class="btn" @click="goChain">上链信息</button>
         <button
           v-if="editEntryVisible"

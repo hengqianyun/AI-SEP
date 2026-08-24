@@ -1,0 +1,47 @@
+runId: RUN-WSC-012
+currentNode: RELEASE_REVIEW
+round: 2
+status: ACTIVE
+blockedBy: []
+releasePaused: false
+completedNodes:
+  - PRD_ANALYSIS
+  - REQUIREMENT_REVIEW
+  - PLAN_DRAFT
+  - PLAN_REVIEW
+  - PLAN_APPROVED
+  - TASK_DISPATCH
+  - DEVELOPMENT
+kind: FEATURE
+basedOnRun: RUN-WSC-011
+scope: |
+  V1.7 交易訂單：鏈內一事一議簡易流程（創建、確認、合約、取消）；
+  本期止於合約達成；外部回傳建單不做；上鏈 mock。
+activeSnapshotId: SNAP-WSC-009
+snapshotStatus: APPROVED
+snapshotApprovedAt: 2026-08-19
+prdPath: product/prd/wsc-v1.7-transaction-orders.md
+prdStatus: DRAFT
+contractsTarget: wsc-contracts@2.3.2
+previousSnapshotId: SNAP-WSC-008
+activePlanId: PLAN-WSC-9.2
+approvedPlanPath: planning/approved/PLAN-WSC-9.2.md
+planStatus: APPROVED
+planType: APPROVED
+planReviewRound: 2
+planReviewConsensus: REACHED
+activeWave: D
+activeTaskIds: []
+verifiedTaskIds:
+  - TASK-WSC-911
+  - TASK-WSC-912
+  - TASK-WSC-913
+  - TASK-WSC-914
+  - TASK-WSC-915
+  - TASK-WSC-916
+  - TASK-WSC-917
+  - TASK-WSC-918
+  - TASK-WSC-919
+nextAction: human/APPROVE_RELEASE
+nextActionOutputs: []
+updatedAt: 2026-08-21T21:10:00+08:00

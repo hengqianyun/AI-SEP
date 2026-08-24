@@ -26,6 +26,15 @@ matrix:
     userManageUI: visible
     userManageApi: { expect: 200, on: valid }
     sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
+    # ── V1.7 订单能力键（SNAP-WSC-009 / PLAN-WSC-9.2 §3.1）──
+    ordersUI: { visible: true, label: "交易订单" }
+    ordersListApi: { expect: 200, on: all }
+    ordersCreateApi: { expect: 403, code: ERR_FORBIDDEN }
+    ordersConfirmApi: { expect: 200, on: any }
+    ordersSubmitContractApi: { expect: 403, code: ERR_FORBIDDEN }
+    ordersConfirmContractApi: { expect: 200, on: any }
+    ordersCancelApi: { expect: 200, on: any }
+    ordersAttachmentGet: { expect: 200 }
 
   - role: PROVIDER
     categoryMaintainUI: hidden
@@ -43,6 +52,15 @@ matrix:
     userManageUI: hidden
     userManageApi: { expect: 403, code: ERR_FORBIDDEN }
     sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
+    # ── V1.7 订单能力键 ──
+    ordersUI: { visible: true, label: "交易订单" }
+    ordersListApi: { expect: 200, on: ownEnterpriseAsProvider }
+    ordersCreateApi: { expect: 403, code: ERR_FORBIDDEN }
+    ordersConfirmApi: { expect: 200, on: ownEnterpriseAsProvider }
+    ordersSubmitContractApi: { expect: 403, code: ERR_FORBIDDEN }
+    ordersConfirmContractApi: { expect: 200, on: ownEnterpriseAsProvider }
+    ordersCancelApi: { expect: 200, on: ownEnterpriseAsProvider }
+    ordersAttachmentGet: { expect: 200, on: ownEnterpriseAsProvider }
 
   - role: USER
     categoryMaintainUI: hidden
@@ -60,6 +78,15 @@ matrix:
     userManageUI: hidden
     userManageApi: { expect: 403, code: ERR_FORBIDDEN }
     sessionRoleSwitch: { expect: 410, code: ERR_ROLE_SWITCH_DISABLED }
+    # ── V1.7 订单能力键 ──
+    ordersUI: { visible: true, label: "我的订单" }
+    ordersListApi: { expect: 200, on: ownAsDemand }
+    ordersCreateApi: { expect: 200 }
+    ordersConfirmApi: { expect: 403, code: ERR_FORBIDDEN }
+    ordersSubmitContractApi: { expect: 200, on: ownAsDemand }
+    ordersConfirmContractApi: { expect: 403, code: ERR_FORBIDDEN }
+    ordersCancelApi: { expect: 200, on: ownAsDemand }
+    ordersAttachmentGet: { expect: 200, on: ownAsDemand }
 
 notes:
   - 写 API 以服务端会话角色为准，禁止仅信前端隐藏（隐藏 ≠ 授权）
@@ -74,3 +101,14 @@ notes:
   - userManage* 仅 ADMIN
   - 导入错误报告：管理员或具备导入权限的提供方可 GET；报告字段白名单不扩大
   - GET /catalog/l2-distribution 可选 l1CategoryId；**不按**登录用户企业过滤
+  # ── V1.7 订单注释 ──
+  - 订单 scope **仅**信 SessionPrincipal；拒绝客户端 enterpriseId/userId/demandUserId 参数扩权
+  - USER 订单菜单文案「我的订单」；PROVIDER/ADMIN 文案「交易订单」
+  - ordersCreateApi：仅 USER 可创建；PROVIDER/ADMIN → 403
+  - ordersConfirmApi / ordersConfirmContractApi：ADMIN 可代任意企业；PROVIDER 仅本企业；USER → 403
+  - ordersSubmitContractApi：仅 USER 本人需求方；ADMIN/PROVIDER → 403
+  - ordersCancelApi：三未完成态三方均可；USER 本人 / PROVIDER 本企业 / ADMIN 任意
+  - ordersAttachmentGet：需求方本人 / 本企业 PROVIDER / ADMIN 可下载
+  - ADMIN 列表范围=全部；PROVIDER=本企业作为提供方；USER=本人作为需求方
+  - 订单号 UUID v4 格式（不可预测、不含可推断业务语义字段）
+  - V1.6 全部既有能力键保持不变（零回退）

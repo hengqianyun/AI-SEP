@@ -90,4 +90,66 @@ public final class RbacMatrix {
   public static boolean canManageUsers(Role role) {
     return role == Role.ADMIN;
   }
+
+  // ── V1.7 订单能力方法（SNAP-WSC-009 / PLAN-WSC-9.2 §3.1 / matrix.yaml）──
+
+  /**
+   * 订单列表 API — ADMIN 全部、PROVIDER 本企业提供方、USER 本人需求方（均 200）。
+   *
+   * @param role 会话角色
+   * @return 是否允许访问列表（scope 过滤在 Service 层）
+   */
+  public static boolean canListOrders(Role role) {
+    return role != null;
+  }
+
+  /**
+   * 创建订单 — 仅 USER（产品允许简易流程时）；PROVIDER/ADMIN → 403。
+   *
+   * @param role 会话角色
+   * @return 是否允许创建
+   */
+  public static boolean canCreateOrder(Role role) {
+    return role == Role.USER;
+  }
+
+  /**
+   * 确认订单 — ADMIN 可代任意企业；PROVIDER 仅本企业；USER → 403。
+   *
+   * @param role 会话角色
+   * @return 是否允许确认订单（企业范围校验在 Service 层）
+   */
+  public static boolean canConfirmOrder(Role role) {
+    return role == Role.ADMIN || role == Role.PROVIDER;
+  }
+
+  /**
+   * 提交合约 — 仅 USER 本人需求方；ADMIN/PROVIDER → 403。
+   *
+   * @param role 会话角色
+   * @return 是否允许提交合约
+   */
+  public static boolean canSubmitContract(Role role) {
+    return role == Role.USER;
+  }
+
+  /**
+   * 确认合约 — ADMIN 可代任意企业；PROVIDER 仅本企业；USER → 403。
+   *
+   * @param role 会话角色
+   * @return 是否允许确认合约（企业范围校验在 Service 层）
+   */
+  public static boolean canConfirmContract(Role role) {
+    return role == Role.ADMIN || role == Role.PROVIDER;
+  }
+
+  /**
+   * 取消订单 — 三未完成态均可：USER 本人、PROVIDER 本企业、ADMIN 任意。
+   *
+   * @param role 会话角色
+   * @return 是否允许取消（范围校验在 Service 层）
+   */
+  public static boolean canCancelOrder(Role role) {
+    return role != null;
+  }
 }

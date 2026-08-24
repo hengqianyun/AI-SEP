@@ -13,6 +13,8 @@
 | runId | PRD | 状态 |
 |---|---|---|
 | [`RUN-WSC-001`](./RUN-WSC-001/) | `product/prd/wsc-v1.0.md` | COMPLETED |
-| [`RUN-WSC-002`](./RUN-WSC-002/) | `product/prd/wsc-v1.1.md` | ACTIVE（DEVELOPMENT · W4 105∥106 · PLAN-WSC-2.2） |
+| [`RUN-WSC-002`](./RUN-WSC-002/) | `product/prd/wsc-v1.1.md` | 见该目录 state |
+| [`RUN-WSC-011`](./RUN-WSC-011/) | `product/prd/wsc-v1.6-catalog-filter-ux.md` | COMPLETED |
+| [`RUN-WSC-012`](./RUN-WSC-012/) | `product/prd/wsc-v1.7-transaction-orders.md` | ACTIVE（RELEASE_REVIEW · 9/9 tasks ✓ → 等待人工批准發布） |
 
 勿手改 `events.jsonl` 历史；恢复协议见 `ai/workflow/resume.md`。

@@ -3,7 +3,7 @@ info:
   title: WSC Access Workbench API
   version: 2.3.3
   description: |
-    wsc-contracts@2.3.3 — 接入端工作台 V1.6（SNAP-WSC-008 / PLAN-WSC-8.3 Wave B）。
+    wsc-contracts@2.3.3 — 接入端工作台 V1.7（SNAP-WSC-009 / PLAN-WSC-9.2）。
     统一响应包装：{ code, message, data, correlationId }；成功时 code="0"。
     会话 SessionPrincipal 必填 enterpriseId + enterpriseName（REQ-USER-002）；scope 单一真源。
     GET /catalog/products 全链默认全平台（REQ-CAT-018）；mine=true → **本企业**产品（非 create_by-only）。
@@ -15,6 +15,8 @@ info:
     浏览 query 支持 l1CategoryId/l2CategoryId/l3CategoryId；浏览**不传** industryCategory（编辑/导入/详情仍用 INDUSTRY_CATEGORY_OPTIONS）。
     产品编码格式（DEC-WSC-001）：`{DOMAIN}-{FEATURE}-{NNNN}`。
     认证：服务端会话（Cookie）；写 API 以服务端会话角色为准。
+    订单 scope **仅**信 SessionPrincipal；拒绝客户端 enterpriseId/userId/demandUserId 参数扩权。
+    V1.6 目录/壳层/用户企业能力不回退。
 
 servers:
   - url: /api/v1
@@ -26,6 +28,8 @@ tags:
   - name: catalog
   - name: chain
   - name: admin
+  - name: orders
+    description: V1.7 交易订单（链内一事一议简易流程；止于合约达成）
 
 security:
   - SessionCookie: []
@@ -1077,6 +1081,285 @@ paths:
                     data: null
                     correlationId: "corr-imp-rep-404"
 
+  # ──────────────────────────────────────────────────────────────
+  # V1.7 交易订单（SNAP-WSC-009 / PLAN-WSC-9.2 §3.1）
+  # ──────────────────────────────────────────────────────────────
+
+  /orders:
+    get:
+      tags: [orders]
+      summary: 订单列表（分页；按角色过滤）
+      description: |
+        分页列表；query：keyword（订单号/产品名/编码/需求方姓名/单位）、status、page、pageSize。
+        范围**仅**信 SessionPrincipal：**禁止**客户端传 enterpriseId/userId/demandUserId 扩权。
+        USER=本人需求方；PROVIDER=本企业作为提供方；ADMIN=全部。
+        分页 envelope：{ total, list, page, pageSize }。
+        pageSize 档位 10/20/50/100；缺省 10。
+      operationId: listOrders
+      parameters:
+        - name: keyword
+          in: query
+          schema: { type: string }
+          description: 模糊搜索（订单号/产品名/编码/需求方姓名/单位）
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/OrderStatus"
+          description: 按状态筛选；空则全部
+        - name: page
+          in: query
+          schema: { type: integer, default: 1, minimum: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 10, enum: [10, 20, 50, 100] }
+      responses:
+        "200":
+          description: 订单分页列表（九组字段 + 分页 envelope）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOrderPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [orders]
+      summary: 链内创建订单（仅 USER；产品允许简易流程）
+      description: |
+        仅 USER 可创建；PROVIDER/ADMIN → 403。
+        body：productId、remark、noticeAccepted=true。
+        备注空/未勾选须知 → 4xx；产品 allowSimpleOrder=false → 4xx。
+        成功：订单号（UUID v4）、状态=PENDING_CONFIRM（待确认订单）、产品快照已写。
+        授权 scope **仅**信 SessionPrincipal；客户端 enterpriseId/userId **不**作为授权依据。
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderCreateRequest"
+      responses:
+        "200":
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOrder"
+        "400":
+          description: 校验失败（备注空/未勾选须知/产品不允许简易流程）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orders/notices/current:
+    get:
+      tags: [orders]
+      summary: 平台统一须知正文
+      description: |
+        返回当前生效的平台统一须知正文与版本标识。
+        notice_version 由服务端自动填充至 t_order_header，前端无需回传版本号。
+      operationId: getCurrentNotice
+      responses:
+        "200":
+          description: 须知正文
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseNotice"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /orders/{orderId}:
+    get:
+      tags: [orders]
+      summary: 订单详情
+      description: |
+        详情：快照、参与方、状态、附件元数据、交易信息、时间线、mock 上链、数字合约版本列表。
+        越权 403。
+      operationId: getOrder
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: 订单详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOrderDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /orders/{orderId}/confirm:
+    post:
+      tags: [orders]
+      summary: 确认订单（PROVIDER 本企业 / ADMIN 代确认）
+      description: |
+        纯动作端点，无 request body（空 JSON 对象）。
+        PROVIDER 本企业或 ADMIN；PENDING_CONFIRM → PENDING_UPLOAD。
+        USER → 403。
+        确认订单 scope **仅**信 SessionPrincipal；拒绝客户端 enterpriseId/userId 参数扩权。
+      operationId: confirmOrder
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 空 JSON 对象（无业务字段）
+      responses:
+        "200":
+          description: 确认成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOrder"
+        "400":
+          description: 状态不对（非 PENDING_CONFIRM）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orders/{orderId}/contract:
+    post:
+      tags: [orders]
+      summary: 提交合约附件与交易信息（仅需求方本人）
+      description: |
+        multipart 硬冻结：part `file`（签署附件，required，Word/PDF ≤20MB）+ part `transactionInfo`（JSON string，required）。
+        transactionInfo schema：{ orderLines: [{ unit, quantity, unitPrice, subtotal }], amountTaxInclusive, amountTaxExclusive, currency: "CNY" }。
+        仅需求方本人；PENDING_UPLOAD → PENDING_CONTRACT_CONFIRM。
+        无合格附件 4xx；orderLines **仅**在 contract 阶段提交。
+        授权 scope **仅**信 SessionPrincipal。
+      operationId: submitContract
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, transactionInfo]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 签署附件（Word/PDF，≤20MB）
+                transactionInfo:
+                  type: string
+                  description: |
+                    JSON string；schema：{ orderLines: [{ unit, quantity, unitPrice, subtotal }], amountTaxInclusive, amountTaxExclusive, currency: "CNY" }
+      responses:
+        "200":
+          description: 提交成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOrder"
+        "400":
+          description: 校验失败（无附件/格式非法/超限/金额校验/扫描失败）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orders/{orderId}/contract/confirm:
+    post:
+      tags: [orders]
+      summary: 统一确认合约（PROVIDER 本企业 / ADMIN 代确认）
+      description: |
+        body：noticeAccepted=true。
+        PROVIDER 本企业或 ADMIN；PENDING_CONTRACT_CONFIRM → CONTRACT_REACHED。
+        USER → 403。
+        授权 scope **仅**信 SessionPrincipal；拒绝客户端 enterpriseId/userId 参数扩权。
+      operationId: confirmContract
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractConfirmRequest"
+      responses:
+        "200":
+          description: 确认成功（合约已达成）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOrder"
+        "400":
+          description: 校验失败（未勾选须知/状态不对）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orders/{orderId}/cancel:
+    post:
+      tags: [orders]
+      summary: 取消订单（三未完成态；三方均可）
+      description: |
+        三未完成态（PENDING_CONFIRM/PENDING_UPLOAD/PENDING_CONTRACT_CONFIRM）可取消。
+        USER 本人 / PROVIDER 本企业 / ADMIN 可代取消。
+        终态（CONTRACT_REACHED/CANCELLED）不可取消。
+        授权 scope **仅**信 SessionPrincipal；拒绝客户端 enterpriseId/userId 参数扩权。
+      operationId: cancelOrder
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: 取消成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOrder"
+        "400":
+          description: 终态不可取消
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /orders/{orderId}/attachment:
+    get:
+      tags: [orders]
+      summary: 下载签署附件（按角色权限）
+      description: |
+        需求方本人、本企业 PROVIDER、ADMIN 可下载签署附件；越权 403。
+        授权 scope **仅**信 SessionPrincipal。
+      operationId: getOrderAttachment
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: 附件文件流
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 
 components:
   securitySchemes:
@@ -1107,6 +1390,12 @@ components:
       in: path
       required: true
       schema: { type: string }
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema: { type: string }
+      description: 订单 ID（UUID v4 格式）
 
   responses:
     Unauthorized:
@@ -1186,6 +1475,17 @@ components:
                 - ERR_ROLE_SWITCH_DISABLED
                 - ERR_USER_USERNAME_CONFLICT
                 - ERR_USER_NOT_FOUND
+                - ERR_ORDER_NOT_FOUND
+                - ERR_ORDER_FORBIDDEN
+                - ERR_ORDER_INVALID_STATE
+                - ERR_ORDER_NOTICE_NOT_ACCEPTED
+                - ERR_ORDER_REMARK_EMPTY
+                - ERR_ORDER_SIMPLE_ORDER_NOT_ALLOWED
+                - ERR_ORDER_ATTACHMENT_INVALID
+                - ERR_ORDER_ATTACHMENT_TOO_LARGE
+                - ERR_ORDER_ATTACHMENT_SCAN_FAILED
+                - ERR_ORDER_AMOUNT_INVALID
+                - ERR_ORDER_LINE_INVALID
                 - "401"
                 - "404"
             data:
@@ -2001,4 +2301,371 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/ImportErrorReport"
+
+    # ──────────────────────────────────────────────────────────────
+    # V1.7 订单 schemas（SNAP-WSC-009 / PLAN-WSC-9.2 §3.1）
+    # ──────────────────────────────────────────────────────────────
+
+    OrderStatus:
+      type: string
+      enum: [PENDING_CONFIRM, PENDING_UPLOAD, PENDING_CONTRACT_CONFIRM, CONTRACT_REACHED, CANCELLED]
+      description: |
+        订单状态枚举。
+        PENDING_CONFIRM=待确认订单；PENDING_UPLOAD=待上传合约；PENDING_CONTRACT_CONFIRM=待确认合约；
+        CONTRACT_REACHED=合约已达成；CANCELLED=已取消。
+        状态不可回退；无拒绝/退回/超时态。
+
+    OrderStatusWithLabel:
+      type: object
+      required: [status, statusLabel]
+      properties:
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        statusLabel:
+          type: string
+          description: 页面文案（与 SNAP 状态机表对齐）
+
+    OrderCreateRequest:
+      type: object
+      required: [productId, remark, noticeAccepted]
+      description: |
+        链内创建订单请求。仅 USER 可调用。
+        授权 scope **仅**信 SessionPrincipal；客户端 enterpriseId/userId **不**作为授权依据。
+      properties:
+        productId:
+          type: string
+          description: 产品 ID
+        remark:
+          type: string
+          description: 备注（不可为空）
+        noticeAccepted:
+          type: boolean
+          description: 是否已阅读并同意平台统一须知（必须为 true）
+
+    ContractConfirmRequest:
+      type: object
+      required: [noticeAccepted]
+      description: 统一合约确认请求
+      properties:
+        noticeAccepted:
+          type: boolean
+          description: 是否已阅读并同意平台统一须知（必须为 true）
+
+    OrderListItem:
+      type: object
+      required: [orderId, productName, productCode, productType, sourcePlatform, providerEnterpriseName, demandUserName, demandUserLoginName, demandEnterpriseName, amountTaxInclusive, amountTaxExclusive, currency, status, statusLabel, chainCount, createTime]
+      description: |
+        订单列表项（九组字段）。
+        ①订单号 ②产品信息 ③提供方 ④需求方 ⑤金额 ⑥状态 ⑦上链次数 ⑧下单时间 ⑨操作（由 FE 按角色渲染）
+      properties:
+        orderId:
+          type: string
+          description: 订单号（UUID v4 格式）
+        productName:
+          type: string
+          description: 产品名称（下单快照）
+        productCode:
+          type: string
+          description: 产品编码（下单快照）
+        productType:
+          type: string
+          description: 产品类型（下单快照）
+        sourcePlatform:
+          type: string
+          description: 来源平台（下单快照）
+        providerEnterpriseName:
+          type: string
+          description: 提供方企业名称
+        demandUserName:
+          type: string
+          description: 需求方用户显示名
+        demandUserLoginName:
+          type: string
+          description: 需求方用户登录名
+        demandEnterpriseName:
+          type: string
+          description: 需求方所属企业名称
+        amountTaxInclusive:
+          type: string
+          description: 含税金额（人民币两位小数，string/decimal）
+        amountTaxExclusive:
+          type: string
+          description: 未税金额（人民币两位小数，string/decimal）
+        currency:
+          type: string
+          enum: [CNY]
+          description: 币种（本期固定 CNY）
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        statusLabel:
+          type: string
+          description: 状态页面文案
+        chainCount:
+          type: integer
+          description: 上链次数（= 详情时间线记录条数）
+        createTime:
+          type: string
+          format: date-time
+          description: 下单时间
+
+    OrderPage:
+      type: object
+      required: [total, list, page, pageSize]
+      properties:
+        total:
+          type: integer
+          format: int64
+          description: 总条数
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderListItem"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+    OrderProductSnapshot:
+      type: object
+      description: 下单时产品快照（不跟新产品漂移）
+      properties:
+        productId:
+          type: string
+        productName:
+          type: string
+        productCode:
+          type: string
+        productType:
+          type: string
+        sourcePlatform:
+          type: string
+        allowSimpleOrder:
+          type: boolean
+          description: 产品是否允许链内简易流程
+
+    OrderParticipant:
+      type: object
+      description: 订单参与方信息
+      properties:
+        providerEnterpriseId:
+          type: string
+        providerEnterpriseName:
+          type: string
+        demandUserId:
+          type: string
+        demandUserName:
+          type: string
+        demandUserLoginName:
+          type: string
+        demandEnterpriseId:
+          type: string
+        demandEnterpriseName:
+          type: string
+
+    OrderLine:
+      type: object
+      required: [unit, quantity, unitPrice, subtotal]
+      description: 计费明细行（仅在 contract 阶段提交）
+      properties:
+        unit:
+          type: string
+          description: 单位
+        quantity:
+          type: number
+          description: 数量
+        unitPrice:
+          type: string
+          description: 单价（人民币两位小数，string/decimal）
+        subtotal:
+          type: string
+          description: 小计（人民币两位小数，string/decimal）
+
+    OrderTransactionInfo:
+      type: object
+      required: [amountTaxInclusive, amountTaxExclusive, currency]
+      description: 交易信息（含税未税本期同价且保留两字段）
+      properties:
+        orderLines:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderLine"
+          description: 计费明细行列表
+        amountTaxInclusive:
+          type: string
+          description: 含税金额（人民币两位小数）
+        amountTaxExclusive:
+          type: string
+          description: 未税金额（人民币两位小数）
+        currency:
+          type: string
+          enum: [CNY]
+
+    OrderAttachmentMeta:
+      type: object
+      description: 附件元数据
+      properties:
+        fileName:
+          type: string
+        fileType:
+          type: string
+          description: 文件类型（Word/PDF）
+        fileSize:
+          type: integer
+          format: int64
+          description: 文件大小（字节）
+        scanResult:
+          type: string
+          description: 扫描结果
+
+    OrderTimelineEvent:
+      type: object
+      required: [eventType, description, operator, operatorRole, occurredAt]
+      description: 时间线事件
+      properties:
+        eventType:
+          type: string
+          description: 事件类型（ORDER_CREATED/ORDER_CONFIRMED/CONTRACT_SUBMITTED/CONTRACT_CONFIRMED/ORDER_CANCELLED 等）
+        description:
+          type: string
+        operator:
+          type: string
+          description: 操作人标识（ADMIN 代操作时为 ADMIN 用户标识）
+        operatorRole:
+          type: string
+          description: 操作人角色（ADMIN/PROVIDER/USER）
+        occurredAt:
+          type: string
+          format: date-time
+
+    OrderChainLog:
+      type: object
+      description: mock 上链记录
+      properties:
+        chainHash:
+          type: string
+          description: 模拟哈希值
+        blockHeight:
+          type: integer
+          format: int64
+          description: 模拟区块高度
+        chainNode:
+          type: string
+          description: 模拟节点标识
+        timestamp:
+          type: string
+          format: date-time
+
+    OrderContractVersion:
+      type: object
+      description: 数字合约版本
+      properties:
+        versionNo:
+          type: integer
+          description: 版本号
+        snapshotJson:
+          type: string
+          description: 合约快照 JSON
+        createdAt:
+          type: string
+          format: date-time
+
+    OrderNotice:
+      type: object
+      required: [content, version]
+      description: 平台统一须知
+      properties:
+        content:
+          type: string
+          description: 须知正文（Markdown 或纯文本）
+        version:
+          type: string
+          description: 须知版本标识
+
+    OrderDetail:
+      type: object
+      required: [orderId, status, statusLabel, productSnapshot, participant, timeline, chainLogs, contractVersions, createTime]
+      description: |
+        订单详情：快照、参与方、状态、附件元数据、交易信息、时间线、mock 上链、数字合约版本列表。
+      properties:
+        orderId:
+          type: string
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        statusLabel:
+          type: string
+        productSnapshot:
+          $ref: "#/components/schemas/OrderProductSnapshot"
+        participant:
+          $ref: "#/components/schemas/OrderParticipant"
+        remark:
+          type: string
+          nullable: true
+        noticeVersion:
+          type: string
+          description: 须知版本（服务端自动填充）
+        transactionInfo:
+          $ref: "#/components/schemas/OrderTransactionInfo"
+        attachment:
+          $ref: "#/components/schemas/OrderAttachmentMeta"
+          nullable: true
+        timeline:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderTimelineEvent"
+        chainLogs:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderChainLog"
+        contractVersions:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderContractVersion"
+        chainCount:
+          type: integer
+          description: 上链次数（= chainLogs.length；列表与此一致）
+        amountTaxInclusive:
+          type: string
+        amountTaxExclusive:
+          type: string
+        currency:
+          type: string
+          enum: [CNY]
+        createTime:
+          type: string
+          format: date-time
+        updateTime:
+          type: string
+          format: date-time
+
+    ApiResponseOrder:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrderListItem"
+
+    ApiResponseOrderPage:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrderPage"
+
+    ApiResponseOrderDetail:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrderDetail"
+
+    ApiResponseNotice:
+      allOf:
+        - $ref: "#/components/schemas/ApiEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrderNotice"
 

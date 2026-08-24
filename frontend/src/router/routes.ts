@@ -15,6 +15,25 @@ export const routes: RouteRecordRaw[] = [
     meta: { title: '总览' },
   },
   {
+    path: '/orders',
+    name: 'orders',
+    component: () => import('@/features/order/OrderListPage.vue'),
+    beforeEnter: requireDeepLinkAccess,
+    meta: { title: '交易订单' },
+  },
+  {
+    path: '/orders/subscribe/:productId',
+    name: 'order-subscribe',
+    component: () => import('@/features/order/OrderSubscribePage.vue'),
+    meta: { title: '订购数据产品' },
+  },
+  {
+    path: '/orders/:orderId',
+    name: 'order-detail',
+    component: () => import('@/features/order/OrderDetailPage.vue'),
+    meta: { title: '订单详情' },
+  },
+  {
     path: '/catalog',
     name: 'catalog',
     component: () => import('@/features/catalog/browse/CatalogBrowsePage.vue'),

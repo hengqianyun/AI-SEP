@@ -97,6 +97,74 @@ codes:
     message: "用户不存在"
     refs: [REQ-USER-001, PLAN-WSC-5.2 §3.1]
 
+  # ── V1.7 订单错误码（SNAP-WSC-009 / PLAN-WSC-9.2）──
+
+  ERR_ORDER_NOT_FOUND:
+    httpStatus: 404
+    code: ERR_ORDER_NOT_FOUND
+    message: "订单不存在"
+    refs: [REQ-WSC-ORDER-009, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_FORBIDDEN:
+    httpStatus: 403
+    code: ERR_ORDER_FORBIDDEN
+    message: "当前角色无权操作此订单"
+    refs: [REQ-WSC-ORDER-001, REQ-WSC-ORDER-011, PLAN-WSC-9.2 §4]
+
+  ERR_ORDER_INVALID_STATE:
+    httpStatus: 400
+    code: ERR_ORDER_INVALID_STATE
+    message: "订单当前状态不允许执行此操作"
+    refs: [REQ-WSC-ORDER-010, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_NOTICE_NOT_ACCEPTED:
+    httpStatus: 400
+    code: ERR_ORDER_NOTICE_NOT_ACCEPTED
+    message: "须知未勾选，无法提交"
+    refs: [REQ-WSC-ORDER-004, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_REMARK_EMPTY:
+    httpStatus: 400
+    code: ERR_ORDER_REMARK_EMPTY
+    message: "备注不能为空"
+    refs: [REQ-WSC-ORDER-006, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_SIMPLE_ORDER_NOT_ALLOWED:
+    httpStatus: 400
+    code: ERR_ORDER_SIMPLE_ORDER_NOT_ALLOWED
+    message: "该产品不允许链内简易流程下单"
+    refs: [REQ-WSC-ORDER-003, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_ATTACHMENT_INVALID:
+    httpStatus: 400
+    code: ERR_ORDER_ATTACHMENT_INVALID
+    message: "附件格式非法，仅支持 Word/PDF"
+    refs: [REQ-WSC-ORDER-013, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_ATTACHMENT_TOO_LARGE:
+    httpStatus: 400
+    code: ERR_ORDER_ATTACHMENT_TOO_LARGE
+    message: "附件超过 20MB 限制"
+    refs: [REQ-WSC-ORDER-013, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_ATTACHMENT_SCAN_FAILED:
+    httpStatus: 400
+    code: ERR_ORDER_ATTACHMENT_SCAN_FAILED
+    message: "附件安全扫描未通过"
+    refs: [REQ-WSC-ORDER-013, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_AMOUNT_INVALID:
+    httpStatus: 400
+    code: ERR_ORDER_AMOUNT_INVALID
+    message: "金额校验失败（须为正数、两位小数、含税未税一致）"
+    refs: [REQ-WSC-ORDER-014, PLAN-WSC-9.2 §3.1]
+
+  ERR_ORDER_LINE_INVALID:
+    httpStatus: 400
+    code: ERR_ORDER_LINE_INVALID
+    message: "计费明细校验失败（缺单位/数量/单价≤0/小计不正确）"
+    refs: [REQ-WSC-ORDER-014, PLAN-WSC-9.2 §3.1]
+
 envelope:
   fields: [code, message, data, correlationId]
   successCode: "0"

@@ -89,6 +89,10 @@ public class WriteAuthorizationInterceptor implements HandlerInterceptor {
       case IMPORT -> true;
         // 错误报告 GET
       case IMPORT_REPORT -> true;
+        // 订单创建：仅 POST 拦截（列表/详情 GET 不经拦截器）
+      case ORDER_CREATE -> !isSafeMethod(method);
+        // 订单确认/提交合约/确认合约/取消：仅 POST 拦截
+      case ORDER_CONFIRM, ORDER_CONTRACT, ORDER_CONFIRM_CONTRACT, ORDER_CANCEL -> !isSafeMethod(method);
       case NONE -> false;
     };
   }
@@ -116,6 +120,11 @@ public class WriteAuthorizationInterceptor implements HandlerInterceptor {
           RbacMatrix.canMaintainCatalog(principal.role(), maintenanceScope(request));
       case IMPORT -> RbacMatrix.canImportProduct(principal.role());
       case IMPORT_REPORT -> RbacMatrix.canGetImportReport(principal.role());
+      case ORDER_CREATE -> RbacMatrix.canCreateOrder(principal.role());
+      case ORDER_CONFIRM -> RbacMatrix.canConfirmOrder(principal.role());
+      case ORDER_CONTRACT -> RbacMatrix.canSubmitContract(principal.role());
+      case ORDER_CONFIRM_CONTRACT -> RbacMatrix.canConfirmContract(principal.role());
+      case ORDER_CANCEL -> RbacMatrix.canCancelOrder(principal.role());
       case NONE -> true;
     };
   }
@@ -168,6 +177,23 @@ public class WriteAuthorizationInterceptor implements HandlerInterceptor {
     if (path.startsWith("/api/v1/catalog/products")) {
       return WriteResource.PRODUCT;
     }
+    // 订单写路径细分（916 扩展：confirm/contract/confirm-contract/cancel）
+    if (path.startsWith("/api/v1/orders") && !path.contains("/notices/")) {
+      // 按路径后缀细分资源类型，确保不同写操作走不同权限检查
+      if (path.endsWith("/confirm") && !path.endsWith("/contract/confirm")) {
+        return WriteResource.ORDER_CONFIRM;
+      }
+      if (path.endsWith("/contract/confirm")) {
+        return WriteResource.ORDER_CONFIRM_CONTRACT;
+      }
+      if (path.endsWith("/contract")) {
+        return WriteResource.ORDER_CONTRACT;
+      }
+      if (path.endsWith("/cancel")) {
+        return WriteResource.ORDER_CANCEL;
+      }
+      return WriteResource.ORDER_CREATE;
+    }
     return WriteResource.NONE;
   }
 
@@ -186,6 +212,16 @@ public class WriteAuthorizationInterceptor implements HandlerInterceptor {
     MAINTENANCE,
     IMPORT,
     IMPORT_REPORT,
+    /** 订单创建（POST /orders）。 */
+    ORDER_CREATE,
+    /** 确认订单（POST /orders/{id}/confirm）。 */
+    ORDER_CONFIRM,
+    /** 提交合约附件与交易信息（POST /orders/{id}/contract）。 */
+    ORDER_CONTRACT,
+    /** 统一确认合约（POST /orders/{id}/contract/confirm）。 */
+    ORDER_CONFIRM_CONTRACT,
+    /** 取消订单（POST /orders/{id}/cancel）。 */
+    ORDER_CANCEL,
     NONE
   }
 }

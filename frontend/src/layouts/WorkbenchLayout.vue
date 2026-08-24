@@ -8,6 +8,7 @@ import {
   canSeeMyCatalog,
   canSeeMyProducts,
 } from '@/features/auth/composables/useCanWrite'
+import { ROUTE_ORDERS } from '@/features/shell/navSurfaces'
 import { isDeepLinkAllowed } from '@/features/shell/deepLinkAccess'
 import {
   ROUTE_CATALOG_BROWSE,
@@ -63,7 +64,6 @@ const navOpen = [
 
 const navClosed = [
   { feature: 'registration', label: '数据登记', icon: 'registration' },
-  { feature: 'orders', label: '交易订单', icon: 'orders' },
   { feature: 'connectors', label: '连接器管理', icon: 'connectors' },
 ] as const
 
@@ -250,6 +250,20 @@ const roleLabel = computed(() => {
         </div>
 
         <RouterLink
+          :to="ROUTE_ORDERS"
+          class="menu-item"
+          :class="{ active: isActive(ROUTE_ORDERS) }"
+          data-testid="nav-orders"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="21" r="1" />
+            <circle cx="20" cy="21" r="1" />
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+          </svg>
+          <span>交易订单</span>
+        </RouterLink>
+
+        <RouterLink
           v-if="userManageVisible"
           to="/admin/users"
           class="menu-item"
@@ -277,11 +291,6 @@ const roleLabel = computed(() => {
             <polyline points="14 2 14 8 20 8" />
             <line x1="12" y1="18" x2="12" y2="12" />
             <line x1="9" y1="15" x2="15" y2="15" />
-          </svg>
-          <svg v-else-if="item.icon === 'orders'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
           </svg>
           <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />

@@ -1,6 +1,46 @@
 # wsc-contracts — REQ 覆盖映射
 
 > 基线 TASK-WSC-101；V1.6 增量见 SNAP-WSC-008 / PLAN-WSC-8.3（contracts@2.3.3 / TASK-WSC-903）。
+> V1.7 增量见 SNAP-WSC-009 / PLAN-WSC-9.2（contracts@2.3.3 / TASK-WSC-911）。
+
+## V1.7（SNAP-WSC-009 — 21 条 REQ 增量）
+
+| REQ | priority | change | 契约/模型/路由 | 测试约束（后续任务） |
+|---|---|---|---|---|
+| REQ-WSC-ORDER-001 | P0 | 新增 | matrix ordersUI/ordersListApi；state-matrix 侧栏角色化文案 | 914/919 导航 + 角色列表 scope |
+| REQ-WSC-ORDER-002 | P0 | 新增 | OpenAPI OrderProductSnapshot | 915 订购入口字段 |
+| REQ-WSC-ORDER-003 | P0 | 新增 | OpenAPI POST /orders；OrderCreateRequest | 913/915 简易流程边界 |
+| REQ-WSC-ORDER-004 | P0 | 新增 | OpenAPI GET /orders/notices/current；OrderNotice | 913/915 平台统一须知 |
+| REQ-WSC-ORDER-005 | P1 | 新增 | 前端外部跳转（非 API 契约） | 918 外部跳转非建单 |
+| REQ-WSC-ORDER-006 | P0 | 新增 | OpenAPI POST /orders 创建；OrderDetail 快照 | 913/919 创建+快照+mock |
+| REQ-WSC-ORDER-007 | P0 | 新增 | OpenAPI GET /orders 分页；OrderPage | 913/919 分页 pageSize 档位 |
+| REQ-WSC-ORDER-008 | P0 | 新增 | OpenAPI OrderListItem 九组字段 | 915/918 列表字段+脱敏 |
+| REQ-WSC-ORDER-009 | P0 | 新增 | OpenAPI GET /orders/{orderId}；OrderDetail | 915/918 详情分区+快照 |
+| REQ-WSC-ORDER-010 | P0 | 新增 | OpenAPI 状态枚举+四步 path；matrix 写能力键 | 916/919 主状态流转 |
+| REQ-WSC-ORDER-011 | P0 | 新增 | matrix ordersConfirmApi/confirmContractApi/submitContractApi | 916/919 状态动作权限 |
+| REQ-WSC-ORDER-012 | P0 | 新增 | OpenAPI POST /orders/{id}/cancel；matrix ordersCancelApi | 916/919 取消旁路 |
+| REQ-WSC-ORDER-013 | P0 | 新增 | OpenAPI POST /orders/{id}/contract multipart | 916/919 签署附件+交易信息 |
+| REQ-WSC-ORDER-014 | P0 | 新增 | OpenAPI OrderTransactionInfo 金额双字段；currency CNY | 916/919 计费+金额 |
+| REQ-WSC-ORDER-015 | P0 | 新增 | OpenAPI POST /orders/{id}/contract/confirm | 916/919 统一合约确认页 |
+| REQ-WSC-ORDER-016 | P0 | 新增 | OpenAPI OrderTimelineEvent/OrderChainLog；OrderChainAttestationPort | 913/916/919 时间线+mock |
+| REQ-WSC-ORDER-017 | P1 | 新增 | OpenAPI OrderContractVersion | 918/919 数字合约版本 |
+| REQ-WSC-ORDER-FE-001 | P0 | 新增 | 前端 toast（非 API 契约） | 915/917/919 写成功 toast |
+| REQ-WSC-ORDER-FE-002 | P0 | 新增 | 前端二次确认（非 API 契约） | 917/919 取消二次确认 |
+| REQ-WSC-ORDER-FE-003 | P0 | 新增 | 前端分页 jumper+pageSize（非 API 契约） | 915/919 分页跳页 |
+| REQ-SHELL-011 | P0 | 修订 | matrix ordersUI；state-matrix 侧栏角色化 | 914/919 开放订单导航 |
+
+### 继承声明（SNAP-WSC-008 不得削弱）
+
+以下 REQ **行为继承** SNAP-WSC-008 / 既有基线，V1.7 **不得削弱**：
+
+- `REQ-CAT-001..008`：浏览结构、详情、编辑、导入、分类维护等
+- `REQ-CAT-012`：`supplierName` 模糊搜、未分类 API 全局置底
+- `REQ-CAT-013`：维护页 Pagination / Cascader / 本页全选
+- `REQ-CAT-014..019`：V1.6 浏览筛选、座序图 L1、mine 本企业、我的目录、全链无企业过滤、行业类别枚举复用
+- `REQ-SHELL-009`、`REQ-SHELL-010`：目录双入口导航、侧栏企业只读
+- `REQ-USER-002`、`REQ-RBAC-002`：用户企业归属、写权限企业范围
+- `REQ-OVW-001..005`、`REQ-CHAIN-001`、`REQ-API-001`
+- `REQ-UX-001..011`（SNAP-WSC-003）UX 令牌不回退
 
 ## V1.6（SNAP-WSC-008 — 十条 REQ）
 
@@ -55,8 +95,9 @@
 | 错误码 | `contracts/errors/codes.yaml` |
 | RBAC | `contracts/rbac/matrix.yaml` |
 | 存证端口 | `contracts/chain/ChainAttestationPort.md` |
+| 订单存证端口 | `contracts/chain/OrderChainAttestationPort.md`（V1.7 新增） |
 | OVW 流 | `contracts/overview/stream-events.yaml` |
 | UI 状态 | `contracts/ui/state-matrix.md`（**2.3.3**） |
 | 敏感字段 | `contracts/security/sensitive-fields.md` |
 | Flyway | `backend/app/data-chain-service/.../sql/init` + `sql/migration` |
-| API client | `frontend/src/api/**`（对齐 **2.3.3**；TASK-WSC-903 唯一写） |
+| API client | `frontend/src/api/**`（对齐 **2.3.3**；TASK-WSC-911 唯一写） |

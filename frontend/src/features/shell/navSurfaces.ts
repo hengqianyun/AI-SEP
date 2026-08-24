@@ -4,6 +4,7 @@ export const ROUTE_CATALOG_MAINTENANCE = '/catalog/maintenance'
 export const ROUTE_CATALOG_BROWSE = '/catalog'
 export const ROUTE_MY_PRODUCTS = '/my-products'
 export const ROUTE_ADMIN_USERS = '/admin/users'
+export const ROUTE_ORDERS = '/orders'
 
 export type CatalogSurface = 'browse' | 'myCatalog' | 'myProducts' | 'maintenance' | 'other'
 

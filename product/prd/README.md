@@ -7,6 +7,8 @@
 | [`v1.0.md`](./v1.0.md) | **AI-SEP 平台本体** PRD（多 Agent 交付流水线 / 项目模板） |
 | [`wsc-v1.0.md`](./wsc-v1.0.md) | WSC 接入端工作台 V1.0（已关联 SNAP-WSC-001） |
 | [`wsc-v1.1.md`](./wsc-v1.1.md) | WSC V1.1（DRAFT；原型见 [`design/prototypes/wsc-v1.1/`](../../design/prototypes/wsc-v1.1/)） |
+| [`wsc-v1.6-catalog-filter-ux.md`](./wsc-v1.6-catalog-filter-ux.md) | WSC V1.6 目录筛选 / 我的目录（SNAP-WSC-008） |
+| [`wsc-v1.7-transaction-orders.md`](./wsc-v1.7-transaction-orders.md) | WSC V1.7 交易订单（SNAP-WSC-009 已批准；RUN-WSC-012） |
 
 ## 版本约定
 

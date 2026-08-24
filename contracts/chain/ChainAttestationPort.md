@@ -50,3 +50,9 @@ public interface ChainAttestationPort {
 
 - V1 实现可为模拟适配；字段语义与可观测性不变。
 - 适配失败时调用方须整单回滚，不产生半成品产品行或孤儿上链行。
+
+## V1.7 并列接口
+
+> V1.7 新增 `OrderChainAttestationPort`（`contracts/chain/OrderChainAttestationPort.md`），面向**订单**状态变更存证。
+> 本接口（`ChainAttestationPort`）继续面向**产品目录快照**存证，签名与行为不变。
+> 两接口并列共存，互不干扰。
